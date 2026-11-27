@@ -38,11 +38,11 @@ n,date,end_date,week,unit_no,concept,kind,topic,in_class,readings,tutorial,lab,d
 33,2027-04-05,,14,3,C9,workshop,Spatial regression workshop,Start Lab 8,,,8,,
 34,2027-04-07,,14,3,Unit 3,prep,Case Study 3 prep,Practice case in pairs,,,,Lab 8,
 35,2027-04-09,,14,3,Unit 3,case,Case Study 3,"In class, closed book",,,,,TA runs
-36,2027-04-12,,15,4,Final project,concept,Project studio,Pairs start the redlining project,,,,,TA runs
-37,2027-04-14,,15,4,New,new,Geographically weighted regression,Partner tutorial: urban vs. rural,beyond-one-model#part 1 (GWR),gwr,,,
-38,2027-04-16,,15,4,New,new,Geodemographic clustering,Partner tutorial: k = 4 vs. k = 8,beyond-one-model#part 2 (clustering),clustering,,,
-39,2027-04-19,,16,4,C10,concept,Continuous surfaces and interpolation,Partner tutorial: IDW vs. kriging,continuous-surfaces,continuous_surfaces,,Lab 9 (GWR + clustering),
-40,2027-04-21,,16,4,C10,workshop,Interpolation workshop,Start Lab 10,,,10,,
-41,2027-04-23,,16,4,Unit 4,prep,Case Study 4 prep,Practice case in pairs,,,,,
-42,2027-04-26,,17,4,Unit 4,case,Case Study 4,"In class, closed book",,,,Lab 10,
+,2027-04-12,,15,4,,off,No class,,,,,,
+36,2027-04-14,,15,4,New,new,Geographically weighted regression,Partner tutorial: urban vs. rural,beyond-one-model#part 1 (GWR),gwr,,,
+37,2027-04-16,,15,4,New,new,Geodemographic clustering,Partner tutorial: k = 4 vs. k = 8,beyond-one-model#part 2 (clustering),clustering,,,
+38,2027-04-19,,16,4,C10,concept,Continuous surfaces and interpolation,Partner tutorial: IDW vs. kriging,continuous-surfaces,continuous_surfaces,,Lab 9 (GWR + clustering),
+39,2027-04-21,,16,4,Project,workshop,Project studio and Lab 10 work time,Pairs start the redlining project,,,10,,
+40,2027-04-23,,16,4,Unit 4,prep,Case Study 4 prep,Practice case in pairs,,,,Project proposal,
+41,2027-04-26,,17,4,Unit 4,case,Case Study 4,"In class, closed book",,,,Lab 10,
 ,,,,,Final,final,Final project presentations,Two formerly redlined cities,,,,Final project,

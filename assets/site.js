@@ -90,8 +90,9 @@
           html = '<span class="day-date">' + dateTxt + '</span><span class="day-topic">No class</span>';
         } else if (r.kind === 'off') {
           cls += ' off';
+          var why = r.topic.replace(/^No class:?\s*/, '');
           html = '<span class="day-date">' + dateTxt + '</span><span class="day-topic">No class</span>' +
-            '<span class="day-sub">' + esc(r.topic.replace(/^No class:\s*/, '')) + '</span>';
+            (why ? '<span class="day-sub">' + esc(why) + '</span>' : '');
         } else {
           if (r.kind === 'case') { cls += ' case'; dateTxt += ' ★'; }
           html = '<span class="day-date">' + dateTxt + '</span><span class="day-topic">' + esc(r.topic) + '</span>';
