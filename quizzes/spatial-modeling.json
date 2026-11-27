@@ -2,43 +2,132 @@
  "reading": "spatial-modeling",
  "questions": [
   {
-   "q": "Under the Queen's case, a neighbor is any feature that…",
+   "q": "For areal data like census tracts, why is analyzing the arrangement of the locations themselves not useful?",
    "options": [
-    "shares an edge",
-    "touches the feature, even at a single corner",
-    "lies within 10 km"
+    "Tracts have no locations",
+    "The boundaries are arbitrarily defined, so the exact locations aren't meaningful; the values are",
+    "Tracts are always the same size",
+    "Areal data can't be mapped"
    ],
    "answer": 1,
-   "why": "Rook's case requires a shared edge. Queen's case counts any touch."
+   "why": "With areal data and marked points, the question is how the values vary across space, which is what spatial autocorrelation measures."
   },
   {
-   "q": "Median household income by NC census tract has a Moran's I of 0.59. This suggests…",
+   "q": "How should you choose a neighborhood definition?",
    "options": [
-    "strong clustering",
-    "a random pattern",
-    "strong dispersion"
-   ],
-   "answer": 0,
-   "why": "Moran's I runs from -1 to 1. Positive values mean similar values sit near each other."
-  },
-  {
-   "q": "What does LISA tell you that a global Moran's I does not?",
-   "options": [
-    "Whether the data are normally distributed",
-    "Where significant clusters and outliers are",
-    "The regression coefficient for each tract"
+    "Always use Queen's case",
+    "Base it on a hypothesis about the process causing autocorrelation and on your study goals, then check how sensitive results are",
+    "Pick whichever gives the highest Moran's I",
+    "Use the default in R"
    ],
    "answer": 1,
-   "why": "LISA calculates a statistic for every location, so you can map where the clustering is."
+   "why": "The reading calls it more art than science. Running the analysis with several definitions shows whether the results are robust."
   },
   {
-   "q": "You think high house prices spill over into neighboring tracts. Which model fits that hypothesis?",
+   "q": "Two tracts touch only at a single corner point. They are neighbors under...",
    "options": [
-    "Spatial lag model",
-    "Spatial error model"
+    "Queen's case only",
+    "Rook's case only",
+    "both Queen's and Rook's case",
+    "neither"
    ],
    "answer": 0,
-   "why": "The lag model lets outcomes in one place depend on outcomes next door. The error model is for spatially structured variables you didn't measure."
+   "why": "Queen's case counts any touching. Rook's case requires sharing more than a single point."
+  },
+  {
+   "q": "Why can't you use topological neighborhoods for marked point data?",
+   "options": [
+    "Points don't touch each other",
+    "Points have no values",
+    "Points are always too far apart",
+    "Topology only works for rasters"
+   ],
+   "answer": 0,
+   "why": "Topology depends on shared boundaries. For points, use distance-based or k-nearest neighborhoods."
+  },
+  {
+   "q": "A dataset has a dense city and very sparse rural areas. Which neighborhood definition guarantees every feature the same number of neighbors?",
+   "options": [
+    "A 5-mile distance band",
+    "First-order Rook's case",
+    "K-nearest neighbors",
+    "Second-order Queen's case"
+   ],
+   "answer": 2,
+   "why": "K-nearest neighbors picks the k closest features no matter how far away they are, so sparse areas still get neighbors."
+  },
+  {
+   "q": "A Moran's I of 0.59 for median household income suggests...",
+   "options": [
+    "strong clustering of similar values",
+    "high and low values interspersed",
+    "no spatial pattern",
+    "the result is not significant"
+   ],
+   "answer": 0,
+   "why": "Positive I means similar values cluster. You still need a significance test, because chance alone can create structure."
+  },
+  {
+   "q": "A Moran's I below 0 means...",
+   "options": [
+    "similar values cluster together",
+    "high and low values are interspersed (negative autocorrelation)",
+    "the data are missing",
+    "the neighborhoods are wrong"
+   ],
+   "answer": 1,
+   "why": "Negative I means neighbors tend to differ, like a checkerboard."
+  },
+  {
+   "q": "What does LISA add that global Moran's I does not?",
+   "options": [
+    "A single number for the whole map",
+    "A statistic for each location, showing where significant clusters and outliers are",
+    "A regression coefficient",
+    "A kernel density surface"
+   ],
+   "answer": 1,
+   "why": "Global Moran's I summarizes the whole dataset. LISA maps local clusters (HH, LL) and outliers (HL, LH)."
+  },
+  {
+   "q": "In a LISA map, a high-income tract surrounded by low-income tracts is labeled...",
+   "options": [
+    "High-High",
+    "Low-Low",
+    "High-Low",
+    "Low-High"
+   ],
+   "answer": 2,
+   "why": "The first label is the location's own value and the second is its neighbors'. High-Low is a spatial outlier."
+  },
+  {
+   "q": "How do you know you need a spatial regression model?",
+   "options": [
+    "The map looks clustered",
+    "The residuals from a regular regression are spatially autocorrelated",
+    "The R-squared is low",
+    "You have more than 100 observations"
+   ],
+   "answer": 1,
+   "why": "Regression requires independent residuals. If the residuals show autocorrelation, a spatial model is needed."
+  },
+  {
+   "q": "Housing prices that spill over into neighboring areas (a diffusion process) fit best with...",
+   "options": [
+    "a spatial lag model",
+    "a spatial error model"
+   ],
+   "answer": 0,
+   "why": "The lag model puts neighbors' outcomes (Wy) into the equation, which matches contagion or spillover: second-order structure."
+  },
+  {
+   "q": "Spatial dependence that comes from omitted variables that vary smoothly over space fits best with...",
+   "options": [
+    "a spatial lag model",
+    "a spatial error model"
+   ],
+   "answer": 1,
+   "why": "The error model puts the spatial structure in the error term, representing unobserved processes: first-order structure."
   }
  ]
 }

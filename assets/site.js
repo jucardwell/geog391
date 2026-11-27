@@ -56,6 +56,72 @@
   });
   document.querySelectorAll('table.schedule tr[data-date="' + todayIso + '"]').forEach(function (tr) { tr.classList.add('today'); });
 
+
+  // Everything a student needs for the week, grouped: readings and quizzes,
+  // tutorials, homework, case studies and slides. Links only.
+  function hwLink(h) {
+    var t = 'Homework ' + h.n + ': ' + esc(h.title);
+    return '<a href="' + esc(h.href || 'homework.html') + '">' + t + '</a>';
+  }
+  function weekList(wrows, monIso, friIso) {
+    var groups = [];
+    function item(when, body) { return '<li><span class="wl-when">' + esc(when) + '</span><span class="wl-what">' + body + '</span></li>'; }
+
+    var read = [];
+    wrows.forEach(function (r) {
+      (r.readings || []).forEach(function (it) {
+        var t = esc(it.title) + (it.section ? ', ' + esc(it.section) : '');
+        var body = it.href ? '<a href="' + esc(it.href) + '">' + t + '</a>'
+          : '<a href="readings.html">' + t + '</a>' + (it.soon ? ' <span class="muted">(coming soon)</span>' : '');
+        if (it.slug && it.href && C.quizzes[it.slug]) body += '<a href="' + esc(it.href) + '#reading-quiz">Reading quiz</a>';
+        read.push(item(r.label, body));
+      });
+    });
+    if (read.length) groups.push(['Read before class', read]);
+
+    var tut = [];
+    wrows.forEach(function (r) {
+      if (r.tutorial) tut.push(item(r.label, r.tutorial.href ? '<a href="' + r.tutorial.href + '">' + esc(r.tutorial.title) + '</a>'
+        : '<a href="tutorials.html">' + esc(r.tutorial.title) + '</a> <span class="muted">(coming soon)</span>'));
+    });
+    if (tut.length) groups.push(['Tutorials', tut]);
+
+    var hw = [], seen = {};
+    rows.forEach(function (r) {
+      var m = /^HW (\d+)/.exec(r.due || '');
+      if (!m || !r.date || r.date < monIso || r.date > friIso) return;
+      var h = (C.homeworks || []).filter(function (x) { return x.n === m[1]; })[0];
+      if (h && !seen[h.n]) { seen[h.n] = 1; hw.push(item('Due ' + r.label, hwLink(h))); }
+    });
+    if (!hw.length) {
+      var nxt = rows.filter(function (r) { return /^HW \d+/.test(r.due || '') && r.date > friIso; })[0];
+      if (nxt) {
+        var h2 = (C.homeworks || []).filter(function (x) { return x.n === /^HW (\d+)/.exec(nxt.due)[1]; })[0];
+        if (h2) hw.push(item('Due ' + nxt.label, hwLink(h2)));
+      }
+    }
+    if (hw.length) groups.push(['Homework', hw]);
+
+    var cs = [];
+    wrows.forEach(function (r) {
+      if (r.kind === 'prep' || r.kind === 'case') {
+        var n = r.kind === 'case' ? caseNo[r.date] : (C.cases.filter(function (c) { return c.date > r.date; })[0] || {}).n;
+        if (n) cs.push(item(r.label, '<a href="case_studies.html#case-study-' + n + '">Case Study ' + n + (r.kind === 'prep' ? ' prep' : '') + ', study guide</a>'));
+      }
+    });
+    if (cs.length) groups.push(['Case studies', cs]);
+
+    var sl = [];
+    wrows.forEach(function (r) { if (r.slides && r.date <= todayIso) sl.push(item(r.label, '<a href="' + esc(r.slides) + '">' + esc(r.topic) + '</a>')); });
+    if (sl.length) groups.push(['Slides', sl]);
+
+    var box = el('div', { 'class': 'week-list' });
+    groups.forEach(function (g) {
+      box.appendChild(el('section', { 'class': 'wl-group' }, '<h3>' + g[0] + '</h3><ul>' + g[1].join('') + '</ul>'));
+    });
+    return box;
+  }
+
   // ---- This week ---------------------------------------------------------
   var wk = document.getElementById('this-week');
   if (wk) {
@@ -77,7 +143,7 @@
         (fin && fin.in_class ? '<span class="day-sub">' + esc(fin.in_class) + '</span>' : '')));
     } else {
       var fri = addDays(monday, 4);
-      var anyRow = null;
+      var anyRow = null, weekRows = [];
       [0, 2, 4].forEach(function (off) {
         var day = addDays(monday, off);
         var r = rowFor(iso(day));
@@ -93,22 +159,10 @@
           html = '<span class="day-date">' + dateTxt + '</span><span class="day-topic">No class</span>' +
             (why ? '<span class="day-sub">' + esc(why) + '</span>' : '');
         } else {
-          if (r.kind === 'case') { cls += ' case'; dateTxt += ' ★'; }
-          html = '<span class="day-date">' + dateTxt + '</span>';
-          var links = [];
-          (r.readings || []).forEach(function (it) {
-            if (it.href) {
-              links.push('<a href="' + esc(it.href) + '">' + (it.external ? '' : 'Read: ') + esc(it.title) + '</a>');
-              if (it.slug && C.quizzes[it.slug]) links.push('<a href="' + esc(it.href) + '#reading-quiz">Quiz: ' + esc(it.title) + '</a>');
-            } else {
-              links.push('<span>Read: ' + esc(it.title) + (it.soon ? ' <span class="muted">(coming soon)</span>' : '') + '</span>');
-            }
-          });
-          if (r.tutorial && r.tutorial.href) links.push('<a href="' + r.tutorial.href + '">Tutorial: ' + esc(r.tutorial.title) + '</a>');
-          if (r.kind === 'case') links.push('<a href="case_studies.html#case-study-' + caseNo[r.date] + '">Case Study ' + caseNo[r.date] + ' study guide</a>');
-          if (r.slides && r.date <= todayIso) links.push('<a href="' + esc(r.slides) + '">Slides</a>');
-          if (links.length) html += '<div class="day-links">' + links.join('') + '</div>';
-          else html += '<span class="day-sub">' + esc(r.topic) + '</span>';
+          if (r.kind === 'case') { cls += ' case';  }
+          html = '<span class="day-date">' + dateTxt + '</span><span class="day-topic">' + esc(r.topic) + '</span>';
+          if (r.in_class) html += '<span class="day-sub">' + esc(r.in_class) + '</span>';
+          weekRows.push(r);
         }
         if (r && r.due) {
           var m = /^HW (\d+)/.exec(r.due), hw = m && (C.homeworks || []).filter(function (h) { return h.n === m[1]; })[0];
@@ -120,6 +174,34 @@
       var range = MON[monday.getMonth()] + ' ' + monday.getDate() + '–' +
         (fri.getMonth() !== monday.getMonth() ? MON[fri.getMonth()] + ' ' : '') + fri.getDate();
       head.textContent = range;
+      wk.appendChild(weekList(weekRows, iso(monday), iso(fri)));
+    }
+  }
+
+  // ---- Table of contents: drop a lone top entry (the page's own title) ----
+  var tocList = document.querySelector('#TOC > ul');
+  if (tocList && tocList.children.length === 1) {
+    var sub = tocList.children[0].querySelector('ul');
+    if (sub) { sub.classList.remove('collapse'); tocList.replaceWith(sub); }
+  }
+
+  // ---- Contour band behind every page title, in a palette color ----------
+  var tb = document.querySelector('#title-block-header');
+  if (tb && tb.querySelector('h1') && C.contours) {
+    var name = (location.pathname.split('/').pop() || 'index.html');
+    var col = getComputedStyle(document.body).getPropertyValue('--t-plan-edge').trim();
+    if (!col && C.contourColors && C.contourColors.length) {
+      var hsh = 0;
+      for (var ci = 0; ci < name.length; ci++) hsh = (hsh * 31 + name.charCodeAt(ci)) >>> 0;
+      col = C.contourColors[hsh % C.contourColors.length];
+    }
+    var holder = document.createElement('div');
+    holder.innerHTML = C.contours;
+    var svgEl = holder.firstElementChild;
+    if (svgEl) {
+      if (col) svgEl.style.stroke = col;
+      tb.classList.add('has-contours');
+      tb.insertBefore(svgEl, tb.firstChild);
     }
   }
 

@@ -1,4 +1,6 @@
-# Command Compendium
+---
+title: "Command Compendium"
+---
 
 [ggplot color options](https://sape.inf.usi.ch/quick-reference/ggplot2/colour)
 

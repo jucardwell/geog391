@@ -16,7 +16,7 @@ FRIENDLY = {"basic_R": "Install R and RStudio; intro to R tutorial", "describing
             "estimation_sampling": "Partner tutorial: physical vs. mental health", "ppa": "Partner tutorial: early vs. late crime",
             "regression": "Partner tutorial: lag vs. error", "gwr": "Partner tutorial: urban vs. rural",
             "clustering": "Partner tutorial: k = 4 vs. k = 8"}
-READ = [(r"^(?:NEW )?Quantitative Revolution \+ Kwan$", "quantitative-revolution;text:Kwan and Schwanen article"),
+READ = [(r"^(?:NEW )?Quantitative Revolution \+ Kwan$", "quantitative-revolution;link:Kwan and Schwanen (2009) Quantitative Revolution 2|https://doi.org/10.1080/00330120902931903"),
         (r"^Intro to Space: (.*)$", r"introduction-to-space#\1"),
         (r"^(?:NEW )?Describing Spatial Data, (.*)$", r"describing-spatial-data#\1"),
         (r"^(?:NEW )?Describing Data$", "describing-data"),

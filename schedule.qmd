@@ -4,8 +4,4 @@ toc: false
 page-layout: full
 ---
 
-::: legend-row
-<span>■ Concept day</span> <span class="s-prep">○ Case study prep</span> <span class="s-cs">★ Case study</span> <span class="muted">— No class</span>
-:::
-
 {{< include _generated/schedule.md >}}

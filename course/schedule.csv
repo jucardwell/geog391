@@ -1,7 +1,7 @@
 n,date,end_date,week,unit_no,concept,kind,topic,in_class,readings,tutorial,lab,due,note
 1,2027-01-06,,1,1,Intro,concept,Welcome and How This Course Works,Install R and RStudio; intro to R tutorial,,basic_R,,,
 2,2027-01-08,,1,1,Intro,concept,Class contract and AI policy,Co-write the AI policy (discussion),,,,,
-3,2027-01-11,,2,1,C1,concept,The Quantitative Revolution and early laws,Annotated reading discussion (Kwan),quantitative-revolution;text:Kwan and Schwanen article,,,,
+3,2027-01-11,,2,1,C1,concept,The Quantitative Revolution and early laws,Annotated reading discussion (Kwan),quantitative-revolution;link:Kwan and Schwanen (2009) Quantitative Revolution 2|https://doi.org/10.1080/00330120902931903,,,,
 4,2027-01-13,,2,1,C1,concept,Spatial is special,Geographer's First Spatial Pattern,introduction-to-space#Spatial is Special,,,,
 5,2027-01-15,,2,1,C2,concept,Data and spatial data,Spatial Data Exploration,"introduction-to-space#data sources, categories, vector and raster",,,HW 1,
 ,2027-01-18,,3,1,,off,No class: MLK,,,,,,

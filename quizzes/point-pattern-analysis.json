@@ -2,32 +2,131 @@
  "reading": "point-pattern-analysis",
  "questions": [
   {
-   "q": "Under complete spatial randomness, events will be…",
+   "q": "Under complete spatial randomness (CSR), events...",
    "options": [
-    "evenly spaced across the study region",
-    "equally likely anywhere, so chance clusters and gaps can still appear"
+    "are evenly spaced across the region",
+    "are equally likely anywhere and independent of each other",
+    "always form small clusters",
+    "follow a normal distribution"
    ],
    "answer": 1,
-   "why": "Random does not mean evenly spaced. Apparent clusters or gaps can arise by chance alone."
+   "why": "CSR has two assumptions: uniform intensity and independence. Random does not mean evenly spaced, and chance alone can still produce clusters and gaps."
   },
   {
-   "q": "Crime incidents cluster near bars because bars draw people in. What kind of structure is this?",
+   "q": "Crime incidents cluster near bars because bars are located downtown. This is mainly...",
    "options": [
-    "First-order",
-    "Second-order"
+    "first-order structure",
+    "second-order structure"
    ],
    "answer": 0,
-   "why": "The bars are an external factor that raises the intensity of the process in part of the region. Second-order structure comes from events interacting with each other."
+   "why": "First-order structure comes from intensity that varies with external drivers like the environment, policy or infrastructure."
   },
   {
-   "q": "A point pattern has an average nearest neighbor ratio of R = 0.6. What does that suggest?",
+   "q": "Trees that keep their distance from each other because they compete for light produce a regular pattern. That is...",
    "options": [
-    "Clustering",
-    "Randomness",
-    "Dispersion"
+    "first-order structure",
+    "second-order structure"
+   ],
+   "answer": 1,
+   "why": "Second-order structure comes from interaction among the points themselves, either attraction or repulsion."
+  },
+  {
+   "q": "What is the difference between intensity and density?",
+   "options": [
+    "They mean the same thing",
+    "Intensity is the underlying rate of the process; density is the observed points per unit area, often used to estimate it",
+    "Density is only for rasters",
+    "Intensity is always lower than density"
+   ],
+   "answer": 1,
+   "why": "Intensity belongs to the process. Density, n divided by area, is what you can measure from the data."
+  },
+  {
+   "q": "Why is the Poisson distribution used to model point patterns?",
+   "options": [
+    "It is designed for counts of rare events spread over a continuous space",
+    "Points always form a bell curve",
+    "It has no parameters",
+    "It only works for clustered patterns"
+   ],
+   "answer": 0,
+   "why": "The chance of an event at any exact location is tiny, which fits the Poisson's rare-event counts."
+  },
+  {
+   "q": "In an inhomogeneous Poisson process...",
+   "options": [
+    "intensity is constant and events attract each other",
+    "intensity varies across space, but events are still independent of each other",
+    "events repel each other",
+    "there are no events"
+   ],
+   "answer": 1,
+   "why": "Events respond to the environment but not to each other. That's why it can serve as a null model once first-order trends are accounted for."
+  },
+  {
+   "q": "Why does the course use Monte Carlo simulation for most point pattern tests?",
+   "options": [
+    "Many point pattern statistics don't have tractable variance formulas under CSR",
+    "Simulation is always faster",
+    "It avoids the need for a null hypothesis",
+    "R cannot do chi-square tests"
+   ],
+   "answer": 0,
+   "why": "Without a variance formula there is no classical test, so you simulate many CSR patterns and compare the observed statistic to them."
+  },
+  {
+   "q": "The quadrat test results can change if you...",
+   "options": [
+    "change the size or placement of the quadrats",
+    "rename the points",
+    "use a different color scheme",
+    "change nothing; it always gives the same answer"
+   ],
+   "answer": 0,
+   "why": "Quadrat tests are sensitive to quadrat size, placement and the shape of the study area."
+  },
+  {
+   "q": "In kernel density estimation, the bandwidth controls...",
+   "options": [
+    "the number of points",
+    "how large the moving window is, and therefore how smooth the surface is",
+    "the p-value",
+    "the projection"
+   ],
+   "answer": 1,
+   "why": "A wider bandwidth spreads each point's influence further and gives a smoother surface. KDE is exploratory, with no formal test."
+  },
+  {
+   "q": "An average nearest neighbor ratio R = 0.6 suggests...",
+   "options": [
+    "clustering",
+    "randomness",
+    "dispersion"
    ],
    "answer": 0,
    "why": "R below 1 means points are closer to their nearest neighbors than expected under CSR."
+  },
+  {
+   "q": "Ripley's K-function differs from ANN because it...",
+   "options": [
+    "only looks at the single nearest neighbor",
+    "summarizes clustering or regularity across a range of distances",
+    "measures first-order intensity",
+    "doesn't need a study area"
+   ],
+   "answer": 1,
+   "why": "ANN catches very local structure. K counts all neighbors within distance d, for many values of d."
+  },
+  {
+   "q": "Why do edge effects matter for the K-function?",
+   "options": [
+    "Points near the boundary have neighbors outside the window that are missed, so counts are underestimated at larger distances",
+    "Edges make the map harder to read",
+    "Edges add extra points",
+    "They only matter for rasters"
+   ],
+   "answer": 0,
+   "why": "Edge corrections compensate for the part of each search circle that falls outside the study area."
   }
  ]
 }

@@ -2,33 +2,134 @@
  "reading": "probability",
  "questions": [
   {
-   "q": "The number of floods in a decade is a…",
+   "q": "Which of these is NOT one of the sources of uncertainty in geography named in the reading?",
    "options": [
-    "discrete variable",
-    "continuous variable"
+    "Stochasticity (randomness)",
+    "Measurement error",
+    "Sampling uncertainty",
+    "Map projection"
+   ],
+   "answer": 3,
+   "why": "The reading names three sources: stochastic processes, imperfect measurement, and working with samples rather than whole populations."
+  },
+  {
+   "q": "A random variable is...",
+   "options": [
+    "a variable that has been randomly sampled",
+    "any variable whose outcome involves uncertainty, whatever the source of that uncertainty",
+    "a variable with a normal distribution",
+    "a variable that changes over time"
+   ],
+   "answer": 1,
+   "why": "Uncertainty can come from randomness, measurement or sampling. Any of them makes the outcome a random variable."
+  },
+  {
+   "q": "A probability distribution built from 50 years of recorded summer temperatures is...",
+   "options": [
+    "empirical",
+    "theoretical"
    ],
    "answer": 0,
-   "why": "It takes countable values (0, 1, 2…), so probabilities can be assigned to exact values."
+   "why": "Empirical distributions come straight from observed frequencies. Theoretical ones are defined mathematically from assumptions about the process."
   },
   {
-   "q": "A normal distribution is…",
+   "q": "Which of these is a discrete variable?",
    "options": [
-    "skewed to the right",
-    "bell shaped and symmetric around its mean",
-    "flat, with every value equally likely"
+    "Rainfall in inches",
+    "Elevation",
+    "Number of floods in a decade",
+    "Distance to the nearest hospital"
    ],
-   "answer": 1,
-   "why": "Most observations sit near the mean, with fewer in the tails."
+   "answer": 2,
+   "why": "Discrete variables take countable values. Rainfall, elevation and distance are measured along a continuum."
   },
   {
-   "q": "We have data for every county in North Carolina. Why do geographers still use probability?",
+   "q": "For a continuous variable like temperature, the probability of one exact value (say, exactly 88.000°F) is...",
    "options": [
-    "We don't. With the whole population, probability doesn't apply",
-    "The observed pattern is treated as one possible outcome of an underlying process",
-    "Because counties are always a random sample"
+    "about 0, so we calculate probabilities over ranges",
+    "the height of the curve at that value",
+    "always 0.5",
+    "the same as for a discrete variable"
+   ],
+   "answer": 0,
+   "why": "On a continuous distribution, probability is area under the curve, and a single point has no width, so you work with ranges."
+  },
+  {
+   "q": "On a normal curve, the probability that an observation falls below a value is...",
+   "options": [
+    "the height of the curve at that value",
+    "the area under the curve to the left of that value",
+    "the mean divided by the standard deviation",
+    "always less than 0.5"
    ],
    "answer": 1,
-   "why": "This is the idea of a natural sample: the map we see is one realization of a process that could have played out differently."
+   "why": "Probability is area under the curve. Below a value means the area to the left."
+  },
+  {
+   "q": "Why would a researcher fit a theoretical distribution to temperature data instead of only counting past days?",
+   "options": [
+    "Theoretical distributions don't need any data",
+    "It lets you estimate probabilities for values that may not appear in the observed record",
+    "Empirical probabilities are always wrong",
+    "It removes all uncertainty"
+   ],
+   "answer": 1,
+   "why": "A fitted distribution generalizes beyond the sample. It still needs parameters, such as the mean and standard deviation, estimated from the data."
+  },
+  {
+   "q": "In estimation in sampling, the uncertainty comes mainly from...",
+   "options": [
+    "measurement error",
+    "random sampling variability: different samples give different estimates",
+    "spatial autocorrelation",
+    "omitted variables"
+   ],
+   "answer": 1,
+   "why": "Each random sample gives a slightly different estimate. Confidence intervals quantify that variability."
+  },
+  {
+   "q": "Comparing whether transportation mode differs across neighborhood types (categorical counts) would use...",
+   "options": [
+    "a one-sample t-test",
+    "a paired t-test",
+    "a chi-square test",
+    "OLS regression"
+   ],
+   "answer": 2,
+   "why": "Chi-square tests work with categorical data and frequency counts. The t-tests compare means."
+  },
+  {
+   "q": "Why does spatial pattern analysis need probability, even though we can see the map?",
+   "options": [
+    "Maps are always inaccurate",
+    "Completely random processes can still produce apparent clusters and gaps by chance",
+    "Probability makes maps look better",
+    "Spatial data can't be described"
+   ],
+   "answer": 1,
+   "why": "You compare the observed pattern to what random arrangements produce, often with Monte Carlo simulation, before calling it a real pattern."
+  },
+  {
+   "q": "OLS regression typically assumes that the residuals...",
+   "options": [
+    "are spatially autocorrelated",
+    "follow a normal distribution with constant variance",
+    "are all zero",
+    "follow a Poisson distribution"
+   ],
+   "answer": 1,
+   "why": "That assumption is what allows confidence intervals and p-values. Spatial regression models relax the independence part."
+  },
+  {
+   "q": "If you have data for every county in the US (the whole population), why might you still use statistical inference?",
+   "options": [
+    "You never would; inference only applies to samples",
+    "The observed pattern is one possible realization of processes that contain randomness",
+    "Counties are always a sample of states",
+    "To make the dataset larger"
+   ],
+   "answer": 1,
+   "why": "Geographers often treat the observed arrangement as one outcome of a stochastic process, so they ask whether it reflects a systematic process or chance."
   }
  ]
 }

@@ -2,42 +2,135 @@
  "reading": "continuous-surfaces",
  "questions": [
   {
-   "q": "Why is IDW called deterministic?",
+   "q": "Temperature measured at weather stations is an example of...",
    "options": [
-    "It always uses exactly 12 neighbors",
-    "Predictions come entirely from the sample points and the weighting scheme, with no model of uncertainty",
-    "It only works on elevation data"
+    "geostatistical data",
+    "unmarked point data",
+    "areal data",
+    "a point pattern"
    ],
-   "answer": 1,
-   "why": "IDW gives no estimate of how uncertain each prediction is. Kriging does."
+   "answer": 0,
+   "why": "The phenomenon is continuous, but it is only measured at discrete locations. Interpolation estimates the values in between."
   },
   {
-   "q": "Raising the inverse distance power (p) from 1 to 3 makes the surface…",
+   "q": "Spatial interpolation rests on which assumption?",
    "options": [
-    "smoother and more general",
-    "more local, shaped mostly by the closest points"
+    "Values are normally distributed",
+    "Spatial autocorrelation: nearby locations are more similar than distant ones",
+    "Every location has been sampled",
+    "The process is stationary in time"
    ],
    "answer": 1,
-   "why": "A higher power makes influence fall off faster with distance."
+   "why": "Because nearby points are related, you can use them to estimate the value at an unsampled location."
   },
   {
-   "q": "On a semivariogram, the distance where the curve flattens is the…",
+   "q": "IDW is called deterministic because...",
+   "options": [
+    "it always gives the right answer",
+    "the predictions depend entirely on the sample points and the weighting scheme, with no model of uncertainty",
+    "it uses a variogram",
+    "it can only be run once"
+   ],
+   "answer": 1,
+   "why": "IDW doesn't model randomness, so it gives no uncertainty estimate."
+  },
+  {
+   "q": "Raising the inverse distance power from 1 to 3 makes the surface...",
+   "options": [
+    "smoother and more generalized",
+    "more locally sensitive, because influence drops off quickly with distance",
+    "identical",
+    "probabilistic"
+   ],
+   "answer": 1,
+   "why": "With a higher p, nearby points dominate. With p = 1, distant points still contribute and the surface is smoother."
+  },
+  {
+   "q": "How should you choose the pixel size of an IDW surface?",
+   "options": [
+    "Always use 1 meter",
+    "Based on the scale of the phenomenon and how dense the input points are",
+    "Whatever renders fastest",
+    "The pixel size doesn't matter"
+   ],
+   "answer": 1,
+   "why": "Fine pixels suit dense data with lots of local variation. Coarse pixels suit sparse data or broad patterns."
+  },
+  {
+   "q": "In a Gaussian random field, the observed values are treated as...",
+   "options": [
+    "the complete surface",
+    "one realization of a random process, observed at discrete locations on a continuous surface",
+    "independent of each other",
+    "errors to be removed"
+   ],
+   "answer": 1,
+   "why": "The true surface exists everywhere, but we see only one realization of it at our sample points."
+  },
+  {
+   "q": "On a semivariogram, the distance where the curve flattens out is the...",
    "options": [
     "nugget",
     "sill",
     "range"
    ],
    "answer": 2,
-   "why": "Beyond the range, observations are no longer spatially correlated. The sill is the plateau's height and the nugget is where the curve starts."
+   "why": "Beyond the range, observations are effectively independent of each other."
   },
   {
-   "q": "Where would you expect the kriging variance to be highest?",
+   "q": "The nugget on a semivariogram represents...",
    "options": [
-    "Right next to a weather station",
-    "Far from any weather station"
+    "the overall variance in the data",
+    "measurement error or very small-scale variation",
+    "the number of sample points",
+    "the distance where points become independent"
    ],
    "answer": 1,
-   "why": "Kriging variance is lowest where there are dense, strongly correlated observations nearby."
+   "why": "The nugget is where the curve starts at zero distance. The sill is the plateau, which reflects overall variance."
+  },
+  {
+   "q": "How does kriging choose its weights differently from IDW?",
+   "options": [
+    "It uses distance only",
+    "It uses a fitted variogram model, including how each sample point relates to every other one",
+    "It weights all points equally",
+    "It ignores nearby points"
+   ],
+   "answer": 1,
+   "why": "IDW weights by distance alone. Kriging's weights come from the modeled spatial dependence."
+  },
+  {
+   "q": "Where is the kriging variance (uncertainty) highest?",
+   "options": [
+    "Right next to a sample point",
+    "In areas with sparse or distant observations",
+    "Everywhere equally",
+    "Only at the edges of the map"
+   ],
+   "answer": 1,
+   "why": "Dense, strongly correlated nearby points give low uncertainty. Gaps between stations give high uncertainty."
+  },
+  {
+   "q": "Which of these does kriging give you that IDW does not?",
+   "options": [
+    "A raster surface",
+    "An estimate of uncertainty at each location",
+    "A weighted average",
+    "Predictions at unsampled locations"
+   ],
+   "answer": 1,
+   "why": "Both produce weighted-average surfaces. Only the probabilistic method also estimates how uncertain each prediction is."
+  },
+  {
+   "q": "Adding elevation as a covariate to a temperature interpolation lets the model...",
+   "options": [
+    "ignore spatial autocorrelation entirely",
+    "use both spatial structure and an external variable that drives the values",
+    "skip the variogram",
+    "predict only at stations"
+   ],
+   "answer": 1,
+   "why": "Covariates move beyond proximity alone by bringing in factors that shape the surface, such as elevation, land cover or soil."
   }
  ]
 }
