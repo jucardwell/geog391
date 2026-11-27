@@ -98,7 +98,7 @@ st_distance(torn_center, torn_center_fat) / 1609.34
 ### Step 4: Standard Deviational Ellipse
 
 ::: {.why}
-The standard deviational ellipse shows the spread of the points around the mean center and the direction they stretch in. It can be weighted too.
+The standard deviational ellipse shows the spread of the points around the mean center and the direction they stretch in.
 :::
 
 ```{r}
@@ -129,7 +129,7 @@ nc_hosp <- st_read("https://drive.google.com/uc?export=download&id=1K7lH1U6oQQ6s
 
 1. Find the mean center of all hospitals. *(Step 2)*
 2. Find the mean center weighted by `hgenlic`, and the distance between the two centers in miles. Divide feet by 5,280. *(Step 3)*
-3. Make the standard deviational ellipse weighted by `hgenlic`. Pass `weights = nc_hosp$hgenlic` to `std_dev_ellipse()`. *(Step 4)*
+3. Make the standard deviational ellipse for the hospitals that have general beds (`hgenlic > 0`). *(Step 4)*
 4. Map the hospitals, both centers and the ellipse together.
 
 When you finish, bring the distance between your two centers to Part 3, along with the city your weighted center is closest to and your map.
@@ -140,7 +140,7 @@ When you finish, bring the distance between your two centers to Part 3, along wi
 
 1. Count how many hospitals have any psychiatric beds.
 2. Find the mean center weighted by `psylic`, and its distance in miles from the unweighted mean center. Divide feet by 5,280. *(Steps 2 and 3)*
-3. Make the standard deviational ellipse weighted by `psylic`. Pass `weights = nc_hosp$psylic` to `std_dev_ellipse()`. *(Step 4)*
+3. Make the standard deviational ellipse for the hospitals that have psychiatric beds (`psylic > 0`). *(Step 4)*
 4. Map the hospitals, both centers and the ellipse together.
 
 When you finish, bring the count from item 1 and the distance between your two centers to Part 3, along with the city your weighted center is closest to and your map.
@@ -171,8 +171,8 @@ c_psy <- center_mean(nc_hosp, weights = nc_hosp$psylic)
 mi <- function(a, b) as.numeric(st_distance(a, b)) / 5280
 d_gen <- mi(c_all, c_gen); d_psy <- mi(c_all, c_psy); d_gp <- mi(c_gen, c_psy)
 n_psy <- sum(nc_hosp$psylic > 0, na.rm = TRUE)
-e_gen <- std_dev_ellipse(nc_hosp, weights = nc_hosp$hgenlic)
-e_psy <- std_dev_ellipse(nc_hosp, weights = nc_hosp$psylic)
+e_gen <- std_dev_ellipse(filter(nc_hosp, hgenlic > 0))
+e_psy <- std_dev_ellipse(filter(nc_hosp, psylic > 0))
 #nearest hospital city to each weighted center, as a landmark
 near_city <- function(pt) nc_hosp$fcity[st_nearest_feature(st_sf(geometry = pt), nc_hosp)]
 city_gen <- near_city(c_gen); city_psy <- near_city(c_psy)
@@ -185,7 +185,7 @@ area_ratio <- (e_psy$sx * e_psy$sy) / (e_gen$sx * e_gen$sy)
 | Distance from the unweighted center | `r fmt(d_gen, 1)` miles | `r fmt(d_psy, 1)` miles |
 | Nearest hospital city to the weighted center | `r str_to_title(city_gen)` | `r str_to_title(city_psy)` |
 
-The two weighted centers are `r fmt(d_gp, 1)` miles apart. The psychiatric-bed ellipse covers `r fmt(100 * area_ratio)`% of the area of the general-bed ellipse.
+The two weighted centers are `r fmt(d_gp, 1)` miles apart. The ellipse around hospitals with psychiatric beds covers `r fmt(100 * area_ratio)`% of the area of the ellipse around hospitals with general beds.
 
 A good card says something like this. Only `r n_psy` of the `r nrow(nc_hosp)` hospitals have psychiatric beds, so that center depends on a few large hospitals. The ellipses show how evenly each kind of care is spread across the state. A new psychiatric unit should go where the psychiatric ellipse is thin compared with the general one, which means a region that has general hospitals but few psychiatric beds. The card should name that region and point to the maps as evidence.
 
@@ -201,8 +201,8 @@ hosp_center <- center_mean(nc_hosp)
 gen_center <- center_mean(nc_hosp, weights = nc_hosp$hgenlic)
 st_distance(hosp_center, gen_center) / 5280
 
-#A3: weighted ellipse (Step 4)
-gen_vals <- std_dev_ellipse(nc_hosp, weights = nc_hosp$hgenlic)
+#A3: ellipse for hospitals with general beds (Step 4)
+gen_vals <- std_dev_ellipse(filter(nc_hosp, hgenlic > 0))
 gen_ellipse <- st_ellipse(geometry = gen_vals, sx = gen_vals$sx, sy = gen_vals$sy,
                           rotation = -gen_vals$theta)
 
@@ -223,8 +223,8 @@ hosp_center <- center_mean(nc_hosp)
 psy_center <- center_mean(nc_hosp, weights = nc_hosp$psylic)
 st_distance(hosp_center, psy_center) / 5280
 
-#B3: weighted ellipse (Step 4)
-psy_vals <- std_dev_ellipse(nc_hosp, weights = nc_hosp$psylic)
+#B3: ellipse for hospitals with psychiatric beds (Step 4)
+psy_vals <- std_dev_ellipse(filter(nc_hosp, psylic > 0))
 psy_ellipse <- st_ellipse(geometry = psy_vals, sx = psy_vals$sx, sy = psy_vals$sy,
                           rotation = -psy_vals$theta)
 
