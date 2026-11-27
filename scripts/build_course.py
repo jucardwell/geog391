@@ -119,7 +119,7 @@ def main():
             prep = None
     case_of_date = {c["date"]: c["n"] for c in cases}
 
-    # Homework: studio day from the lab column, due date from the due column.
+    # Homework: due date from the due column.
     def hw_href(n):
         return f"homework_{n}.html" if (ROOT / f"homework_{n}.qmd").exists() else ""
     labs = {n: {"n": n, "title": hw_titles.get(n, f"Homework {n}"), "workshop": "", "due": "",
@@ -222,7 +222,7 @@ def main():
     # ---- Labs list --------------------------------------------------------
     out = ['<table class="plain-list"><tbody>']
     for l in labs.values():
-        ws = f'studio {l["workshop"]}' if l["workshop"] else ""
+        ws = ""
         title = f'<a href="{l["href"]}">{esc(l["title"])}</a>' if l["href"] else esc(l["title"])
         out.append(f'<tr><td class="num">{l["n"]}</td><td>{title}</td><td class="muted">{esc(ws)}</td>'
                    f'<td>{("due " + esc(l["due"])).replace("due Exam slot", "due in the exam slot") if l["due"] else ""}</td></tr>')

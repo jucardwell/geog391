@@ -68,7 +68,7 @@ AI is not used during class. The rest of the policy is written together on Frida
 <tr><td><b>In-class activities and partner tutorials</b><br><span class="muted">Nearly every class, graded on meaningful effort. Three misses allowed.</span></td><td>40%</td></tr>
 <tr><td><b>Case studies (4)</b><br><span class="muted">6.25% each. Closed book and handwritten, with a prep day before each one.</span></td><td>25%</td></tr>
 <tr><td><b>Final project</b><br><span class="muted">Pairs compare two formerly redlined cities, presented in the exam slot.</span></td><td>20%</td></tr>
-<tr><td><b>Homeworks (9)</b><br><span class="muted">Started with a partner in a studio class and finished outside class.</span></td><td>15%</td></tr>
+<tr><td><b>Homeworks (9)</b><br><span class="muted">Completed outside class and turned in on Canvas.</span></td><td>15%</td></tr>
 </tbody></table>
 ```
 
