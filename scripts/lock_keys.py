@@ -6,8 +6,8 @@ The key is derived from the codeword with PBKDF2-SHA256, and the page decrypts
 it in the browser when someone types the codeword. The answers also come out
 of the site search index.
 
-Each tutorial has its own codeword. They all live in one GitHub Actions
-secret, GEOG391_KEY_CODEWORDS, one line per tutorial page:
+Each tutorial has its own codeword, listed one line per tutorial page in
+answer_key_codewords.txt at the top of the repository:
 
     probability: riverbend
     clt: floodplain
@@ -15,6 +15,10 @@ secret, GEOG391_KEY_CODEWORDS, one line per tutorial page:
 The name before the colon is the page's file name without .html. A page with
 an answer key but no codeword gets its key removed instead, so an answer key
 is never published in plain text by accident.
+
+If the GEOG391_KEY_CODEWORDS Actions secret is set (same format), it is used
+instead of the file. The repository is public, so the file is readable by
+anyone who looks for it; the secret keeps the codewords off GitHub entirely.
 
 Runs as a Quarto post-render script; needs `cryptography` and `beautifulsoup4`.
 """
@@ -121,9 +125,17 @@ def scrub_search(out_dir: pathlib.Path) -> None:
     index.write_text(json.dumps(kept), encoding="utf-8")
 
 
+CODEWORD_FILE = pathlib.Path(__file__).resolve().parent.parent / "answer_key_codewords.txt"
+
+
 def read_codewords() -> dict[str, str]:
+    text = os.environ.get("GEOG391_KEY_CODEWORDS", "")
+    if not text.strip() and CODEWORD_FILE.exists():
+        text = CODEWORD_FILE.read_text(encoding="utf-8")
     codewords = {}
-    for line in os.environ.get("GEOG391_KEY_CODEWORDS", "").splitlines():
+    for line in text.splitlines():
+        if line.lstrip().startswith("#"):
+            continue
         page, sep, word = line.partition(":")
         if sep and page.strip() and word.strip():
             codewords[page.strip().removesuffix(".html").lower()] = word.strip()
@@ -143,7 +155,7 @@ def main() -> None:
     scrub_search(out_dir)
     print(f"lock_keys: locked {len(locked)} answer key(s): {', '.join(locked) or 'none'}")
     if removed:
-        print(f"lock_keys: no codeword in GEOG391_KEY_CODEWORDS for {', '.join(removed)}, so those keys were removed")
+        print(f"lock_keys: no codeword listed for {', '.join(removed)}, so those keys were removed")
 
 
 if __name__ == "__main__":
