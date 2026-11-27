@@ -9,8 +9,8 @@ library(tmap)
 
 #course data (read once for the whole page)
 ch_rainfall <- read_csv("https://drive.google.com/uc?export=download&id=1wYLHVVsemxQVjsdsmSzV9m0G6eLR_YK4", show_col_types = FALSE)
-pm_nc <- read_csv("https://drive.google.com/uc?export=download&id=19Axv5_bv7p4LbDWNDs4TmdFi3gfYeNXc", show_col_types = FALSE)
 rdu_jan <- read_csv("https://drive.google.com/uc?export=download&id=1ABpiu5ABzAo-WXbYBp9LWgN8-lHuFQR9", show_col_types = FALSE)
+pm_nc <- read_csv("https://drive.google.com/uc?export=download&id=19Axv5_bv7p4LbDWNDs4TmdFi3gfYeNXc", show_col_types = FALSE)
 
 #numbers quoted in the text below come from here, so they stay right if the data changes
 fmt <- function(x, d = 3) formatC(x, format = "f", digits = d)
@@ -21,19 +21,19 @@ jan_years <- range(lubridate::year(rdu_jan$date))
 ```
 
 ::: {.plan}
-- **Part 1 · about 15 min.** Read the run-through and run the code with your partner.
-- **Part 2 · about 25 min.** Split up: Partner A takes Bolin Creek flooding, Partner B takes cold days.
+- **Part 1 · about 15 min.** Read the walkthrough and run the code with your partner.
+- **Part 2 · about 25 min.** Split up. Partner A uses the binomial and Partner B uses the normal model, both on bad-air days in Charlotte.
 - **Part 3 · about 10 min.** Combine your numbers to answer one joint question, and write it on an index card.
 :::
 
-## Part 1 · Run-through {#run-through}
+## Part 1 · Walkthrough {#walkthrough}
 
 Run each chunk in your own .Rmd. You will reuse this code in Part 2.
 
 ### Step 1 · Load the data
 
 ::: {.why}
-Three datasets: daily rainfall in Chapel Hill (`r rain_years[1]` to `r rain_years[2]`, from the [NC State Climate Office](https://products.climate.ncsu.edu/data/)), daily PM2.5 across North Carolina (2016 to 2020, from the [CDC Environmental Public Health Tracking Network](https://ephtracking.cdc.gov/)), and daily January highs at RDU airport (`r jan_years[1]` to `r jan_years[2]`, from the [Iowa Environmental Mesonet](https://mesonet.agron.iastate.edu/request/download.phtml)).
+Daily rainfall in Chapel Hill (`r rain_years[1]` to `r rain_years[2]`, from the [NC State Climate Office](https://products.climate.ncsu.edu/data/)) and daily January highs at RDU airport (`r jan_years[1]` to `r jan_years[2]`, from the [Iowa Environmental Mesonet](https://mesonet.agron.iastate.edu/request/download.phtml)).
 :::
 
 ```{r, eval = FALSE}
@@ -45,9 +45,6 @@ library(tmap)
 #daily rainfall in Chapel Hill
 ch_rainfall <- read_csv("https://drive.google.com/uc?export=download&id=1wYLHVVsemxQVjsdsmSzV9m0G6eLR_YK4")
 
-#daily PM2.5 across North Carolina, 2016-2020
-pm_nc <- read_csv("https://drive.google.com/uc?export=download&id=19Axv5_bv7p4LbDWNDs4TmdFi3gfYeNXc")
-
 #daily January high temperatures at RDU
 rdu_jan <- read_csv("https://drive.google.com/uc?export=download&id=1ABpiu5ABzAo-WXbYBp9LWgN8-lHuFQR9")
 ```
@@ -55,7 +52,7 @@ rdu_jan <- read_csv("https://drive.google.com/uc?export=download&id=1ABpiu5ABzAo
 ### Step 2 · Make one row per day
 
 ::: {.why}
-Probability counts days, so each row must be one day. The rainfall file has `r format(n_rain_rows, big.mark = ",")` rows but only `r format(n_rain_dates, big.mark = ",")` distinct dates: some dates were recorded twice. We keep one row per date, and count the day as rainy if either record shows rain.
+Probability counts days, so each row must be one day. The rainfall file has `r format(n_rain_rows, big.mark = ",")` rows but only `r format(n_rain_dates, big.mark = ",")` distinct dates. We keep one row per date and count the day as rainy if either record shows rain.
 :::
 
 ```{r}
@@ -68,14 +65,10 @@ ch_daily <- ch_rainfall |>
 ch_daily <- ch_daily |> mutate(rain = ifelse(prec_in > 0, 1, 0))
 ```
 
-::: {.reading}
-**Why it matters.** Always ask what one row represents before you count anything. Duplicate rows would count some days twice.
-:::
-
 ### Step 3 · Empirical probability
 
 ::: {.why}
-Empirical probability is the share of observed days on which the event happened: **P(E) = f / n**, where f is the number of days the event happened and n is the number of days observed.
+**P(E) = f / n**: the number of days the event happened divided by the number of days observed.
 :::
 
 ```{r}
@@ -84,47 +77,10 @@ p_rain <- sum(ch_daily$rain) / nrow(ch_daily)
 p_rain
 ```
 
-::: {.reading}
-**What it tells us.** About `r round(100 * p_rain)`% of days in the record had some rain, roughly one day in three.
-:::
-
-### Step 4 · Empirical probability at many places
+### Step 4 · Binomial distribution
 
 ::: {.why}
-The same formula works for every location at once if we group first. Here each row of `pm_nc` is one day in one census tract (a modelled estimate at the tract centre), so we flag days with moderate or worse air quality (a daily PM2.5 above 9.0 µg/m³, the EPA "moderate" line since 2024), then count f and n for each location.
-:::
-
-```{r, message = FALSE}
-#flag moderate or worse days (1 = PM2.5 above 9.0, 0 = not)
-flagged_pm <- pm_nc |> mutate(aq_flag = ifelse(pm_val > 9, 1, 0))
-
-#f and n for each location, then P(E) = f / n
-pm_prob <- flagged_pm |>
-  group_by(lat, lon) |>
-  summarise(tot_flag = sum(aq_flag), tot_ob = n()) |>
-  mutate(p_bad_air = tot_flag / tot_ob)
-
-#turn it into a spatial object: longitude (x) goes first, then latitude (y)
-pm_prob_sf <- pm_prob |> st_as_sf(coords = c("lon", "lat"), crs = 4326)
-
-#map the probability at each location
-tm_shape(pm_prob_sf) +
-  tm_dots(fill = "p_bad_air", size = 0.3,
-          fill.legend = tm_legend(title = "P(moderate or worse)"))
-```
-
-```{r, include = FALSE}
-pm_range <- range(pm_prob$p_bad_air)
-```
-
-::: {.reading}
-**What it tells us.** Across `r format(nrow(pm_prob), big.mark = ",")` tracts, the chance of a moderate or worse air day ranges from `r fmt(pm_range[1])` to `r fmt(pm_range[2])`. If the points don't fall in North Carolina, check the order inside `coords =`: longitude comes first.
-:::
-
-### Step 5 · Binomial distribution
-
-::: {.why}
-The binomial distribution counts "successes" across a fixed number of trials, where each trial has two outcomes (rain or no rain) and the same probability. Rain isn't really independent from day to day, and it varies by season, so treat this as a simplifying model.
+The binomial counts "successes" in a fixed number of trials, each with the same probability. Rain isn't really independent from day to day, so treat this as a simplifying model.
 :::
 
 ```{r}
@@ -134,7 +90,6 @@ probability_days <- tibble(
   probability = dbinom(x = 0:10, size = 10, prob = p_rain)
 )
 
-#plot the distribution
 ggplot(probability_days, aes(x = num_days, y = probability)) +
   geom_col() +
   scale_x_continuous(breaks = 0:10)
@@ -142,37 +97,24 @@ ggplot(probability_days, aes(x = num_days, y = probability)) +
 
 ```{r, include = FALSE}
 most_likely <- probability_days |> slice_max(probability)
-p_zero <- dbinom(0, 10, p_rain)
 ```
 
-::: {.reading}
-**What it tells us.** The most likely outcome is `r most_likely$num_days` rainy days (`r fmt(most_likely$probability)`). A dry stretch of 10 days is rare: `dbinom(0, 10, p_rain)` is `r fmt(p_zero)`, about 1 in `r round(1 / p_zero)`.
-:::
-
-### Step 6 · Cumulative probability
-
-::: {.why}
-`pbinom(q, size, p)` gives the probability of **q or fewer**. Questions are often worded the other way, so translate the words first.
-:::
+`pbinom(q, size, p)` gives the probability of **q or fewer**, so translate the question's wording first:
 
 | Question says | Which outcomes | Code | Answer |
 |---|---|---|---|
+| most likely number | the tallest bar | `slice_max(probability_days, probability)` | `r most_likely$num_days` days (`r fmt(most_likely$probability)`) |
 | 3 days or fewer | 0 to 3 | `pbinom(3, 10, p_rain)` | `r fmt(pbinom(3, 10, p_rain))` |
 | more than 3 days | 4 to 10 | `1 - pbinom(3, 10, p_rain)` | `r fmt(1 - pbinom(3, 10, p_rain))` |
 | at least 3 days | 3 to 10 | `1 - pbinom(2, 10, p_rain)` | `r fmt(1 - pbinom(2, 10, p_rain))` |
 
-::: {.reading}
-**What it tells us.** "More than 3" and "at least 3" differ by a whole bar of the chart, here `r fmt(dbinom(3, 10, p_rain))`. Part 2 uses "more than 3".
-:::
-
-### Step 7 · Normal distribution
+### Step 5 · Normal distribution
 
 ::: {.why}
-A continuous variable like temperature can be modelled with a normal curve built from its mean and standard deviation.
+A continuous variable can be modelled with a normal curve built from its mean and standard deviation. `pnorm()` gives the share *below* a value, so subtract from 1 for "above".
 :::
 
 ```{r}
-#mean and standard deviation of January highs
 jan_mean <- mean(rdu_jan$max_temp)
 jan_sd <- sd(rdu_jan$max_temp)
 
@@ -182,7 +124,7 @@ jan_sd <- sd(rdu_jan$max_temp)
 #empirical check: share of observed days at 60 or above
 mean(rdu_jan$max_temp >= 60)
 
-#histogram of the data with the normal curve on top
+#histogram with the normal curve on top
 ggplot(rdu_jan, aes(x = max_temp)) +
   geom_histogram(aes(y = after_stat(density)), binwidth = 4, boundary = 0) +
   stat_function(fun = dnorm, args = list(mean = jan_mean, sd = jan_sd)) +
@@ -190,164 +132,136 @@ ggplot(rdu_jan, aes(x = max_temp)) +
 ```
 
 ::: {.reading}
-**What it tells us.** The normal model says `r round(100 * (1 - pnorm(60, jan_mean, jan_sd)))`% of January days reach 60°F; the record says `r round(100 * mean(rdu_jan$max_temp >= 60))`%. The curve fits the middle well but misses in the tails, so be careful using it for rare events. `pnorm()` gives the share *below* a value, which is why we subtract from 1 for "above".
+The model says `r round(100 * (1 - pnorm(60, jan_mean, jan_sd)))`% of January days reach 60°F; the record says `r round(100 * mean(rdu_jan$max_temp >= 60))`%. Compare the model with the data before trusting it, especially in the tails.
 :::
 
-### Check yourselves before splitting up
+## Part 2 · Partner practice {#partner-practice}
 
-1. What does one row of `ch_daily` represent, and why did we have to make that true?
-2. Your partner says "at least 2 rainy days" and writes `1 - pbinom(2, 10, p_rain)`. What should they write instead?
+Both partners use daily PM2.5 estimates for 300 North Carolina census tracts, 2016 to 2020, from the [CDC Environmental Public Health Tracking Network](https://ephtracking.cdc.gov/). Each row is one day in one tract. A **bad-air day** is a day with PM2.5 above 9.0 µg/m³, the EPA "moderate" line since 2024. The step to reuse is in parentheses.
 
-## Part 2 · Partner work {#partner-work}
-
-Each partner uses the Part 1 steps on a different dataset. The step to reuse is in parentheses. Write down your result for Part 3.
+```{r, eval = FALSE}
+#daily PM2.5 by census tract, 2016-2020 (both partners)
+pm_nc <- read_csv("https://drive.google.com/uc?export=download&id=19Axv5_bv7p4LbDWNDs4TmdFi3gfYeNXc")
+```
 
 :::: {.partners}
 ::: {.partner .partner-a}
-### Partner A · Flood-risk days at Bolin Creek
+### Partner A · Binomial
 
-```{r, eval = FALSE}
-#USGS gauge readings, 2015-2025
-bolin_creek_data <- read_csv("https://drive.google.com/uc?export=download&id=1eEzriJ5XzR-aS74nJmyiQFVrmV4T3cel")
-```
+1. Flag bad-air days, then find the empirical probability of a bad-air day for every tract by grouping on `lat` and `lon`. *(Step 3)*
+2. Map those probabilities with `st_as_sf(coords = c("lon", "lat"), crs = 4326)`. Longitude goes first.
+3. For the tract at `lat` 35.142, `lon` -80.956 (southwest Charlotte), find the most likely number of bad-air days in a 30-day month. *(Step 4)*
+4. Find the probability of **more than 15** bad-air days in a 30-day month for that tract. *(Step 4)*
 
-1. Make one row per day by keeping each day's highest water reading. *(Step 2)*
-2. A flood-risk day is one where the water is more than 1 ft above the median daily height. Flag those days and find the empirical probability. *(Steps 2 and 3)*
-3. Find the most likely number of flood-risk days in a 25-day period. *(Step 5)*
-4. Find the probability of **more than 3** flood-risk days in 25 days. *(Step 6)*
-
-**Bring to Part 3:** your daily probability and your answer to item 4.
+**Bring to Part 3:** the tract's daily probability and your answer to item 4.
 :::
 
 ::: {.partner .partner-b}
-### Partner B · Cold January days across NC
+### Partner B · Normal model
 
-```{r, eval = FALSE}
-#January highs at 42 ASOS stations, 2000-2019
-asos_jan_data <- read_csv("https://drive.google.com/uc?export=download&id=1_zE1kcC7YY083R6rv20sqeN1l2dCdmhi")
-```
+1. Keep only the southwest Charlotte tract: `filter(round(lat, 3) == 35.142, round(lon, 3) == -80.956)`.
+2. Find the mean and standard deviation of its daily PM2.5. *(Step 5)*
+3. Use the normal model to find the probability that a day is above 9.0 µg/m³, and compare it with the empirical share of days above 9.0. *(Step 5)*
+4. Plot a histogram of daily PM2.5 with the normal curve on top. *(Step 5)*
 
-1. Group by station and find each station's mean and standard deviation of January highs. *(Steps 4 and 7)*
-2. Use the normal model to find each station's probability of a high **below 40°F**. *(Step 7)*
-3. Map the probabilities. *(Step 4: longitude goes first)*
-4. Pick the station with the highest probability east of the mountains (longitude east of -80).
-
-**Bring to Part 3:** that station's name and its daily probability.
+**Bring to Part 3:** the normal-model probability and one sentence on how well the curve fits.
 :::
 ::::
 
 ## Part 3 · Together {#together}
 
-1. Partner A runs Partner B's station probability through the binomial: the chance of **more than 3** cold days in a 25-day stretch of January.
-2. Partner B explains to Partner A why the normal model might over- or underestimate cold days at that station (look back at Step 7).
-3. Decide together which hazard deserves planning first, and what your numbers can't tell you (for example, how bad each event is).
+1. Partner A runs Partner B's normal-model probability through the binomial: the chance of **more than 15** bad-air days in 30.
+2. Partner B explains to Partner A why the two daily probabilities differ, using the histogram.
+3. Decide together which estimate the county health department should use, and why.
 
-| Hazard | Probability per day | P(more than 3 days in 25) |
+| Daily probability from | Probability per day | P(more than 15 days in 30) |
 |---|---|---|
-| Flood-risk day, Bolin Creek | | |
-| Cold day, your station | | |
+| Empirical (Partner A) | | |
+| Normal model (Partner B) | | |
 
 ::: {.deliver}
-**Index card, one per pair.** Both names, the two numbers for each hazard from the table, and your two or three sentences. Hand it in on your way out.
+**Index card, one per pair.** Both names, the four numbers from the table, and your two or three sentences. Hand it in on your way out.
 :::
 
 ## Answer key {#answer-key .answer-key}
 
 ```{r key-values, include = FALSE}
 #Partner A
-bolin_creek_data <- read_csv("https://drive.google.com/uc?export=download&id=1eEzriJ5XzR-aS74nJmyiQFVrmV4T3cel", show_col_types = FALSE)
-bolin_daily <- bolin_creek_data |> group_by(time) |> summarise(max_water = max(value))
-median_height <- median(bolin_daily$max_water)
-p_flood <- mean(bolin_daily$max_water > median_height + 1)
-flood_mode <- which.max(dbinom(0:25, 25, p_flood)) - 1
-flood_more3 <- 1 - pbinom(3, 25, p_flood)
+pm_prob <- pm_nc |>
+  mutate(bad_air = ifelse(pm_val > 9, 1, 0)) |>
+  group_by(lat, lon) |>
+  summarise(p_bad_air = sum(bad_air) / n(), .groups = "drop")
+tract <- pm_prob |> filter(round(lat, 3) == 35.142, round(lon, 3) == -80.956)
+p_emp <- tract$p_bad_air
+mode_emp <- which.max(dbinom(0:30, 30, p_emp)) - 1
+more15_emp <- 1 - pbinom(15, 30, p_emp)
+top_tract <- pm_prob |> slice_max(p_bad_air, n = 1, with_ties = FALSE)
 
 #Partner B
-asos_jan_data <- read_csv("https://drive.google.com/uc?export=download&id=1_zE1kcC7YY083R6rv20sqeN1l2dCdmhi", show_col_types = FALSE)
-station_cold <- asos_jan_data |>
-  group_by(station) |>
-  summarise(n_days = n(),
-            p_cold = pnorm(40, mean(max_temp), sd(max_temp)),
-            emp_cold = mean(max_temp < 40),
-            lon = first(lon)) |>
-  arrange(desc(p_cold))
-top_east <- station_cold |> filter(lon > -80) |> slice_max(p_cold)
-top_all <- station_cold |> slice_max(p_cold)
-short_stations <- station_cold |> filter(n_days < 100)
-cold_more3 <- 1 - pbinom(3, 25, top_east$p_cold)
-n_under <- sum(station_cold$p_cold < station_cold$emp_cold)
+charlotte <- pm_nc |> filter(round(lat, 3) == 35.142, round(lon, 3) == -80.956)
+pm_mean <- mean(charlotte$pm_val)
+pm_sd <- sd(charlotte$pm_val)
+p_norm <- 1 - pnorm(9, mean = pm_mean, sd = pm_sd)
+more15_norm <- 1 - pbinom(15, 30, p_norm)
 ```
 
 | Item | Value |
 |---|---|
-| Bolin Creek median daily max | `r median_height` ft |
-| A: flood-risk probability per day | `r fmt(p_flood)` |
-| A: most likely count in 25 days | `r flood_mode` (probability `r fmt(dbinom(flood_mode, 25, p_flood))`) |
-| A: P(more than 3 in 25) | `r fmt(flood_more3)` |
-| B: highest station east of -80 | `r top_east$station`, `r fmt(top_east$p_cold)` |
-| B: highest overall (mountains) | `r top_all$station`, `r fmt(top_all$p_cold)` |
-| Joint: P(more than 3 cold days in 25) at `r top_east$station` | `r fmt(cold_more3)` |
+| A: tracts mapped | `r nrow(pm_prob)` |
+| A: chance of a bad-air day, lowest to highest tract | `r fmt(min(pm_prob$p_bad_air))` to `r fmt(max(pm_prob$p_bad_air))` |
+| A: southwest Charlotte, empirical daily probability | `r fmt(p_emp)` |
+| A: most likely number of bad-air days in 30 | `r mode_emp` |
+| A: P(more than 15 in 30), empirical | `r fmt(more15_emp)` |
+| B: mean and sd of daily PM2.5 | `r fmt(pm_mean, 2)` and `r fmt(pm_sd, 2)` µg/m³ |
+| B: normal-model daily probability | `r fmt(p_norm)` |
+| Joint: P(more than 15 in 30), normal model | `r fmt(more15_norm)` |
 
-**What a good card says.** Cold days are the more likely problem (`r fmt(cold_more3)` vs `r fmt(flood_more3)` for more than 3 days in 25), but the numbers say nothing about how damaging each event is. The normal model gives a lower chance of a high below 40°F than the record does at `r n_under` of `r nrow(station_cold)` stations, so it tends to understate cold days.
-
-`r if (nrow(short_stations) > 0) paste0("Most stations have about 600 January days in the file, but some have far fewer: ", paste0(short_stations$station, " (", short_stations$n_days, ")", collapse = ", "), ". If a pair picks one of these, ask whether they trust that estimate.")`
+**What a good card says.** Daily PM2.5 is right-skewed: most days sit a little below the mean and a few very smoky days pull the mean up. The normal curve is symmetric, so it puts too many days above 9.0 (`r fmt(p_norm)` vs `r fmt(p_emp)`), and that small gap grows to `r fmt(more15_norm)` vs `r fmt(more15_emp)` for more than 15 bad-air days in a month. The empirical estimate is the better one to use here.
 
 ```{r, eval = FALSE}
-#### Partner A: flood-risk days at Bolin Creek ####
-bolin_creek_data <- read_csv("https://drive.google.com/uc?export=download&id=1eEzriJ5XzR-aS74nJmyiQFVrmV4T3cel")
+#### Partner A: binomial ####
+#A1: flag bad-air days and find the empirical probability for every tract (Step 3)
+pm_prob <- pm_nc |>
+  mutate(bad_air = ifelse(pm_val > 9, 1, 0)) |>
+  group_by(lat, lon) |>
+  summarise(p_bad_air = sum(bad_air) / n())
 
-#A1: one row per day, keeping each day's highest reading (Step 2)
-bolin_daily <- bolin_creek_data |>
-  group_by(time) |>
-  summarise(max_water = max(value))
+#A2: map it (longitude goes first)
+pm_prob_sf <- st_as_sf(pm_prob, coords = c("lon", "lat"), crs = 4326)
+tm_shape(pm_prob_sf) +
+  tm_dots(fill = "p_bad_air", size = 0.3,
+          fill.legend = tm_legend(title = "P(bad-air day)"))
 
-#A2: flood-risk day = more than 1 ft above the median daily height (Steps 2-3)
-median_height <- median(bolin_daily$max_water)
-bolin_daily <- bolin_daily |>
-  mutate(flood_risk = ifelse(max_water > median_height + 1, 1, 0))
-p_flood <- sum(bolin_daily$flood_risk) / nrow(bolin_daily)
-p_flood
+#A3: most likely number of bad-air days in 30 for southwest Charlotte (Step 4)
+p_charlotte <- pm_prob |>
+  filter(round(lat, 3) == 35.142, round(lon, 3) == -80.956) |>
+  pull(p_bad_air)
+bad_air_days <- tibble(num_days = 0:30,
+                       probability = dbinom(0:30, size = 30, prob = p_charlotte))
+bad_air_days |> slice_max(probability)
 
-#A3: most likely number of flood-risk days in 25 days (Step 5)
-flood_dist <- tibble(num_days = 0:25,
-                     probability = dbinom(0:25, size = 25, prob = p_flood))
-flood_dist |> slice_max(probability)
+#A4: probability of MORE THAN 15 bad-air days in 30 (Step 4)
+1 - pbinom(15, size = 30, prob = p_charlotte)
 
-#A4: probability of MORE THAN 3 flood-risk days in 25 (Step 6)
-1 - pbinom(3, size = 25, prob = p_flood)
+#### Partner B: normal model ####
+#B1: keep the southwest Charlotte tract
+charlotte <- pm_nc |> filter(round(lat, 3) == 35.142, round(lon, 3) == -80.956)
 
-#### Partner B: cold January days across NC ####
-asos_jan_data <- read_csv("https://drive.google.com/uc?export=download&id=1_zE1kcC7YY083R6rv20sqeN1l2dCdmhi")
+#B2: mean and standard deviation (Step 5)
+pm_mean <- mean(charlotte$pm_val)
+pm_sd <- sd(charlotte$pm_val)
 
-#B1-B2: per-station mean and sd, then normal-model P(high below 40F) (Step 7)
-station_cold <- asos_jan_data |>
-  group_by(station) |>
-  summarise(n_days = n(),
-            jan_mean = mean(max_temp),
-            jan_sd = sd(max_temp),
-            p_cold = pnorm(40, mean = jan_mean, sd = jan_sd),
-            lat = first(lat),
-            lon = first(lon)) |>
-  arrange(desc(p_cold))
-station_cold
+#B3: normal-model probability of a day above 9.0, and the empirical check
+1 - pnorm(9, mean = pm_mean, sd = pm_sd)
+mean(charlotte$pm_val > 9)
 
-#B3: map it (longitude goes first, Step 4)
-station_sf <- st_as_sf(station_cold, coords = c("lon", "lat"), crs = 4326)
-tm_shape(station_sf) +
-  tm_dots(fill = "p_cold", size = 0.8,
-          fill.legend = tm_legend(title = "P(high < 40°F)"))
-
-#B4: highest probability east of the mountains (longitude east of -80)
-station_cold |>
-  filter(lon > -80) |>
-  slice_max(p_cold)
+#B4: histogram with the normal curve
+ggplot(charlotte, aes(x = pm_val)) +
+  geom_histogram(aes(y = after_stat(density)), binwidth = 1, boundary = 0) +
+  stat_function(fun = dnorm, args = list(mean = pm_mean, sd = pm_sd)) +
+  geom_vline(xintercept = 9, linetype = "dashed")
 
 #### Part 3: together ####
-p_cold_station <- station_cold |>
-  filter(lon > -80) |>
-  slice_max(p_cold) |>
-  pull(p_cold)
-
-#P(more than 3 cold days in a 25-day stretch)
-1 - pbinom(3, size = 25, prob = p_cold_station)
+p_normal <- 1 - pnorm(9, mean = pm_mean, sd = pm_sd)
+1 - pbinom(15, size = 30, prob = p_normal)
 ```
