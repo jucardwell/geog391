@@ -11,7 +11,7 @@ TUT = [("intro_to_R", "basic_R"), ("intro_descriptive_statistics", "describing_d
        ("autocorrelation_tutorial", "autocorrelation"), ("spatial_modeling_tutorial", "regression"),
        ("GWR tutorial", "gwr"), ("clustering tutorial", "clustering"),
        ("continuous_surfaces_tutorial", "continuous_surfaces")]
-FRIENDLY = {"basic_R": "Install R and RStudio; intro to R tutorial", "describing_data": "Partner tutorial: county vs. tract", "tmap": "Partner tutorial: equal interval vs. quantile",
+FRIENDLY = {"basic_R": "Class contract and AI policy (20 min); intro to R tutorial in pairs (30 min)", "describing_data": "Partner tutorial: county vs. tract", "tmap": "Partner tutorial: equal interval vs. quantile",
             "describing_spatial_data": "Partner tutorial: mean centers of Covid", "probability": "Partner tutorial: binomial vs. normal (Charlotte bad-air days)",
             "estimation_sampling": "Partner tutorial: physical vs. mental health", "ppa": "Partner tutorial: early vs. late crime",
             "regression": "Partner tutorial: lag vs. error", "gwr": "Partner tutorial: urban vs. rural",
