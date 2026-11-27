@@ -39,6 +39,26 @@
   "--t-key-edge": "#0A8282",
   "--t-button": "#9B2014"
  },
+ "tmap": {
+  "--t-ink": "#1E2414",
+  "--t-title": "#536F04",
+  "--t-rule": "#B2C78F",
+  "--t-link": "#4C6500",
+  "--t-plan-bg": "#EEF8DF",
+  "--t-plan-edge": "#607E06",
+  "--t-why-bg": "#EFF3FF",
+  "--t-why-edge": "#667CE5",
+  "--t-read-bg": "#F4F9EE",
+  "--t-read-edge": "#98AF70",
+  "--t-a-bg": "#E7F4D4",
+  "--t-b-bg": "#E9EEFE",
+  "--t-deliver-bg": "#E0E7FE",
+  "--t-deliver-edge": "#4354AB",
+  "--t-code-bg": "#F5F8F1",
+  "--t-code-edge": "#76923B",
+  "--t-key-edge": "#5366CE",
+  "--t-button": "#475F02"
+ },
  "describing_spatial_data": {
   "--t-ink": "#1B2130",
   "--t-title": "#3D5ABD",
