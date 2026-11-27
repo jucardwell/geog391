@@ -21,7 +21,7 @@ project:
 
 website:
   title: "GEOG 391 · Quantitative Methods in Geography"
-  site-url: https://jucardwell.github.io/quant_methods/
+  site-url: https://jucardwell.github.io/geog391/
   page-navigation: false
   search: false
 
