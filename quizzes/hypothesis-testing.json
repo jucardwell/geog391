@@ -1,0 +1,170 @@
+{
+ "reading": "hypothesis-testing",
+ "questions": [
+  {
+   "q": "The null hypothesis (H₀) states that...",
+   "options": [
+    "there is a difference or effect",
+    "there is no difference, relationship or effect, and any pattern is due to sampling variability",
+    "the sample is biased",
+    "the alternative is proven"
+   ],
+   "answer": 1,
+   "why": "We assume H₀ is true and ask how likely our sample result would be under it."
+  },
+  {
+   "q": "A hypothesis test can lead us to...",
+   "options": [
+    "prove the alternative hypothesis",
+    "prove the null hypothesis",
+    "reject or fail to reject the null hypothesis",
+    "accept the sample mean as the population mean"
+   ],
+   "answer": 2,
+   "why": "Hypothesis testing never proves the alternative. We either reject H₀ or fail to reject it."
+  },
+  {
+   "q": "When is a one-tailed test appropriate?",
+   "options": [
+    "Whenever the result looks significant in one direction",
+    "Only when there's a clear reason, decided before looking at the data, to expect a difference in one direction",
+    "Always; it's more powerful",
+    "Never"
+   ],
+   "answer": 1,
+   "why": "Choosing a direction after seeing the data inflates the chance of a false positive."
+  },
+  {
+   "q": "The one-sample t statistic measures...",
+   "options": [
+    "the probability that H₀ is true",
+    "how far the sample mean is from the null value, in units of standard error",
+    "the effect size",
+    "the sample size needed"
+   ],
+   "answer": 1,
+   "why": "t = (x̄ − μ₀) / (s / √n): the distance from what H₀ expects, scaled by the standard error."
+  },
+  {
+   "q": "A p-value of 0.03 means...",
+   "options": [
+    "there's a 3% chance the null hypothesis is true",
+    "if there were truly no difference, we'd see a difference at least this large in about 3% of random samples",
+    "the effect is small",
+    "there's a 97% chance the result is real"
+   ],
+   "answer": 1,
+   "why": "The p-value assumes H₀ is true. It is not the probability that H₀ is true, and it says nothing about effect size."
+  },
+  {
+   "q": "Rejecting the null hypothesis when it is actually true is a...",
+   "options": [
+    "Type I error (false positive)",
+    "Type II error (false negative)",
+    "correct decision",
+    "power failure"
+   ],
+   "answer": 0,
+   "why": "The probability of a Type I error equals α, the significance level."
+  },
+  {
+   "q": "Lowering α from 0.05 to 0.01...",
+   "options": [
+    "reduces both types of error",
+    "makes a Type I error less likely but a Type II error more likely",
+    "makes a Type I error more likely",
+    "has no effect on errors"
+   ],
+   "answer": 1,
+   "why": "There's a trade-off. The main way to reduce both at once is a larger sample."
+  },
+  {
+   "q": "Testing whether well water near a landfill is contaminated, which error could be most serious?",
+   "options": [
+    "Type I: concluding there's contamination when there isn't",
+    "Type II: concluding there's no contamination when there is",
+    "Neither matters",
+    "Both are equally serious in every case"
+   ],
+   "answer": 1,
+   "why": "Missing real contamination could harm people's health, so we might accept a higher chance of a Type I error."
+  },
+  {
+   "q": "Why does running a LISA test for every county raise a concern about Type I errors?",
+   "options": [
+    "LISA doesn't use p-values",
+    "With many tests at α = 0.05, some will be significant by chance alone",
+    "Counties are always independent",
+    "LISA only runs one test"
+   ],
+   "answer": 1,
+   "why": "Run 20 independent tests at 0.05 and you'd expect about one false positive."
+  },
+  {
+   "q": "Comparing PM2.5 at the same monitors in 2019 and 2020 calls for...",
+   "options": [
+    "a one-sample t-test",
+    "a two-sample t-test",
+    "a paired t-test",
+    "a chi-square goodness-of-fit test"
+   ],
+   "answer": 2,
+   "why": "Each monitor is compared to itself, which removes differences between locations."
+  },
+  {
+   "q": "Why use ANOVA instead of many t-tests to compare income across three NC regions?",
+   "options": [
+    "ANOVA is easier to calculate",
+    "Running many t-tests increases the chance of a Type I error",
+    "t-tests can't compare means",
+    "ANOVA tells you exactly which group differs"
+   ],
+   "answer": 1,
+   "why": "A significant ANOVA says at least one mean differs. Post-hoc tests like Tukey's HSD find which one."
+  },
+  {
+   "q": "Is commute mode related to whether a household is in an urban or rural tract? Which test fits?",
+   "options": [
+    "Two-sample t-test",
+    "Chi-square test of independence",
+    "One-sample t-test",
+    "ANOVA"
+   ],
+   "answer": 1,
+   "why": "Both variables are categorical. The test compares observed counts in a contingency table to the counts expected under independence."
+  },
+  {
+   "q": "If the expected frequency in some chi-square cells is below 5, you can use...",
+   "options": [
+    "a paired t-test",
+    "Fisher's exact test",
+    "ANOVA",
+    "Welch's t-test"
+   ],
+   "answer": 1,
+   "why": "Chi-square needs reasonably large expected counts in each cell."
+  },
+  {
+   "q": "How does positive spatial autocorrelation affect a standard t-test?",
+   "options": [
+    "It makes p-values too high",
+    "Each observation carries less unique information than assumed, so standard errors are too small and p-values too low",
+    "It has no effect",
+    "It makes the test non-parametric"
+   ],
+   "answer": 1,
+   "why": "That raises the chance of a Type I error, which is one reason the course moves to spatial methods."
+  },
+  {
+   "q": "With data for every US census tract, a $50 difference in median income is statistically significant. This shows that...",
+   "options": [
+    "the difference must be important",
+    "with very large samples, even tiny differences can be significant, so you should also report the effect size",
+    "the test is wrong",
+    "the sample is biased"
+   ],
+   "answer": 1,
+   "why": "Significance depends heavily on sample size. Effect sizes and confidence intervals show whether a difference is big enough to matter."
+  }
+ ]
+}

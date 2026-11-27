@@ -1,0 +1,181 @@
+{
+ "reading": "describing-spatial-data",
+ "questions": [
+  {
+   "q": "Two datasets have the same mean and standard deviation. Why might you still need spatial tools to describe them?",
+   "options": [
+    "They can't have the same mean",
+    "They can have completely different spatial patterns, which non-spatial statistics ignore",
+    "Spatial tools change the mean",
+    "They need a different level of measurement"
+   ],
+   "answer": 1,
+   "why": "Attribute statistics ignore location. Maps and centrography describe where values and features are."
+  },
+  {
+   "q": "Percent poverty is strongly skewed, and on an equal interval map most counties land in one class. Why?",
+   "options": [
+    "Equal interval splits the range into equal widths, so skewed data pile into one or two classes",
+    "Equal interval puts the same number of counties in each class",
+    "The map uses too many classes",
+    "Equal interval only works for counts"
+   ],
+   "answer": 0,
+   "why": "Look at a histogram before choosing a classification method."
+  },
+  {
+   "q": "A quantile map puts the same number of areas in each class. What can go wrong?",
+   "options": [
+    "Nothing",
+    "Very similar values can end up in different classes, or very different values in the same class",
+    "It can't show rank",
+    "It requires normally distributed data"
+   ],
+   "answer": 1,
+   "why": "Quantile maps show relative rank well, but the breaks may not reflect real gaps in the data."
+  },
+  {
+   "q": "Why are natural breaks (Jenks) maps hard to compare across years?",
+   "options": [
+    "They always use 10 classes",
+    "The breaks are specific to each dataset",
+    "They only work for points",
+    "They use a diverging color scheme"
+   ],
+   "answer": 1,
+   "why": "Breaks placed at gaps in one year's data won't match the next year's."
+  },
+  {
+   "q": "When are manual breaks especially useful?",
+   "options": [
+    "When there are meaningful thresholds, like the federal poverty line or an EPA standard",
+    "When the data are normal",
+    "Never; they are biased",
+    "Only for raster data"
+   ],
+   "answer": 0,
+   "why": "User-defined breaks can match thresholds readers care about, or round, easy-to-read numbers."
+  },
+  {
+   "q": "A county map of the total number of people in poverty mostly shows...",
+   "options": [
+    "where poverty rates are highest",
+    "where people live, which is why mapping the percent (normalizing) is better",
+    "the MAUP",
+    "large-area bias"
+   ],
+   "answer": 1,
+   "why": "Choropleth maps should almost always show rates, percentages or densities, so areas of different sizes can be compared."
+  },
+  {
+   "q": "Large rural counties visually dominate a choropleth map even though fewer people live there. This is...",
+   "options": [
+    "the small numbers problem",
+    "large-area bias",
+    "the ecological fallacy",
+    "a classification error"
+   ],
+   "answer": 1,
+   "why": "Bigger polygons draw more attention, while small, dense urban units are hard to see."
+  },
+  {
+   "q": "Which color scheme fits a map of population change, from losses through zero to gains?",
+   "options": [
+    "Sequential (light to dark)",
+    "Diverging (two colors with a neutral middle)",
+    "Random categorical colors",
+    "A single color"
+   ],
+   "answer": 1,
+   "why": "Diverging schemes suit data with a meaningful midpoint. Sequential schemes suit data that simply go from low to high."
+  },
+  {
+   "q": "A rural tract with a few hundred residents shows an extremely high rate of a rare disease. Why be cautious?",
+   "options": [
+    "Rural data are always wrong",
+    "Rates for small populations are unstable and can be extreme by chance",
+    "It should be mapped as a count",
+    "The tract is too big"
+   ],
+   "answer": 1,
+   "why": "Small denominators make rates jump around, and those extreme values stand out on a map."
+  },
+  {
+   "q": "The Census Bureau's mean center of US population is weighted by...",
+   "options": [
+    "land area",
+    "the number of people at each location",
+    "income",
+    "distance to Washington, DC"
+   ],
+   "answer": 1,
+   "why": "Weighting each location by its population shows where the population is centered. It has moved west and south since 1790."
+  },
+  {
+   "q": "Why might the median center be a better summary than the mean center?",
+   "options": [
+    "It's always in the middle of the map",
+    "It's less sensitive to outliers far from the rest of the data",
+    "It uses latitude and longitude",
+    "It measures direction"
+   ],
+   "answer": 1,
+   "why": "Like the regular mean, the mean center can be pulled toward a few distant points."
+  },
+  {
+   "q": "Why should data be in a projected coordinate system before calculating centrography?",
+   "options": [
+    "So distances are measured consistently",
+    "To make the map colorful",
+    "Projected data have more points",
+    "Latitude and longitude can't be averaged"
+   ],
+   "answer": 0,
+   "why": "Degrees of longitude change length with latitude. A projection like NC State Plane measures in consistent units."
+  },
+  {
+   "q": "A standard deviational ellipse with a major axis much longer than its minor axis means...",
+   "options": [
+    "the features are roughly circular",
+    "the features are elongated in one direction (a directional trend)",
+    "there are outliers",
+    "the mean center is wrong"
+   ],
+   "answer": 1,
+   "why": "The ellipse's orientation and axes capture direction, which the standard distance circle can't."
+  },
+  {
+   "q": "For wind turbines built before 2005, the mean center falls in southern Utah, where there are almost no turbines. Why?",
+   "options": [
+    "Utah has the most turbines",
+    "The turbines were split among separate regions, and the mean center falls between them",
+    "The data were in latitude and longitude",
+    "The ellipse was miscalculated"
+   ],
+   "answer": 1,
+   "why": "A mean center doesn't have to fall on or near any actual feature."
+  },
+  {
+   "q": "The North Carolina tornado ellipse is stretched east to west. The reading says this mostly reflects...",
+   "options": [
+    "a real directional trend in tornado tracks",
+    "the shape of the state, which is much wider east to west than north to south",
+    "the prevailing winds",
+    "too few tornadoes"
+   ],
+   "answer": 1,
+   "why": "Features can only occur inside the study area, so its boundary can drive the ellipse's orientation."
+  },
+  {
+   "q": "What can't centrography tell you?",
+   "options": [
+    "Where features are centered",
+    "How dispersed features are",
+    "Why features are arranged that way, or whether the pattern differs from chance",
+    "The direction of spread"
+   ],
+   "answer": 2,
+   "why": "Point pattern analysis is needed to compare a pattern to what you'd expect by chance."
+  }
+ ]
+}

@@ -1,0 +1,181 @@
+{
+ "reading": "beyond-one-model",
+ "questions": [
+  {
+   "q": "OLS, the spatial lag model and the spatial error model are all global models. What does that mean?",
+   "options": [
+    "They use data from the whole world",
+    "They estimate one set of coefficients for the whole study area, assuming relationships are the same everywhere",
+    "They ignore spatial autocorrelation",
+    "They can only use areal data"
+   ],
+   "answer": 1,
+   "why": "When processes are non-stationary, a single coefficient can hide how relationships change across space."
+  },
+  {
+   "q": "How does GWR differ from OLS?",
+   "options": [
+    "It has no coefficients",
+    "It estimates a separate regression at each location, so coefficients can vary across space",
+    "It uses a different outcome variable at each location",
+    "It only works with rasters"
+   ],
+   "answer": 1,
+   "why": "Each local regression uses nearby observations, weighted by distance."
+  },
+  {
+   "q": "GWR gives more weight to observations closer to the regression point. Which idea is this built on?",
+   "options": [
+    "The Central Limit Theorem",
+    "Tobler's First Law",
+    "The modifiable areal unit problem",
+    "Central place theory"
+   ],
+   "answer": 1,
+   "why": "Near things are more related than distant things, so nearby observations count more."
+  },
+  {
+   "q": "Census tracts are small in cities and large in rural areas. Which bandwidth usually fits better?",
+   "options": [
+    "A fixed bandwidth (the same distance everywhere)",
+    "An adaptive bandwidth (the same number of nearest neighbors everywhere)",
+    "No bandwidth",
+    "The largest possible bandwidth"
+   ],
+   "answer": 1,
+   "why": "An adaptive bandwidth shrinks where observations are dense and grows where they are sparse."
+  },
+  {
+   "q": "As the GWR bandwidth gets very large, the local estimates...",
+   "options": [
+    "become noisier",
+    "become smoother and approach the global OLS model",
+    "disappear",
+    "become non-significant"
+   ],
+   "answer": 1,
+   "why": "A small bandwidth gives very local, possibly noisy estimates. A huge bandwidth uses nearly everything, which is just OLS."
+  },
+  {
+   "q": "How is the GWR bandwidth usually chosen?",
+   "options": [
+    "By hand, based on what looks best",
+    "By minimizing AICc or a cross-validation score",
+    "It's always 15 km",
+    "By maximizing Moran's I"
+   ],
+   "answer": 1,
+   "why": "The chosen bandwidth reflects the scale at which the process is assumed to operate."
+  },
+  {
+   "q": "An area with a low local R² in a GWR may suggest...",
+   "options": [
+    "the model fits perfectly there",
+    "an important variable is missing from the model in that area",
+    "there's no data there",
+    "the bandwidth is too large everywhere"
+   ],
+   "answer": 1,
+   "why": "Local R² maps where the model explains the outcome well and where it doesn't."
+  },
+  {
+   "q": "In the North Carolina example, the global coefficient for percent with a bachelor's degree is about $7,200, while local coefficients range from about $3,400 to $10,500. What does this show?",
+   "options": [
+    "The global model is wrong about the sign",
+    "The relationship varies across the state, which a single coefficient hides",
+    "Education doesn't matter",
+    "The bandwidth was too small"
+   ],
+   "answer": 1,
+   "why": "This is non-stationarity: the same variable is associated with home value more strongly in some places than others."
+  },
+  {
+   "q": "Which is a limitation of GWR?",
+   "options": [
+    "It can't be mapped",
+    "Variables can be strongly correlated within a local neighborhood (local multicollinearity), making coefficients unstable",
+    "It proves causation",
+    "It only uses one observation per regression"
+   ],
+   "answer": 1,
+   "why": "GWR is mainly exploratory. Coefficient variation could reflect a real process difference or a missing variable."
+  },
+  {
+   "q": "What does multiscale GWR (MGWR) add?",
+   "options": [
+    "It removes the bandwidth",
+    "Each variable gets its own bandwidth, so some relationships can be local while others are close to global",
+    "It uses k-means",
+    "It adds a spatial lag"
+   ],
+   "answer": 1,
+   "why": "Standard GWR assumes every relationship operates at the same scale."
+  },
+  {
+   "q": "In k-means clustering, two census tracts are \"close\" when...",
+   "options": [
+    "they share a border",
+    "they have similar values across all of the clustering variables (attribute space)",
+    "they're in the same county",
+    "they're within 5 miles of each other"
+   ],
+   "answer": 1,
+   "why": "Distance in k-means is measured in attribute space, not geographic space."
+  },
+  {
+   "q": "Why are variables usually standardized into z-scores before k-means?",
+   "options": [
+    "To make them normally distributed",
+    "So variables on large scales, like income in dollars, don't dominate variables measured as percentages",
+    "To remove outliers",
+    "To choose k"
+   ],
+   "answer": 1,
+   "why": "K-means uses distance, so a variable's units would otherwise decide how much it counts."
+  },
+  {
+   "q": "The elbow method helps you...",
+   "options": [
+    "choose the number of clusters, k",
+    "pick starting centroids",
+    "name the clusters",
+    "test for significance"
+   ],
+   "answer": 0,
+   "why": "It plots within-cluster variation against k and looks for where more clusters stop helping much. The silhouette score and interpretability matter too."
+  },
+  {
+   "q": "Why is k-means usually run many times with different random starting points?",
+   "options": [
+    "To get more clusters",
+    "Because the result depends on the starting centroids, so you keep the solution with the smallest within-cluster variation",
+    "To make the clusters contiguous",
+    "To standardize the variables"
+   ],
+   "answer": 1,
+   "why": "Different starting points can lead to different final clusters."
+  },
+  {
+   "q": "K-means doesn't use location, yet the cluster map shows strong spatial patterns. Why?",
+   "options": [
+    "K-means secretly uses coordinates",
+    "The input variables are spatially dependent, so similar places tend to be near each other",
+    "The map is wrong",
+    "Because of the bandwidth"
+   ],
+   "answer": 1,
+   "why": "If you want clusters made only of neighboring areas, use spatially constrained clustering such as SKATER."
+  },
+  {
+   "q": "Not every resident of a tract labeled \"student neighborhood\" is a student. This is the...",
+   "options": [
+    "modifiable areal unit problem",
+    "ecological fallacy",
+    "Type I error",
+    "elbow method"
+   ],
+   "answer": 1,
+   "why": "A cluster describes the average characteristics of an area, not the individuals in it."
+  }
+ ]
+}

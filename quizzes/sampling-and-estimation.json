@@ -1,0 +1,181 @@
+{
+ "reading": "sampling-and-estimation",
+ "questions": [
+  {
+   "q": "A value that describes a sample, like x̄, is called a...",
+   "options": [
+    "parameter",
+    "statistic",
+    "population",
+    "standard error"
+   ],
+   "answer": 1,
+   "why": "Statistics describe samples (Latin letters). Parameters describe populations (Greek letters, like μ)."
+  },
+  {
+   "q": "A transit survey conducted only at bus stops overestimates transit use. This is...",
+   "options": [
+    "sampling error",
+    "bias",
+    "the standard error",
+    "the Central Limit Theorem"
+   ],
+   "answer": 1,
+   "why": "Bias is systematic and comes from how the sample was collected. Unlike sampling error, it doesn't shrink with a bigger sample."
+  },
+  {
+   "q": "What happens to sampling error as the sample size increases?",
+   "options": [
+    "It gets smaller",
+    "It gets larger",
+    "It stays the same",
+    "It becomes bias"
+   ],
+   "answer": 0,
+   "why": "Sampling error can't be eliminated, but it shrinks with larger samples and can be quantified with probability."
+  },
+  {
+   "q": "Why are probability samples required for the inference methods in this course?",
+   "options": [
+    "They're cheaper",
+    "Every member has a known, nonzero chance of selection, so we can quantify how representative the sample is",
+    "They always have 30 or more observations",
+    "They remove spatial dependence"
+   ],
+   "answer": 1,
+   "why": "With convenience or volunteer samples, there's no way to know how representative the sample is."
+  },
+  {
+   "q": "A statewide survey samples separately within urban, suburban and rural counties. This is...",
+   "options": [
+    "simple random sampling",
+    "systematic sampling",
+    "stratified sampling",
+    "cluster sampling"
+   ],
+   "answer": 2,
+   "why": "Stratified sampling takes a random sample within each group so every group is represented."
+  },
+  {
+   "q": "Randomly selecting 20 census block groups and surveying households within them is...",
+   "options": [
+    "stratified sampling",
+    "cluster sampling",
+    "systematic sampling",
+    "transect sampling"
+   ],
+   "answer": 1,
+   "why": "Cluster sampling is cheaper, but usually less precise because members of the same cluster tend to be similar."
+  },
+  {
+   "q": "Placing sample locations on a regular grid gives even coverage, but it can...",
+   "options": [
+    "create clusters by chance",
+    "miss patterns smaller than the grid spacing or that line up with the grid",
+    "only be used for areal data",
+    "never be used for interpolation"
+   ],
+   "answer": 1,
+   "why": "Random spatial sampling is the one that can leave gaps or clusters by chance."
+  },
+  {
+   "q": "Why do sample points close together provide less independent information?",
+   "options": [
+    "They're measured less carefully",
+    "Because of spatial dependence, nearby points tend to have similar values",
+    "They have larger standard errors",
+    "They're always biased"
+   ],
+   "answer": 1,
+   "why": "This is one reason systematic and stratified designs are often preferred for spatial sampling."
+  },
+  {
+   "q": "Why could EPA and PurpleAir monitors give a biased picture of air quality across North Carolina?",
+   "options": [
+    "Their sensors are inaccurate",
+    "Neither network is a random sample of locations; they cluster in cities and wealthier neighborhoods",
+    "They measure the wrong pollutant",
+    "They have too many sensors"
+   ],
+   "answer": 1,
+   "why": "Much spatial data comes from where agencies or people chose to put monitors, not from a planned sampling design."
+  },
+  {
+   "q": "What is the difference between the standard deviation and the standard error?",
+   "options": [
+    "They're the same thing",
+    "The SD describes how much individual observations vary; the SE describes how much the sample mean varies from sample to sample",
+    "The SE is always larger",
+    "The SD only applies to proportions"
+   ],
+   "answer": 1,
+   "why": "The SE is the standard deviation of the sampling distribution, σ divided by the square root of n."
+  },
+  {
+   "q": "To cut the standard error in half, you need a sample that is...",
+   "options": [
+    "twice as large",
+    "four times as large",
+    "half as large",
+    "the same size"
+   ],
+   "answer": 1,
+   "why": "Because n is under a square root, halving the SE takes four times the sample size."
+  },
+  {
+   "q": "The Central Limit Theorem says that, for a large enough sample, the sampling distribution of the mean is approximately normal...",
+   "options": [
+    "only if the population is normal",
+    "regardless of the shape of the population distribution",
+    "only for proportions",
+    "only for spatial data"
+   ],
+   "answer": 1,
+   "why": "That's why we can use the normal distribution even for skewed variables like income. A common rule of thumb is n of 30 or more."
+  },
+  {
+   "q": "Why do confidence intervals for a mean usually use the t-distribution instead of z?",
+   "options": [
+    "We almost never know σ and estimate it with s, which adds uncertainty",
+    "t is always narrower",
+    "z only works for proportions",
+    "t has lighter tails"
+   ],
+   "answer": 0,
+   "why": "The t-distribution has heavier tails, giving a wider interval. With more degrees of freedom it approaches the normal."
+  },
+  {
+   "q": "A correct interpretation of a 95% confidence interval is...",
+   "options": [
+    "there's a 95% probability the parameter is in this interval",
+    "if we repeated the sampling many times, about 95% of the intervals would contain the true parameter",
+    "95% of the data fall in the interval",
+    "the estimate is 95% accurate"
+   ],
+   "answer": 1,
+   "why": "The parameter is fixed; it is either in this interval or not. The 95% describes how reliable the method is."
+  },
+  {
+   "q": "Which change makes a confidence interval narrower?",
+   "options": [
+    "Raising the confidence level from 95% to 99%",
+    "More variability in the data",
+    "A larger sample size",
+    "Using t instead of z"
+   ],
+   "answer": 2,
+   "why": "A larger n shrinks the standard error. A higher confidence level and more variability both widen the interval."
+  },
+  {
+   "q": "Two census tracts have ACS median incomes of $52,000 and $55,000. Before saying the second is higher, you should...",
+   "options": [
+    "round the numbers",
+    "check whether their margins of error (confidence intervals) overlap",
+    "use the decennial census instead",
+    "take the mean of the two"
+   ],
+   "answer": 1,
+   "why": "The ACS is a sample survey with 90% margins of error, and they can be large for small areas like tracts."
+  }
+ ]
+}
