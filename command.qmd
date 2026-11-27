@@ -84,7 +84,7 @@ summary_data <- DATASET |>
 
 ```{r, eval = F}
 #assumes a nonspatial object with a longitude and latitude field
-grouped_pm_sf <- YOUR_NEWOBJECT |> st_as_sf(coords = c("lon", "lat"), crs = 4326)
+grouped_pm_sf <- YOUR_NEWOBJECT |> st_as_sf(coords= c("lat", "lon"), crs = 4326)
 ```
 
 ## Descriptive Statistics
