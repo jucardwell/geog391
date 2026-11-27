@@ -6,9 +6,15 @@ The key is derived from the codeword with PBKDF2-SHA256, and the page decrypts
 it in the browser when someone types the codeword. The answers also come out
 of the site search index.
 
-The codeword is read from the GEOG391_KEY_CODEWORD environment variable
-(a GitHub Actions secret). If it is not set, the keys are removed instead,
-so an answer key is never published in plain text by accident.
+Each tutorial has its own codeword. They all live in one GitHub Actions
+secret, GEOG391_KEY_CODEWORDS, one line per tutorial page:
+
+    probability: riverbend
+    clt: floodplain
+
+The name before the colon is the page's file name without .html. A page with
+an answer key but no codeword gets its key removed instead, so an answer key
+is never published in plain text by accident.
 
 Runs as a Quarto post-render script; needs `cryptography` and `beautifulsoup4`.
 """
@@ -115,16 +121,29 @@ def scrub_search(out_dir: pathlib.Path) -> None:
     index.write_text(json.dumps(kept), encoding="utf-8")
 
 
+def read_codewords() -> dict[str, str]:
+    codewords = {}
+    for line in os.environ.get("GEOG391_KEY_CODEWORDS", "").splitlines():
+        page, sep, word = line.partition(":")
+        if sep and page.strip() and word.strip():
+            codewords[page.strip().removesuffix(".html").lower()] = word.strip()
+    return codewords
+
+
 def main() -> None:
     out_dir = pathlib.Path(
         os.environ.get("QUARTO_PROJECT_OUTPUT_DIR") or (sys.argv[1] if len(sys.argv) > 1 else "docs")
     )
-    codeword = os.environ.get("GEOG391_KEY_CODEWORD")
-    if not codeword:
-        print("lock_keys: GEOG391_KEY_CODEWORD is not set, so answer keys are removed from this build.")
-    locked = [p.name for p in sorted(out_dir.rglob("*.html")) if lock_page(p, codeword)]
+    codewords = read_codewords()
+    locked, removed = [], []
+    for path in sorted(out_dir.rglob("*.html")):
+        word = codewords.get(path.stem.lower())
+        if lock_page(path, word):
+            (locked if word else removed).append(path.stem)
     scrub_search(out_dir)
-    print(f"lock_keys: {'locked' if codeword else 'removed'} answer keys in {len(locked)} page(s): {', '.join(locked)}")
+    print(f"lock_keys: locked {len(locked)} answer key(s): {', '.join(locked) or 'none'}")
+    if removed:
+        print(f"lock_keys: no codeword in GEOG391_KEY_CODEWORDS for {', '.join(removed)}, so those keys were removed")
 
 
 if __name__ == "__main__":

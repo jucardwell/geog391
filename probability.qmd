@@ -94,12 +94,12 @@ p_rain
 ### Step 4 · Empirical probability at many places
 
 ::: {.why}
-The same formula works for every location at once if we group first. Here each row of `pm_nc` is one day at one monitoring location, so we flag days with moderate or worse air quality (PM2.5 above 12 µg/m³), then count f and n for each location.
+The same formula works for every location at once if we group first. Here each row of `pm_nc` is one day at one monitoring location, so we flag days with moderate or worse air quality (a daily PM2.5 above 9.0 µg/m³, the EPA "moderate" line since 2024), then count f and n for each location.
 :::
 
 ```{r, message = FALSE}
-#flag moderate or worse days (1 = PM2.5 above 12, 0 = not)
-flagged_pm <- pm_nc |> mutate(aq_flag = ifelse(pm_val > 12, 1, 0))
+#flag moderate or worse days (1 = PM2.5 above 9.0, 0 = not)
+flagged_pm <- pm_nc |> mutate(aq_flag = ifelse(pm_val > 9, 1, 0))
 
 #f and n for each location, then P(E) = f / n
 pm_prob <- flagged_pm |>
