@@ -9,7 +9,7 @@ n,date,end_date,week,unit_no,concept,kind,topic,in_class,readings,tutorial,lab,d
 7,2027-01-22,,3,1,C3,concept,Mapping as a method,Partner tutorial: equal interval vs. quantile,describing-spatial-data#part 1 (mapping),tmap,,,
 8,2027-01-25,,4,1,C3,concept,Spatial descriptive statistics,Partner tutorial: mean centers of Covid,describing-spatial-data#part 2 (centrography),describing_spatial_data,,HW 2,
 9,2027-01-27,,4,1,C4,concept,What is probability?,Geographer's First Stochastic Process,"probability#Overview, Distributions",,,,
-10,2027-01-29,,4,1,C4,concept,Probability distributions,Partner tutorial: floods vs. cold days,probability#Simple Event Probabilities,probability,,,
+10,2027-01-29,,4,1,C4,concept,Probability distributions,Partner tutorial: binomial vs. normal (Charlotte bad-air days),probability#Simple Event Probabilities,probability,,,
 11,2027-02-01,,5,1,C5,concept,Sampling and the CLT,Natural Samples,sampling-and-estimation#part 1;probability#Natural Samples,clt,,HW 3,
 12,2027-02-03,,5,1,C5,concept,Estimation and confidence intervals,Partner tutorial: physical vs. mental health,sampling-and-estimation#part 2,estimation_sampling,,,
 13,2027-02-05,,5,1,Unit 1,prep,Case Study 1 prep,Practice case in pairs,,,,HW 4,
