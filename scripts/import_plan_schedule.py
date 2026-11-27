@@ -38,8 +38,6 @@ def main(src):
     for r in rows:
         t = r["day_type"]
         kind = {"No class": "off", "Case study prep": "prep", "Case study": "case", "Final": "final"}.get(t, "concept")
-        if kind == "concept" and r["unit"] == "New":
-            kind = "new"
         topic, note = r["topic"], ""
         m = re.search(r"\s*\((?:Julia away; )?guest proctor\)", topic)
         if m:
