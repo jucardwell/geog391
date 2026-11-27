@@ -58,6 +58,7 @@ UNLOCK_JS = """
         body.innerHTML = new TextDecoder().decode(plain);
         body.hidden = false;
         form.hidden = true;
+        if (form.previousElementSibling && form.previousElementSibling.tagName === 'P') form.previousElementSibling.hidden = true;
       } catch (e) {
         msg.textContent = "That codeword didn't work.";
       }

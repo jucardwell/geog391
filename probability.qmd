@@ -149,7 +149,7 @@ pm_nc <- read_csv("https://drive.google.com/uc?export=download&id=19Axv5_bv7p4Lb
 ### Partner A · Binomial
 
 1. Flag bad-air days, then find the empirical probability of a bad-air day for every tract by grouping on `lat` and `lon`. *(Step 3)*
-2. Map those probabilities with `st_as_sf(coords = c("lon", "lat"), crs = 4326)`. Longitude goes first.
+2. Map those probabilities with `st_as_sf()`. In `coords`, longitude goes first.
 3. For the tract at `lat` 35.142, `lon` -80.956 (southwest Charlotte), find the most likely number of bad-air days in a 30-day month. *(Step 4)*
 4. Find the probability of **more than 15** bad-air days in a 30-day month for that tract. *(Step 4)*
 
@@ -159,7 +159,7 @@ pm_nc <- read_csv("https://drive.google.com/uc?export=download&id=19Axv5_bv7p4Lb
 ::: {.partner .partner-b}
 ### Partner B · Normal model
 
-1. Keep only the southwest Charlotte tract: `filter(round(lat, 3) == 35.142, round(lon, 3) == -80.956)`.
+1. Keep only the southwest Charlotte tract (`lat` 35.142, `lon` -80.956). Round `lat` and `lon` to 3 decimals inside `filter()` so the match works.
 2. Find the mean and standard deviation of its daily PM2.5. *(Step 5)*
 3. Use the normal model to find the probability that a day is above 9.0 µg/m³, and compare it with the empirical share of days above 9.0. *(Step 5)*
 4. Plot a histogram of daily PM2.5 with the normal curve on top. *(Step 5)*
