@@ -49,9 +49,9 @@
   // Slides are linked once their class day has arrived.
   document.querySelectorAll('a.slides-link[data-date]').forEach(function (a) {
     if (a.getAttribute('data-date') > todayIso) {
-      var prev = a.previousSibling;
-      if (prev && prev.nodeType === 3) prev.textContent = prev.textContent.replace(/ · $/, '');
+      var box = a.parentNode;
       a.remove();
+      if (box && box.classList.contains('row-links') && !box.children.length) box.remove();
     }
   });
   document.querySelectorAll('table.schedule tr[data-date="' + todayIso + '"]').forEach(function (tr) { tr.classList.add('today'); });
@@ -142,12 +142,6 @@
   // ---- Tutorial pages ------------------------------------------------------
   if (tIdx >= 0) {
     var t = tutorials[tIdx];
-    var useRow = rows.filter(function (r) { return r.tutorial && r.tutorial.file === t.file; })[0];
-    var h1 = document.querySelector('#title-block-header h1, main h1');
-    if (h1 && /Concept \d+/.test(t.concept)) {
-      var u = useRow && C.units[useRow.unit];
-      h1.parentNode.insertBefore(el('span', { 'class': 'concept-line' }, esc(t.concept) + (u ? ' · Unit ' + useRow.unit + ', ' + esc(u.name) : '')), h1);
-    }
     if (sidebar) {
       var used = classDays(function (r) { return r.tutorial && r.tutorial.file === t.file; });
       if (used) sidebar.appendChild(sideBlock('Used in class', used));

@@ -89,7 +89,6 @@ h3 { font-size: 1.3rem; }
   .here { background: $ink; color: #FFFFFF; font-weight: 700; }
 }
 
-.concept-line { color: $brown; font-weight: 700; font-size: 15px; display: block; margin-bottom: 4px; }
 
 .sheet-pager {
   display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border: 1px solid $ink; margin-top: 40px;
@@ -258,3 +257,7 @@ main li > p { margin: 0; }
 main li { margin: 2px 0; line-height: 1.5; }
 main li > ul, main li > ol { margin: 2px 0 4px; }
 main ul, main ol { margin-bottom: 0.9rem; }
+
+// Extra links under a schedule cell (slides, study guide, tutorial), one per line.
+.row-links { display: block; }
+.row-links a { display: block; }

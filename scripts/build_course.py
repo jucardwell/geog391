@@ -166,13 +166,16 @@ def main():
                        f'<td colspan="3"><em>{esc(r["topic"])}</em></td><td>{due_html(r["due"])}</td></tr>')
             continue
         topic = f'<b>{esc(r["topic"])}</b>'
+        extra = []
         if r["slides"]:
-            topic += f' · <a class="slides-link" data-date="{r["date"]}" href="{esc(r["slides"])}">slides</a>'
+            extra.append(f'<a class="slides-link" data-date="{r["date"]}" href="{esc(r["slides"])}">Slides</a>')
         if k == "case":
-            topic += f' · <a href="case_studies.html#case-study-{case_of_date[r["date"]]}">study guide</a>'
+            extra.append(f'<a href="case_studies.html#case-study-{case_of_date[r["date"]]}">Study guide</a>')
+        if extra:
+            topic += '<span class="row-links">' + "".join(extra) + '</span>'
         inclass = esc(r["in_class"])
         if r["tutorial"] and r["tutorial"]["href"]:
-            inclass += f' · <a href="{r["tutorial"]["href"]}">tutorial</a>'
+            inclass += f'<span class="row-links"><a href="{r["tutorial"]["href"]}">Tutorial</a></span>'
         if r["note"]:
             inclass += f' <span class="muted">({esc(r["note"])})</span>'
         concept = esc(r["concept"]) if k != "final" else "Final"
