@@ -77,9 +77,7 @@ def main():
         for item in filter(None, (field or "").split(";")):
             item = item.strip()
             if item.startswith("text:"):
-                q = item[5:].replace(" article", "")
-                out.append({"title": item[5:], "external": True,
-                            "href": "https://scholar.google.com/scholar?q=" + q.replace(" ", "+")})
+                out.append({"title": item[5:], "href": ""})
             elif item.startswith("link:"):
                 title, _, url = item[5:].partition("|")
                 out.append({"title": title, "href": url, "external": True})
@@ -156,8 +154,8 @@ def main():
 
     # ---- Schedule table -------------------------------------------------
     out = ['<div class="schedule-scroll"><table class="schedule">',
-           '<thead><tr><th>Date</th><th></th><th>Topic</th><th>In class</th>'
-           '<th>Read before class</th><th>Due</th></tr></thead><tbody>']
+           '<thead><tr><th>Date</th><th></th><th>Topic</th><th>In Class</th>'
+           '<th>Read Before Class</th><th>Due</th></tr></thead><tbody>']
     cur_unit = None
     for r in rows:
         if r["unit"] and r["unit"] != cur_unit and r["kind"] != "final":
@@ -243,7 +241,7 @@ def main():
     # ---- This week section shell (filled in by site.js) -------------------
     svg = (ROOT / "assets" / "contours.svg").read_text(encoding="utf-8")
     week = (f'<section id="this-week" class="this-week">{svg}'
-            '<div class="week-head"><h2>This week</h2><span class="week-label"></span>'
+            '<div class="week-head"><h2>This Week</h2><span class="week-label"></span>'
             '</div><div class="week-days">'
             '</div></section>')
     (GEN / "week.md").write_text(raw(week), encoding="utf-8")

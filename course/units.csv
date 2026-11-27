@@ -1,5 +1,5 @@
 unit_no,name,concepts
-1,"Foundations, probability and estimation","Concepts 1–5: the Quantitative Revolution, data, spatial description, probability, sampling and estimation"
-2,Inference and point patterns,"Concepts 6–7: hypothesis testing, causation, point pattern analysis"
-3,Spatial relationships,"Concepts 8–9: spatial autocorrelation, regression and spatial regression, plus GWR and geodemographic clustering"
-4,Continuous surfaces and the final project,"Concept 10: continuous surfaces and interpolation"
+1,"Foundations, Probability and Estimation","Concepts 1–5: the Quantitative Revolution, data, spatial description, probability, sampling and estimation"
+2,Inference and Point Patterns,"Concepts 6–7: hypothesis testing, causation, point pattern analysis"
+3,Spatial Relationships,"Concepts 8–9: spatial autocorrelation, regression and spatial regression, plus GWR and geodemographic clustering"
+4,Continuous Surfaces and the Final Project,Concept 10: continuous surfaces and interpolation

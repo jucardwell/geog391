@@ -72,12 +72,12 @@
       (r.readings || []).forEach(function (it) {
         var t = esc(it.title) + (it.section ? ', ' + esc(it.section) : '');
         var body = it.href ? '<a href="' + esc(it.href) + '">' + t + '</a>'
-          : '<a href="readings.html">' + t + '</a>' + (it.soon ? ' <span class="muted">(coming soon)</span>' : '');
+          : !it.slug ? t : '<a href="readings.html">' + t + '</a>' + (it.soon ? ' <span class="muted">(coming soon)</span>' : '');
         if (it.slug && it.href && C.quizzes[it.slug]) body += '<a href="' + esc(it.href) + '#reading-quiz">Reading quiz</a>';
         read.push(item(r.label, body));
       });
     });
-    if (read.length) groups.push(['Read before class', read]);
+    if (read.length) groups.push(['Read Before Class', read]);
 
     var tut = [];
     wrows.forEach(function (r) {
@@ -109,7 +109,7 @@
         if (n) cs.push(item(r.label, '<a href="case_studies.html#case-study-' + n + '">Case Study ' + n + (r.kind === 'prep' ? ' prep' : '') + ', study guide</a>'));
       }
     });
-    if (cs.length) groups.push(['Case studies', cs]);
+    if (cs.length) groups.push(['Case Studies', cs]);
 
     var sl = [];
     wrows.forEach(function (r) { if (r.slides && r.date <= todayIso) sl.push(item(r.label, '<a href="' + esc(r.slides) + '">' + esc(r.topic) + '</a>')); });
@@ -226,7 +226,7 @@
     var t = tutorials[tIdx];
     if (sidebar) {
       var used = classDays(function (r) { return r.tutorial && r.tutorial.file === t.file; });
-      if (used) sidebar.appendChild(sideBlock('Used in class', used));
+      if (used) sidebar.appendChild(sideBlock('Used in Class', used));
     }
     var main = document.querySelector('main');
     if (main) {
@@ -244,7 +244,7 @@
     var slug = rm[1];
     var hasIt = function (r) { return (r.readings || []).some(function (it) { return it.slug === slug; }); };
     var before = classDays(hasIt);
-    if (before) sidebar.insertBefore(sideBlock('Read before', before), sidebar.firstChild);
+    if (before) sidebar.insertBefore(sideBlock('Read Before', before), sidebar.firstChild);
     var seen = {}, goes = '';
     rows.filter(hasIt).forEach(function (r) {
       if (r.tutorial && r.tutorial.href && !seen[r.tutorial.file]) {
