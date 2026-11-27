@@ -1,0 +1,54 @@
+---
+title: "Homework 8 · Uninsured rates and Medicaid outreach"
+---
+
+## Overview
+
+For this assignment you will create a well-designed knitted .html report that uses geographically weighted regression (GWR) and geodemographic clustering to support health insurance outreach in North Carolina.
+
+## Scenario
+
+North Carolina expanded Medicaid in December 2023, but many eligible residents still have not enrolled. You are an analyst at the North Carolina Department of Health and Human Services. The outreach team has a limited budget and wants to know two things before it plans the next enrollment campaign:
+
+1. **Do the factors linked to being uninsured differ from place to place?** If poverty or language barriers matter more in some regions than others, a single statewide message will miss people.
+2. **What kinds of places need different outreach strategies?** The team wants a small number of neighborhood types it can design campaigns around, rather than 2,600 individual census tracts.
+
+## Task
+
+Create a well-organized knitted .html report for the outreach team that integrates analysis, visualization, and interpretation throughout. At a minimum, your report should:
+
+- Introduce Medicaid expansion in North Carolina and explain why uninsurance is geographically uneven, using at least two external research or policy sources.
+- Map the percent of residents without health insurance (`no_health_insur`) across census tracts and describe the pattern.
+- Fit an OLS regression with `no_health_insur` as the dependent variable and at least three predictors from the ACS data (for example `pct_pov`, `pct_hisp`, `pct_unemp`, `pc_bach`, `pct_no_veh`). Interpret the coefficients.
+- Fit a GWR with the same predictors. Report how the bandwidth was chosen, map the local coefficients for at least two predictors, and map local R². Interpret where each relationship is stronger, weaker, or reverses sign, and compare the GWR results with the OLS results.
+- Build a geodemographic classification with k-means clustering on at least four standardized ACS variables of your choosing. Justify the number of clusters (for example with an elbow plot), map the clusters, and give each cluster a short descriptive name based on its average values.
+- Combine the two analyses into a recommendation: which clusters and regions should the outreach team prioritize, and what kind of message or channel would fit each? Note at least one limitation of GWR or of your classification.
+
+Two practical notes:
+
+- Some tracts have missing values. Drop tracts with missing values in the variables you use (`drop_na()`) and say how many you dropped.
+- GWR measures distance, so project the data first: `st_transform(32119)` (NC State Plane, meters).
+
+## Data
+
+In your .Rmd, add a chunk for loading libraries and reading in data, and paste in this code:
+
+```{r, eval = FALSE}
+#load libraries
+library(tidyverse)
+library(sf)
+library(tmap)
+library(GWmodel)
+
+#2023 ACS estimates for North Carolina census tracts
+acs_tract_nc <- st_read("https://raw.githubusercontent.com/jucardwell/geog391/main/data/nc_tract_acs_2023.geojson")
+```
+
+Submit your polished knitted .html to the Homework 8 assignment on Canvas.
+
+## Rubric (10 points)
+
+| Part | Points | Criteria |
+|---|---|---|
+| Analysis and visualizations | 6 | Maps and describes uninsurance with appropriate statistics (0.5); correctly fits and interprets OLS (1); correctly fits GWR, explains bandwidth choice, and maps local coefficients and local R² (2); builds and justifies a k-means classification on standardized variables, with a cluster map and cluster profiles (2); clear, well-designed maps and figures (0.5) |
+| Discussion | 4 | Explains Medicaid expansion and uneven uninsurance with external sources (1); interprets how relationships vary across the state and how GWR changes the OLS story (1); gives a clear, evidence-based outreach recommendation tied to clusters and regions, with a limitation (1); polished, well-organized report for the outreach team (1) |
