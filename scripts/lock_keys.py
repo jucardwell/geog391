@@ -63,7 +63,7 @@ UNLOCK_JS = """
 """
 
 FORM_HTML = """
-<p>Check your work once you're done. Enter the codeword from class to open the answers and the full script.</p>
+<p>Enter the codeword to open the key.</p>
 <form class="key-unlock">
   <label>Codeword <input type="password" autocomplete="off" spellcheck="false"></label>
   <button type="submit">Open key</button>

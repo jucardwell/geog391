@@ -1,6 +1,5 @@
 ---
-title: "Probability: rain days and cold days"
-subtitle: "Partner tutorial · in class"
+title: "Probability"
 ---
 
 ```{r setup, include = FALSE}
@@ -21,8 +20,6 @@ rain_years <- range(lubridate::year(ch_rainfall$date))
 jan_years <- range(lubridate::year(rdu_jan$date))
 ```
 
-Watch the method once on Chapel Hill rain, North Carolina air quality and RDU temperatures. Then you and your partner each run it on a different North Carolina hazard and decide together which one emergency managers should plan for first.
-
 ::: {.plan}
 - **Part 1 · about 15 min.** Read the run-through and run the code with your partner.
 - **Part 2 · about 25 min.** Split up: Partner A takes Bolin Creek flooding, Partner B takes cold days.
@@ -31,7 +28,7 @@ Watch the method once on Chapel Hill rain, North Carolina air quality and RDU te
 
 ## Part 1 · Run-through {#run-through}
 
-Everything in this part is worked for you. Run each chunk in your own .Rmd so you have the code ready for Part 2.
+Run each chunk in your own .Rmd. You will reuse this code in Part 2.
 
 ### Step 1 · Load the data
 
@@ -121,10 +118,10 @@ pm_range <- range(pm_prob$p_bad_air)
 ```
 
 ::: {.reading}
-**What it tells us.** Across `r format(nrow(pm_prob), big.mark = ",")` locations, the chance of a moderate or worse air day ranges from `r fmt(pm_range[1])` to `r fmt(pm_range[2])`. If your map lands in the ocean or Antarctica, check the order inside `coords =`: it is always longitude first.
+**What it tells us.** Across `r format(nrow(pm_prob), big.mark = ",")` locations, the chance of a moderate or worse air day ranges from `r fmt(pm_range[1])` to `r fmt(pm_range[2])`. If the points don't fall in North Carolina, check the order inside `coords =`: longitude comes first.
 :::
 
-### Step 5 · Binomial distribution: how many rainy days in 10?
+### Step 5 · Binomial distribution
 
 ::: {.why}
 The binomial distribution counts "successes" across a fixed number of trials, where each trial has two outcomes (rain or no rain) and the same probability. Rain isn't really independent from day to day, and it varies by season, so treat this as a simplifying model.
@@ -152,7 +149,7 @@ p_zero <- dbinom(0, 10, p_rain)
 **What it tells us.** The most likely outcome is `r most_likely$num_days` rainy days (`r fmt(most_likely$probability)`). A dry stretch of 10 days is rare: `dbinom(0, 10, p_rain)` is `r fmt(p_zero)`, about 1 in `r round(1 / p_zero)`.
 :::
 
-### Step 6 · Cumulative probability: read the question's wording
+### Step 6 · Cumulative probability
 
 ::: {.why}
 `pbinom(q, size, p)` gives the probability of **q or fewer**. Questions are often worded the other way, so translate the words first.
@@ -168,7 +165,7 @@ p_zero <- dbinom(0, 10, p_rain)
 **What it tells us.** "More than 3" and "at least 3" differ by a whole bar of the chart, here `r fmt(dbinom(3, 10, p_rain))`. Part 2 uses "more than 3".
 :::
 
-### Step 7 · Normal distribution: how often is January warm?
+### Step 7 · Normal distribution
 
 ::: {.why}
 A continuous variable like temperature can be modelled with a normal curve built from its mean and standard deviation.
@@ -203,7 +200,7 @@ ggplot(rdu_jan, aes(x = max_temp)) +
 
 ## Part 2 · Partner work {#partner-work}
 
-Each of you runs the same method on a different hazard. Use the steps from Part 1; each line below says which step to copy from. Write your result as one number and one sentence, because your partner will need it in Part 3.
+Each partner uses the Part 1 steps on a different dataset. The step to reuse is in parentheses. Write down your result for Part 3.
 
 :::: {.partners}
 ::: {.partner .partner-a}
@@ -239,9 +236,7 @@ asos_jan_data <- read_csv("https://drive.google.com/uc?export=download&id=1_zE1k
 :::
 ::::
 
-## Part 3 · Together: which hazard should emergency managers plan for first? {#together}
-
-To compare the two hazards you need them on the same scale. Teach each other your method, then fill in the table together.
+## Part 3 · Together {#together}
 
 1. Partner A runs Partner B's station probability through the binomial: the chance of **more than 3** cold days in a 25-day stretch of January.
 2. Partner B explains to Partner A why the normal model might over- or underestimate cold days at that station (look back at Step 7).
