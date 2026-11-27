@@ -1,5 +1,5 @@
 ---
-title: "Course information"
+title: "Course Information"
 aliases:
   - how_this_course_works.html
 ---
@@ -21,25 +21,25 @@ Case studies
 : [Dates and study guides](case_studies.qmd)
 :::
 
-## Course description and goals
+## Course Description and Goals
 
 [Description and goals, revised from the Spring 2026 syllabus to match the four units.]
 
-## Student learning outcomes
+## Student Learning Outcomes
 
 [Outcomes for the four units: foundations and probability; classical inference; spatial patterns and relationships; new methods and surfaces.]
 
-## Course philosophy
+## Course Philosophy
 
 In a rapidly changing educational landscape, our time in class is becoming increasingly valuable. I strongly believe that in-class peer engagement, real-time critical thinking and real-world application of course concepts are the strongest facilitators of learning right now. This class is built around that belief, so in-class work makes up 65% of your grade.
 
 [Student agency and co-creation paragraph, carried over from the fall courses.]
 
-## Course expectations
+## Course Expectations
 
 ::: expect
 ::: {}
-### What you can expect from me
+### What You Can Expect from Me
 
 - I'll treat you with respect and as a collaborator
 - I'll be clear about expectations and deadlines
@@ -48,7 +48,7 @@ In a rapidly changing educational landscape, our time in class is becoming incre
 :::
 
 ::: {}
-### What I expect from you
+### What I Expect from You
 
 - Come to class with a charged computer, paper and a pen
 - Be engaged and collaborate during class
@@ -57,7 +57,7 @@ In a rapidly changing educational landscape, our time in class is becoming incre
 :::
 :::
 
-## Course AI policy
+## Course AI Policy
 
 AI is not used during class. The rest of the policy is written together on Friday, January 8.
 
@@ -82,7 +82,7 @@ Reading quizzes are ungraded.
 </tbody></table>
 ```
 
-## Late work and absences
+## Late Work and Absences
 
 Contact me as soon as possible if you will miss a deadline. Without an approved extension, late work loses 10% per day, up to a maximum of 30%. In-class work missed for a University Excused Absence can be made up in office hours within two weeks. You can miss three in-class activities with no effect on your grade.
 

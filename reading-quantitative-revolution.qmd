@@ -1,0 +1,95 @@
+---
+title: "The Quantitative Revolution"
+author: "Julia Cardwell"
+date: "November 2026"
+reading: quantitative-revolution
+---
+
+## Overview
+
+Geography has not always been a quantitative discipline. For most of its history, geography was a descriptive field, focused on documenting what places were like and how they differed from one another. In the 1950s and 1960s, a group of mostly young geographers pushed the discipline to become more scientific, more theoretical, and much more mathematical. This shift is known as the **Quantitative Revolution**, and the methods that are core to quantitative geography today still trace back to it.
+
+This chapter introduces the eras of geographic thought leading up to the Quantitative Revolution, the models and "laws" that came out of it, the critiques that followed, and its legacy.
+
+## Before the Revolution
+
+### Exploration and Environmental Determinism
+
+Modern academic geography grew out of growing global exploration, a growing need for maps, and colonial development. In the 19th and early 20th centuries, much geographic work focused on cataloguing the physical and human characteristics of places, often in service of colonial administration and resource extraction.
+
+One of the dominant ideas of this period was **environmental determinism**, the idea that the physical environment (especially climate) directly determines human behavior, culture, and economic development. Geographers such as Ellen Churchill Semple and Ellsworth Huntington argued that temperate climates produced "advanced" societies while tropical climates produced "less developed" ones. These claims were used to justify racist hierarchies and colonial rule, and environmental determinism was largely discredited by the mid-20th century.
+
+### Regional Geography
+
+By the 1930s and 1940s, American geography had largely moved toward **regional geography** (sometimes called *chorology*). In this approach, the goal of geography was to describe and synthesize the unique character of individual regions. A geographer might spend a career studying a single region, documenting its landforms, climate, agriculture, settlement, and culture, and explaining how these pieces come together to create a unique place.
+
+One of the most influential books on this view was Richard Hartshorne's *The Nature of Geography* (1939), which argued that geography's role was to study areal differentiation: how and why places differ from one another. In this framework, every region was considered unique, which meant that general laws about space were not a goal.
+
+Regional geography produced a lot of rich, detailed description. However, critics argued that it did not produce knowledge that could be generalized or tested.
+
+## The Quantitative Revolution
+
+### Exceptionalism and the Push for Science
+
+The opening of the Quantitative Revolution is often traced to Fred K. Schaefer's 1953 article "Exceptionalism in Geography: A Methodological Examination," published in the *Annals of the Association of American Geographers*. Schaefer argued that geography should not be an "exceptional" discipline that only describes unique places. Instead, geography should be a science like any other, focused on discovering general **laws** that govern the spatial arrangement of phenomena.
+
+The Quantitative Revolution borrowed heavily from the philosophy of **positivism**, which holds that knowledge should be built through observation, measurement, and the testing of hypotheses. In practice, this meant:
+
+- **Hypothesis testing:** Geographic claims should be stated as hypotheses that can be tested with data
+- **Generalization:** The goal is to find patterns and relationships that hold across many places, not just to describe one place
+- **Models and theory:** Simplified mathematical models can help explain how spatial processes work
+- **Quantification:** Geographic phenomena should be measured, and those measurements should be analyzed using statistics
+
+The Quantitative Revolution also grew out of World War II. During the war, many American geographers worked for the federal government, especially in the Research and Analysis Branch of the Office of Strategic Services (OSS), where they produced maps, terrain studies, and regional intelligence reports for the military. Hartshorne himself led the geography division of the OSS. This work pushed geographers toward applied, problem-solving research and exposed them to fields like operations research, which used mathematical models and statistics to solve logistical problems such as routing supplies and locating facilities. After the war, federal funding for science grew rapidly (the National Science Foundation was created in 1950), and many veterans entered graduate school on the GI Bill. Together, these changes moved geography toward research that was more systematic and more mathematical.
+
+### Where the Revolution Happened
+
+The University of Washington in the late 1950s is usually considered the center of the Quantitative Revolution. William Garrison taught some of the first statistics courses in a U.S. geography department there, and his graduate students (sometimes called the "space cadets") went on to shape the discipline for decades. This group included Brian Berry, William Bunge, Richard Morrill, Duane Marble, John Nystuen, Michael Dacey, and Waldo Tobler. The University of Iowa (where Schaefer worked) was another early center. In Sweden, Torsten Hägerstrand at Lund University was developing quantitative models of how innovations spread across space, and in the UK, Peter Haggett and Richard Chorley at Cambridge became leading voices for the new approach.
+
+In 1963, Ian Burton published "The Quantitative Revolution and Theoretical Geography" in *The Canadian Geographer*, where he famously declared that the revolution was already over, in the sense that quantitative approaches had become an accepted part of the discipline.
+
+The Quantitative Revolution also coincided with the arrival of computers in universities. Computers made it possible to run statistical analyses on large datasets that would have been impossible to calculate by hand, and some of the earliest work that would eventually become GIS came out of this same community.
+
+### Early Models and "Laws"
+
+A major goal of the Quantitative Revolution was to develop general models and laws of spatial organization. Many of these built on earlier work (much of it from German economists and geographers) that had been largely overlooked by regional geographers. Some of the most influential include:
+
+- **Von Thünen's model of agricultural land use (1826):** Johann Heinrich von Thünen modeled how agricultural land use would arrange itself in concentric rings around a single market town, based on the cost of transporting goods. Perishable and heavy goods (like dairy and vegetables) would be produced closest to the market, with more extensive land uses (like grain and ranching) farther away.
+- **Weber's theory of industrial location (1909):** Alfred Weber modeled where factories should locate in order to minimize transportation and labor costs, given the locations of raw materials and markets.
+- **Central Place Theory (1933):** Walter Christaller proposed that settlements are arranged in a hierarchy, where larger "central places" provide a wider range of goods and services to a larger surrounding area. Under idealized conditions, this produces a hexagonal pattern of market areas. August Lösch extended this work in 1940.
+- **Gravity models:** Borrowing from Newton, gravity models propose that the interaction between two places (for instance, migration, trade, or shopping trips) is proportional to the size of the places and inversely proportional to the distance between them. Ravenstein's "laws of migration" in the 1880s already noted that most migrants travel short distances, and gravity models made this idea formal.
+- **Spatial diffusion (1953):** Hägerstrand modeled how innovations spread through space, showing that adoption tends to spread outward from initial adopters to nearby people. His work was one of the first to use simulation (Monte Carlo methods) in geography, which we will use later in this course!
+- **Tobler's First Law of Geography (1970):** In a paper simulating urban growth in Detroit, Waldo Tobler stated that "everything is related to everything else, but near things are more related than distant things." You have already seen this in the Introduction to Space reading, and it underlies almost every spatial method in this class.
+
+What all of these models have in common is that they treat **distance** and **location** as variables that can be measured and used to explain spatial patterns. They also share a set of simplifying assumptions: a flat, uniform landscape (often called an *isotropic plain*), rational decision-makers who try to minimize cost, and perfect information. These assumptions made the models mathematically tractable, but they also became the main target of the critiques that followed.
+
+## Critiques of the Quantitative Revolution
+
+By the late 1960s and 1970s, many geographers (including some of the same people who had led the Quantitative Revolution) began to question its assumptions. The critiques generally fall into a few groups.
+
+### Humanistic Geography
+
+Humanistic geographers, including Yi-Fu Tuan, Edward Relph, and Anne Buttimer, argued that the Quantitative Revolution had stripped geography of human experience. People do not experience the world as points on an isotropic plain; they experience **places**, which carry meaning, memory, and emotion. Humanistic geography emphasized qualitative methods and the subjective experience of place, which quantitative models could not easily capture.
+
+### Radical and Marxist Geography
+
+Radical geographers argued that quantitative spatial science described patterns without asking *why* those patterns existed or *who* benefitted from them. For example, a model of residential location might describe the patterns of segregation in a city, but it would treat those patterns as the result of individual choices rather than the outcome of racism, redlining, and capitalist land markets.
+
+The most famous example of this shift is David Harvey. After writing *Explanation in Geography* (1969), one of the key philosophical statements of the Quantitative Revolution, Harvey published *Social Justice and the City* (1973), which argued for a Marxist approach to geography. The journal *Antipode*, founded in 1969, became a central venue for radical geography. William Bunge, another former "space cadet", founded the Detroit Geographical Expedition and Institute in the late 1960s, which worked with residents of Black neighborhoods in Detroit to map issues like where children were being hit by cars on their way to school.
+
+### Feminist Geography
+
+Feminist geographers argued that the "rational economic actor" at the center of many spatial models was implicitly a white, middle-class man, and that the questions quantitative geography asked (and the data it collected) reflected this. For instance, transportation models built around the commute to work often ignored the complex trip chains (school drop-offs, errands, caregiving) that disproportionately fall on women. Gillian Rose's *Feminism and Geography* (1993) is one of the key texts here. Feminist geographers also questioned the idea that researchers could be fully objective observers, standing outside the systems they study.
+
+### Critical GIS
+
+As GIS grew in the 1980s and 1990s, many of these critiques were directed at it as well. The book *Ground Truth: The Social Implications of Geographic Information Systems* (edited by John Pickles, 1995, who was a faculty member in our department for a long time) argued that GIS was not a neutral tool: it reflected the priorities of the militaries, governments, and corporations that funded and used it, and it tended to represent the world in ways that left some people and forms of knowledge out (connect to "authoritative" data sources in the Introduction to Space reading).
+
+## Legacy
+
+Today, geography includes quantitative, qualitative, and mixed-methods approaches. The Quantitative Revolution left several lasting impacts on the discipline:
+
+- **Spatial analysis and GIS:** The methods and technologies developed in this period became the foundation of spatial analysis and Geographic Information Systems. In 1992, Michael Goodchild argued for **Geographic Information Science** (GIScience) as a field focused on the fundamental questions raised by spatial data, not just on the software.
+- **Spatial statistics:** Many of the methods in this course (spatial autocorrelation, point pattern analysis, spatial regression, interpolation) were developed or refined by geographers and statisticians working in the tradition of the Quantitative Revolution.
+- **Critical quantitative geography:** Many geographers now argue that quantitative methods and critical perspectives are not opposites. Mei-Po Kwan's work on feminist visualization and GIS, for example, showed how quantitative tools could be used to study the everyday lives of women and immigrants. Critical quantitative geographers use numbers and models while also asking who collected the data, what assumptions are built in, and who the results serve.
+- **Computational and data-driven geography:** The explosion of "new school" spatial data (see Introduction to Space) has led to new fields like geographic data science, which in many ways continue the Quantitative Revolution's goals with much larger datasets and much more computing power.

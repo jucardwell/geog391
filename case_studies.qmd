@@ -1,5 +1,5 @@
 ---
-title: "Case studies"
+title: "Case Studies"
 toc: false
 page-layout: full
 ---

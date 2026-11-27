@@ -35,6 +35,9 @@ READ = [(r"^(?:NEW )?Quantitative Revolution \+ Kwan$", "quantitative-revolution
 def main(src):
     rows = list(csv.DictReader(open(src, newline="", encoding="utf-8")))
     out, unit = [], 1
+    # Keep the tutorial already assigned to a date when the new in_class text names no tutorial.
+    prev_path = ROOT / "course" / "schedule.csv"
+    prev = {x["date"]: x["tutorial"] for x in csv.DictReader(open(prev_path, newline="", encoding="utf-8"))} if prev_path.exists() else {}
     for r in rows:
         t = r["day_type"]
         kind = {"No class": "off", "Case study prep": "prep", "Case study": "case", "Final": "final"}.get(t, "concept")
@@ -53,7 +56,7 @@ def main(src):
                 topic = f"No class: {why}" if why else "No class"
         if kind == "final":
             date = ""
-        tut = next((f for k, f in TUT if k in r["in_class"]), "")
+        tut = next((f for k, f in TUT if k in r["in_class"]), "") or (prev.get(r["date"], "") if r["in_class"].startswith("Partner tutorial") else "")
         in_class = r["in_class"].replace("In-class, closed book", "In class, closed book")
         if in_class.startswith("Partner tutorial"):
             pass

@@ -1,5 +1,5 @@
 ---
-title: "This week"
+title: "This Week"
 toc: false
 page-layout: full
 body-classes: course-page
