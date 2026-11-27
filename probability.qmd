@@ -6,17 +6,24 @@ css: styles/tutorial.css
 ```{=html}
 <style>
 :root {
-  --t-ink: #1E1038;
-  --t-title: #5B1FD1;
-  --t-rule: #FF2E93;
-  --t-link: #5B1FD1;
-  --t-plan-bg: #FFF4A8;   --t-plan-edge: #FF2E93;
-  --t-why-bg: #D8FAF5;    --t-why-edge: #00A99D;
-  --t-read-bg: #EBE2FF;   --t-read-edge: #5B1FD1;
-  --t-a-bg: #FFE2C7;      --t-b-bg: #E6FBB8;
-  --t-deliver-bg: #FFD6EA; --t-deliver-edge: #FF2E93;
-  --t-code-bg: #F4EFFF;   --t-code-edge: #5B1FD1;
-  --t-key-edge: #FF7A00;  --t-button: #FF2E93;
+  --t-ink: #2F1C1B;
+  --t-title: #AC3037;
+  --t-rule: #EDAAA7;
+  --t-link: #9E2B32;
+  --t-plan-bg: #FEF0EF;
+  --t-plan-edge: #BD4045;
+  --t-why-bg: #E7F6FF;
+  --t-why-edge: #0D92C4;
+  --t-read-bg: #FEF4F3;
+  --t-read-edge: #D78E8B;
+  --t-a-bg: #FCE9E8;
+  --t-b-bg: #DEF2FD;
+  --t-deliver-bg: #CEEDFE;
+  --t-deliver-edge: #06668A;
+  --t-code-bg: #FEF4F4;
+  --t-code-edge: #C46665;
+  --t-key-edge: #017CA7;
+  --t-button: #9B1D29;
 }
 </style>
 ```
