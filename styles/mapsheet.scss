@@ -252,3 +252,9 @@ form.key-unlock button { border: 1px solid $ink; background: $ink; color: #FFFFF
 .course-page main.content { margin-top: 0; padding-top: 0; } .course-page .this-week { margin-top: -1rem; }
 
 .front-links p { display: flex; flex-wrap: wrap; gap: 8px 28px; font-size: 18px; font-weight: 700; padding: 28px 0 8px; margin: 0; }
+
+// Tight lists everywhere: pandoc wraps loose list items in <p>, which adds a full paragraph gap.
+main li > p { margin: 0; }
+main li { margin: 2px 0; line-height: 1.5; }
+main li > ul, main li > ol { margin: 2px 0 4px; }
+main ul, main ol { margin-bottom: 0.9rem; }
