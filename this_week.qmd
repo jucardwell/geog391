@@ -1,0 +1,8 @@
+---
+title: "This week"
+toc: false
+page-layout: full
+body-classes: course-page
+---
+
+{{< include _generated/week.md >}}

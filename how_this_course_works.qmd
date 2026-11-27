@@ -3,19 +3,6 @@ title: "How this course works"
 toc-title: "On this page"
 ---
 
-## Course information
-
-::: facts
-Class meetings
-: {{< var meetings >}} in {{< var room >}}
-
-Instructor
-: {{< var instructor >}}, office hours {{< var office_hours >}}, {{< var office >}}
-
-Course material
-: Everything is on this website. Canvas is only for turning in homework.
-:::
-
 ## Course description and goals
 
 [Description and goals, revised from the Spring 2026 syllabus to match the four units.]

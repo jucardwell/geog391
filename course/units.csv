@@ -1,5 +1,5 @@
 unit_no,name,concepts
-1,Foundations and probability,"Concepts 1–4: the Quantitative Revolution, data, spatial description, probability"
-2,Classical inference,"Concepts 5–6: sampling, estimation, hypothesis testing, plus causation"
-3,Spatial patterns and relationships,"Concepts 7–9: point patterns, autocorrelation, regression"
-4,New methods and surfaces,"GWR, geodemographic clustering, Concept 10: continuous surfaces"
+1,"Foundations, probability and estimation","Concepts 1–5: the Quantitative Revolution, data, spatial description, probability, sampling and estimation"
+2,Inference and point patterns,"Concepts 6–7: hypothesis testing, causation, point pattern analysis"
+3,Spatial relationships,"Concepts 8–9: spatial autocorrelation, regression and spatial regression, plus GWR and geodemographic clustering"
+4,Continuous surfaces and the final project,"Concept 10: continuous surfaces and interpolation"

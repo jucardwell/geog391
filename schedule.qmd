@@ -1,3 +1,11 @@
-# Course Schedule
+---
+title: "Schedule"
+toc: false
+page-layout: full
+---
 
-See the course schedule [here](https://docs.google.com/spreadsheets/d/1xFehjUfZDQcKskXwoSzTVgZa4hr6-CiJRIdRVy_iNKw/edit?usp=sharing)!
+::: legend-row
+<span>■ Concept day</span> <span class="s-prep">○ Case study prep</span> <span class="s-cs">★ Case study</span> <span class="muted">— No class</span>
+:::
+
+{{< include _generated/schedule.md >}}
