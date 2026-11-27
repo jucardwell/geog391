@@ -1,134 +1,232 @@
-# Central Limit Theorem
+---
+title: "Central Limit Theorem"
+css: styles/tutorial.css
+---
 
-The **Central Limit Theorem** states that if a sample size (n) is large enough, the sampling distribution of the sample mean will be *approximately normal*, regardless of the shape of the population distribution. In general, a sample size of n \> 30 is considered to be large enough for the Central Limit Theorem to hold.
-
-Because of the CLT, we can make inferences about a population using samples, even if the original population's distribution is unknown or not normal.
-
-In this chapter, we will demonstrate the CLT using a raster of tree canopy coverage across the Chapel Hill Area (from the [2023 National Land Cover Dataset](https://www.mrlc.gov/data/type/nlcd-tree-canopy-cover)).
-
-**To follow along with this tutorial, make a new .Rmd document. As you move through the tutorial add chunks, headers, and relevant text to your document.**
-
-## Reading in Data
-
-Paste the following code into a chunk at the top of your document
-
-```{r, include = F}
-library(terra)
-library(tidyverse)
-library(tmap)
-
-canopy_raster <- rast("https://drive.google.com/uc?export=download&id=1qxedXO256Xf-dP-rSeE0icQ-Hi-a3ioC")
-  
-```
-
-```{r, eval = F}
-#load libraries
-library(terra)
-library(tidyverse)
-library(tmap)
-
-#read in canopy raster
-canopy_raster <- rast("https://drive.google.com/uc?export=download&id=1qxedXO256Xf-dP-rSeE0icQ-Hi-a3ioC")
-
-```
-
-This data represents the percent of tree cover per 30-meter pixel. When we map the data, we can see the spatial pattern in tree canopy coverage across the Chapel Hill area
-
-```{r, message=F, warning= F}
-#map canopy raster 
-tm_shape(canopy_raster) + 
-tm_raster(col.scale = tm_scale_intervals(values = "carto.sunset_dark", n = 5))
-```
-
-**Q1: Can you pick out any known features from this map?**
-
-Because we have the entire raster, we can calculate the true mean of this raster and visualize the population distribution.
-
-```{r}
-#turn raster into a dataframe
-canopy_raster_df <- as.data.frame(canopy_raster, xy = TRUE)
-
-#calculate mean and sd
-tree_coverage_mean <- mean(canopy_raster_df$NLCD_Percent_Tree_Canopy_Cover)
-tree_coverage_sd <- sd(canopy_raster_df$NLCD_Percent_Tree_Canopy_Cover)
-
-#density plot
-ggplot(canopy_raster_df, aes(x = NLCD_Percent_Tree_Canopy_Cover)) + geom_histogram(binwidth = 3)
-
-```
-
-**Q2: How can we interpret that mean value? What does the value represent?**
-
-**Q3: What are the characteristics of the distribution of tree canopy cover across Chapel Hill?**
-
-## CLT Part 1
-
-Regardless of the population’s shape, the sampling distribution of the sample mean becomes approximately normal as the sample size increases
-
-To test the CLT, we can take simple random samples of our raster. Let's take 300 samples, with n = 75.
-
-```{r}
-#parameters for sampling
-sample_size <- 75
-num_samples <- 300
-
-#draw random samples
-samples <- replicate(num_samples, sample(canopy_raster_df$NLCD_Percent_Tree_Canopy_Cover, size = sample_size,replace = TRUE))
-
-#calculate sample means
-sample_means <- colMeans(samples)
-
-sample_means_df <- data.frame(sample_means = sample_means)
-
-mean_of_means <- mean(sample_means_df$sample_means)
-
-#density plot
-ggplot(sample_means_df, aes(x = sample_means)) + geom_histogram(binwidth = 3)
-```
-
-**Q4: Run the code above with a smaller sample size (n = 5). Does the distribution of means still follow a normal distribution?**
-
-## CLT Part 2
-
-The mean of the sampling distribution of the sample mean will become the population mean
-
-**Q5: Calculate the mean of our sample means. How does the mean compare to the population mean?**
-
-## CLT Part 3
-
-The standard deviation of the sampling distribution is called the standard error, and is related to the population standard deviation by the formula:
-
-$$
-SE = \frac{s}{\sqrt{n}}
-$$
-
-where ${s}$ is equal to the sample standard deviation, and ${n}$ is the sample size.
-
-A smaller SE means the sample mean is likely closer to the population mean, so our estimate of the mean is more accurate and precise.
-
-We can test this by running repeated samples at different sample sizes
-
-```{r}
-sample_sizes <- c(5, 10, 50, 100, 200)  # small and large sample
-num_samples <- 300
-
-se_values <- data.frame(sample_size = integer(), SE = numeric())
-
-for (n in sample_sizes) {
-  sample_means <- replicate(num_samples, 
-                            mean(sample(canopy_raster_df$NLCD_Percent_Tree_Canopy_Cover, 
-                                        size = n, replace = TRUE)))
-  se_values <- rbind(se_values, data.frame(sample_size = n, SE = sd(sample_means)))
+```{=html}
+<style>
+:root {
+  --t-ink: #261E2C;
+  --t-title: #7F42A6;
+  --t-rule: #CEB0E5;
+  --t-link: #743C98;
+  --t-plan-bg: #F7F0FD;
+  --t-plan-edge: #8E51B6;
+  --t-why-bg: #F2F7D9;
+  --t-why-edge: #848F02;
+  --t-read-bg: #FAF4FF;
+  --t-read-edge: #B695CF;
+  --t-a-bg: #F4EAFE;
+  --t-b-bg: #EDF3CD;
+  --t-deliver-bg: #E6EDC0;
+  --t-deliver-edge: #5C6402;
+  --t-code-bg: #F9F5FC;
+  --t-code-edge: #9C70BC;
+  --t-key-edge: #707902;
+  --t-button: #703396;
 }
+</style>
+```
 
-# Plot SE vs sample size
-ggplot(se_values, aes(x = sample_size, y = SE)) +
-  geom_point(size = 3) +
-  geom_line() +
-  labs(title = "Standard Error vs Sample Size",
-       x = "Sample Size (n)",
-       y = "Standard Error (SE)") +
-  theme_minimal()
+```{r setup, include = FALSE}
+library(tidyverse)
+library(terra)
+library(sf)
+library(tmap)
 
+#course data (read once for the whole page)
+canopy_raster <- rast("https://drive.google.com/uc?export=download&id=1qxedXO256Xf-dP-rSeE0icQ-Hi-a3ioC")
+torn <- st_read("https://drive.google.com/uc?export=download&id=1K5yFnDthJGKnWPragZPmQyCDpf8seSEI", quiet = TRUE)
 
+#numbers quoted in the text below come from here, so they stay right if the data changes
+fmt <- function(x, d = 2) formatC(x, format = "f", digits = d, big.mark = ",")
+```
+
+## Part 1: Walkthrough {#walkthrough}
+
+Run each chunk in your own .Rmd. You will reuse this code in Part 2.
+
+### Step 1: Load and Map the Population
+
+::: {.why}
+The raster is the percent of tree canopy in each 30-meter pixel around Chapel Hill, from the [2023 National Land Cover Database](https://www.mrlc.gov/data/type/nlcd-tree-canopy-cover). Because we have every pixel, we know the true population mean and standard deviation.
+:::
+
+```{r, eval = FALSE}
+#load libraries
+library(tidyverse)
+library(terra)
+library(sf)
+library(tmap)
+
+#tree canopy raster
+canopy_raster <- rast("https://drive.google.com/uc?export=download&id=1qxedXO256Xf-dP-rSeE0icQ-Hi-a3ioC")
+```
+
+```{r, fig.alt = "Map of percent tree canopy around Chapel Hill. Most of the area is heavily forested, with low canopy along major roads and in the town centers."}
+tm_shape(canopy_raster) +
+  tm_raster(col.scale = tm_scale_intervals(values = "carto.sunset_dark", n = 5))
+```
+
+### Step 2: Describe the Population
+
+```{r, fig.alt = "Histogram of percent tree canopy for every pixel. The distribution is far from normal, with large spikes near 0 and near 90 percent."}
+#one row per pixel
+canopy_df <- as.data.frame(canopy_raster)
+names(canopy_df) <- "canopy"
+
+pop_mean <- mean(canopy_df$canopy)
+pop_sd <- sd(canopy_df$canopy)
+
+ggplot(canopy_df, aes(x = canopy)) +
+  geom_histogram(binwidth = 3, fill = "lightgrey", color = "black") +
+  labs(x = "Tree canopy (%)", y = "Number of pixels")
+```
+
+The population mean is `r fmt(pop_mean)`% and the standard deviation is `r fmt(pop_sd)`%.
+
+### Step 3: Build a Sampling Distribution
+
+::: {.why}
+Take many random samples of the same size, and keep the mean of each one. `set.seed()` makes the random draws repeatable, so your numbers match your partner's when you use the same seed.
+:::
+
+```{r, fig.alt = "Histogram of 300 sample means with n = 75. The means form a single symmetric, bell-shaped hump centered near the population mean."}
+set.seed(391)
+
+#300 samples of 75 pixels each, keeping each sample's mean
+sample_means <- replicate(300, mean(sample(canopy_df$canopy, size = 75, replace = TRUE)))
+means_df <- data.frame(sample_mean = sample_means)
+
+ggplot(means_df, aes(x = sample_mean)) +
+  geom_histogram(binwidth = 1, fill = "lightgrey", color = "black") +
+  labs(x = "Sample mean of tree canopy (%)", y = "Number of samples")
+```
+
+### Step 4: Compare the Sampling Distribution with the Population
+
+::: {.why}
+The CLT says the mean of the sample means is close to the population mean, and their standard deviation (the standard error) is close to the population standard deviation divided by the square root of n.
+:::
+
+```{r}
+#center: mean of the sample means vs. the population mean
+mean(sample_means)
+pop_mean
+
+#spread: standard error from the samples vs. from the formula
+sd(sample_means)
+pop_sd / sqrt(75)
+```
+
+## Part 2: Partner Practice {#partner-practice}
+
+Both partners treat the path lengths of all `r fmt(nrow(torn), 0)` U.S. tornadoes from 1954 to 2022 as the population. The `len` column is the path length in miles. Partner A takes small samples of 5 tornadoes, and Partner B takes larger samples of 50. Each task tells you in parentheses which walkthrough step to reuse.
+
+```{r, eval = FALSE}
+#tornado touchdown points, 1954-2022 (both partners)
+torn <- st_read("https://drive.google.com/uc?export=download&id=1K5yFnDthJGKnWPragZPmQyCDpf8seSEI")
+torn_len <- torn$len
+```
+
+:::: {.partners}
+::: {.partner .partner-a}
+### Partner A: Samples of 5
+
+1. Find the population mean and standard deviation of `torn_len`, and plot its histogram. *(Step 2)*
+2. Run `set.seed(391)`, then take 500 samples of 5 tornadoes and keep each sample's mean. *(Step 3)*
+3. Plot a histogram of your 500 sample means. *(Step 3)*
+4. Find the mean and standard deviation of your sample means, and the standard error from the formula. *(Step 4)*
+
+When you finish, bring your mean of the sample means, both standard errors and your histogram to Part 3.
+:::
+
+::: {.partner .partner-b}
+### Partner B: Samples of 50
+
+1. Find the population mean and standard deviation of `torn_len`, and plot its histogram. *(Step 2)*
+2. Run `set.seed(391)`, then take 500 samples of 50 tornadoes and keep each sample's mean. *(Step 3)*
+3. Plot a histogram of your 500 sample means. *(Step 3)*
+4. Find the mean and standard deviation of your sample means, and the standard error from the formula. *(Step 4)*
+
+When you finish, bring your mean of the sample means, both standard errors and your histogram to Part 3.
+:::
+::::
+
+## Part 3: Together {#together}
+
+1. Fill in the table.
+2. Put your two histograms side by side. Which one looks normal, and why doesn't the other one?
+3. Partner B's samples are 10 times larger than Partner A's. Work out how many times smaller Partner B's standard error is, and check it against the formula.
+
+| Sample size | Mean of the sample means | Standard error from the samples | Standard error from the formula |
+|---|---|---|---|
+| n = 5 (Partner A) | | | |
+| n = 50 (Partner B) | | | |
+
+::: {.deliver}
+Each pair turns in one index card before leaving. Write both of your names on it, fill in the six numbers from the table, and add two or three sentences explaining why the n = 50 histogram looks normal when the tornado lengths themselves are not.
+:::
+
+## Answer Key {#answer-key .answer-key}
+
+```{r key-values, include = FALSE}
+torn_len <- torn$len
+p_mean <- mean(torn_len); p_sd <- sd(torn_len)
+set.seed(391)
+means_5 <- replicate(500, mean(sample(torn_len, size = 5, replace = TRUE)))
+set.seed(391)
+means_50 <- replicate(500, mean(sample(torn_len, size = 50, replace = TRUE)))
+```
+
+Population: mean `r fmt(p_mean)` miles, standard deviation `r fmt(p_sd)` miles. With `set.seed(391)` the numbers below match exactly. With another seed they will be close.
+
+| Sample size | Mean of the sample means | Standard error from the samples | Standard error from the formula |
+|---|---|---|---|
+| n = 5 | `r fmt(mean(means_5))` | `r fmt(sd(means_5))` | `r fmt(p_sd / sqrt(5))` |
+| n = 50 | `r fmt(mean(means_50))` | `r fmt(sd(means_50))` | `r fmt(p_sd / sqrt(50))` |
+
+The n = 50 standard error is `r fmt(sd(means_5) / sd(means_50), 1)` times smaller than the n = 5 one. The formula predicts √10, which is about 3.2.
+
+A good card says something like this. Tornado path lengths are very right-skewed, because most tornadoes are short and a few travel more than 100 miles. With samples of 5, one long tornado can pull a sample's mean far to the right, so the sample means are still right-skewed. With samples of 50, those long tornadoes average out, so the sample means pile up symmetrically around the population mean. That is the Central Limit Theorem: the sampling distribution of the mean becomes approximately normal as n grows, even when the population is not normal.
+
+```{r, eval = FALSE}
+torn <- st_read("https://drive.google.com/uc?export=download&id=1K5yFnDthJGKnWPragZPmQyCDpf8seSEI")
+torn_len <- torn$len
+
+#### both partners: the population (Step 2) ####
+pop_mean <- mean(torn_len)
+pop_sd <- sd(torn_len)
+
+ggplot(data.frame(len = torn_len), aes(x = len)) +
+  geom_histogram(binwidth = 5, fill = "lightgrey", color = "black") +
+  labs(x = "Path length (miles)", y = "Number of tornadoes")
+
+#### Partner A: samples of 5 ####
+set.seed(391)
+means_5 <- replicate(500, mean(sample(torn_len, size = 5, replace = TRUE)))
+
+ggplot(data.frame(sample_mean = means_5), aes(x = sample_mean)) +
+  geom_histogram(binwidth = 1, fill = "lightgrey", color = "black") +
+  labs(x = "Sample mean path length (miles), n = 5", y = "Number of samples")
+
+mean(means_5)
+sd(means_5)
+pop_sd / sqrt(5)
+
+#### Partner B: samples of 50 ####
+set.seed(391)
+means_50 <- replicate(500, mean(sample(torn_len, size = 50, replace = TRUE)))
+
+ggplot(data.frame(sample_mean = means_50), aes(x = sample_mean)) +
+  geom_histogram(binwidth = 0.5, fill = "lightgrey", color = "black") +
+  labs(x = "Sample mean path length (miles), n = 50", y = "Number of samples")
+
+mean(means_50)
+sd(means_50)
+pop_sd / sqrt(50)
+
+#### Part 3: together ####
+sd(means_5) / sd(means_50)
+sqrt(10)
 ```
