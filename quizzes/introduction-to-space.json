@@ -2,17 +2,40 @@
  "reading": "introduction-to-space",
  "questions": [
   {
-   "q": "Tobler's First Law says that…",
+   "q": "Spatial data has two components. What are they?",
    "options": [
-    "everything is related to everything else, but near things are more related than distant things",
-    "spatial data always follow a normal distribution",
-    "nearby places are always identical"
+    "A location and attributes",
+    "A map and a legend",
+    "A sample and a population",
+    "A raster and a vector"
    ],
    "answer": 0,
-   "why": "This is why spatial data break the classical assumption that observations are independent."
+   "why": "The location says where a feature is, using a coordinate system. The attributes are the non-spatial variables about what is there."
   },
   {
-   "q": "Restaurant locations with a star rating attached to each point are an example of…",
+   "q": "Why are Census Bureau or USGS data called \"authoritative\"?",
+   "options": [
+    "They are always more accurate than any other source",
+    "Formal institutions rely on them as trusted, decision-relevant data collected by experts with standardized methods",
+    "They are free to download",
+    "They are updated every day"
+   ],
+   "answer": 1,
+   "why": "Authoritative refers to who collects the data and how, and to the fact that governments rely on it. It doesn't mean the data is error-free."
+  },
+  {
+   "q": "Which of these is crowdsourced spatial data?",
+   "options": [
+    "Census tract boundaries",
+    "USGS elevation models",
+    "eBird sightings recorded by birdwatchers",
+    "EPA regulated facility locations"
+   ],
+   "answer": 2,
+   "why": "Crowdsourced data is collected on purpose by non-experts. OpenStreetMap, Mapillary, eBird and iNaturalist are the reading's examples."
+  },
+  {
+   "q": "Restaurant locations with a star rating attached to each point are an example of...",
    "options": [
     "unmarked point data",
     "marked point data",
@@ -23,23 +46,110 @@
    "why": "The rating is a mark: extra information attached to each location."
   },
   {
+   "q": "Why is Census data released as areal data, such as tracts and block groups?",
+   "options": [
+    "Points are too hard to map",
+    "Aggregating protects the privacy of individuals",
+    "Areas are more accurate than points",
+    "Census data has no locations"
+   ],
+   "answer": 1,
+   "why": "The Census always aggregates its data to some areal unit so that it doesn't reveal information about individual people."
+  },
+  {
    "q": "Which data model represents space as a grid of equal-sized cells?",
    "options": [
     "Vector",
     "Raster"
    ],
    "answer": 1,
-   "why": "Rasters are arrays of regularly spaced pixels. Vector data are points, lines and polygons."
+   "why": "Raster data is a grid of regularly spaced pixels. It fits continuous phenomena like elevation or temperature, which the field view describes."
   },
   {
-   "q": "The relationship between home value and distance to jobs is strong in Durham but weak in Raleigh. This is an example of…",
+   "q": "Of the three vector primitives (point, line, polygon), which is the only one with an area?",
    "options": [
-    "spatial dependence",
-    "spatial non-stationarity",
+    "Point",
+    "Line",
+    "Polygon"
+   ],
+   "answer": 2,
+   "why": "A polygon closes on itself: three or more points where the first and last coordinate pair are the same."
+  },
+  {
+   "q": "A shapefile is actually...",
+   "options": [
+    "a single .shp file",
+    "a set of files, such as .shp, .shx, .dbf and .prj",
+    "a raster format",
+    "an open standard from the Open Geospatial Consortium"
+   ],
+   "answer": 1,
+   "why": "The geometry, index, attribute table and projection live in separate files that must travel together. GeoPackage is the open, single-file alternative."
+  },
+  {
+   "q": "A raster with 1 m pixels compared to one with 30 m pixels has...",
+   "options": [
+    "lower resolution",
+    "higher resolution",
+    "the same resolution, because resolution depends on the sensor",
+    "no resolution, because only vectors have resolution"
+   ],
+   "answer": 1,
+   "why": "In raster data, resolution is the pixel size on the ground. Smaller pixels capture more detail, which means higher resolution."
+  },
+  {
+   "q": "Tobler's First Law says that...",
+   "options": [
+    "everything is related to everything else, but near things are more related than distant things",
+    "spatial data always follow a normal distribution",
+    "nearby places are always identical"
+   ],
+   "answer": 0,
+   "why": "This is why spatial data break the classical assumption that observations are independent."
+  },
+  {
+   "q": "Wolf territories spaced to avoid neighbors are an example of...",
+   "options": [
+    "strong positive spatial autocorrelation (clustered)",
+    "strong negative spatial autocorrelation (dispersed)",
+    "weak spatial autocorrelation (random)",
+    "the modifiable areal unit problem"
+   ],
+   "answer": 1,
+   "why": "Territorial species keep their distance to reduce competition, so the pattern is more evenly spaced than random. That is negative autocorrelation."
+  },
+  {
+   "q": "A spatial process is non-stationary when...",
+   "options": [
+    "it changes over time",
+    "the way it operates changes from place to place",
+    "it can't be measured",
+    "it produces a random pattern"
+   ],
+   "answer": 1,
+   "why": "If a relationship differs across space, a single global model can miss it. Geographically weighted regression estimates the relationship locally instead."
+  },
+  {
+   "q": "Poverty rates have a standard deviation of 13.82 across NC zip codes but 6.58 across counties. This illustrates...",
+   "options": [
+    "the zone effect of the MAUP",
+    "the scale effect of the MAUP",
+    "spatial diffusion",
     "the minimum mapping unit"
    ],
    "answer": 1,
-   "why": "Non-stationarity means a process works differently in different places. GWR is one way to explore it."
+   "why": "Larger units average away local variation. When results change with the size of the units, that is the scale effect."
+  },
+  {
+   "q": "Which is the best way to reduce MAUP problems?",
+   "options": [
+    "Always use the largest units available",
+    "Match the areal units to the scale of the process you think is at work, and check results with similar units",
+    "Avoid aggregated data entirely",
+    "Use a raster instead"
+   ],
+   "answer": 1,
+   "why": "Patterns depend on scale, so pick units that fit the hypothesized process and test whether results hold at, say, block group and tract levels."
   }
  ]
 }
