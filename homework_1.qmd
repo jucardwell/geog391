@@ -1,0 +1,46 @@
+---
+title: "Homework 1 · Critiquing a quantitative spatial argument"
+---
+
+## Overview
+
+In this assignment, you will analyze how quantitative data is used to make an argument about a spatial issue in Chapel Hill or Carrboro. You will select a recent document, explain the argument made through its spatial quantitative analysis, and then either critique or extend that argument using a humanist, feminist, or Marxist perspective. Finally, you will propose a more balanced interpretation, following Mei-Po Kwan's approach to finding a middle ground.
+
+## Identify an issue
+
+Select a news story, government report, or policy, planning, or research report from the last three years (e.g., The Daily Tar Heel, Chapelboro, The News & Observer, reports from the Town of Chapel Hill or Orange County Government, or research from UNC Chapel Hill centers or local nonprofits) regarding a local spatial issue in Chapel Hill or Carrboro. Examples might include gentrification in Northside, redevelopment of the Greene Tract, the "Innovation District" on Franklin Street, or increasing housing prices. Familiarize yourself with the context surrounding the spatial issue.
+
+Your selected document must include a quantitative spatial analysis, for example:
+
+- Maps that display data
+- Place-based statistics (e.g., housing prices, demographic data, or land use by area)
+- Data that makes comparisons or explores patterns across places
+
+## Create a presentation
+
+Using VoiceThread, Zoom, or another recording software, create a 5–7 minute presentation based on the slide model below.
+
+**Slide 1: Quantitative analysis.** Briefly introduce the spatial issue, describe the quantitative spatial analysis used in your source, and clearly explain the argument that is being made based on that analysis.
+
+**Slide 2: Critical intervention.** Either critique or extend the argument using a humanist, feminist, or Marxist perspective by examining the data, methods, or interpretation and considering what may be missing or how the argument could be strengthened.
+
+**Slide 3: Finding a middle ground.** Propose a more balanced approach by combining insights from the quantitative analysis and your critique or extension, explaining how these perspectives can work together to improve understanding of the issue.
+
+## Example: pedestrian safety in Chapel Hill
+
+Source: the Town of Chapel Hill's 2019 *Pedestrian Safety Action Plan*, which maps pedestrian crashes across town.
+
+**Slide 1:** This slide would introduce pedestrian safety as a local spatial issue in Chapel Hill and explain how the Town uses mapped crash data to identify high-risk locations. The spatial analysis shows where pedestrian crashes are concentrated and is used to argue that safety interventions should be prioritized in these "hotspots." The underlying argument is that past crash locations indicate where future safety improvements are most needed.
+
+**Slide 2:** This slide would challenge the reliance on crash data by arguing that it captures only incidents where a collision actually occurs, not the full range of unsafe conditions pedestrians encounter. A feminist critique would emphasize that safety should be understood in terms of everyday conditions and embodied experience, rather than only recorded outcomes. Because crashes are relatively rare and partly random events, they may not accurately represent where pedestrian infrastructure is consistently unsafe. Near misses, unsafe crossings, high vehicle speeds, or lack of sidewalks may create dangerous conditions even when no crash is recorded, meaning the data may underrepresent many locations where pedestrian risk is high.
+
+**Slide 3:** This slide would propose combining crash data with more experiential or qualitative forms of data to produce a more complete understanding of pedestrian safety. Rather than replacing quantitative analysis, the approach would extend it by incorporating data on near misses, perceived safety, or pedestrian activity patterns. For example, planners could combine mapped crash data with surveys, community reporting, or observational data to identify both where crashes occur and where people feel unsafe but incidents may go unreported.
+
+## Rubric (10 points)
+
+| Part | Points | Criteria |
+|---|---|---|
+| Slide 1 | 3 | Selects an appropriate source (1), provides sufficient context (1), describes the argument made by the quantitative analysis (1) |
+| Slide 2 | 2 | Either critiques or extends the Slide 1 argument (1) by applying a coherent critical argument based on material covered in class (1) |
+| Slide 3 | 2 | Clearly combines insight from Slides 1 and 2 (1) to propose an integrated approach (1) |
+| Presentation | 3 | Polished, clear, and within time limits (1.5); design helps overall comprehension (1.5) |

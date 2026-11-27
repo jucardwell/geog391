@@ -1,0 +1,44 @@
+---
+title: "Homework 2 · Predicting a spatial pattern"
+---
+
+## Overview
+
+We know that spatial processes drive spatial patterns. Typically, we observe patterns and attempt to infer the processes behind them. In this assignment, you will reverse that logic: you are given a set of spatial processes and must predict the spatial pattern they produce.
+
+## Scenario
+
+We live in the rapidly industrializing nation of Fakelandia. Despite our country's advanced society, we have yet to develop the tools to measure air pollution. However, because of the rapid industrialization we've become increasingly concerned about air pollution and have done in-depth analysis to identify the spatial processes that contribute to it. As the Head Cartographer of Fakelandia, you have been asked to create a map that represents the likely spatial pattern of air pollution given the known processes.
+
+Fakelandia is divided into square counties arranged in a rectangular grid (A–E from north to south, 1–7 from west to east).
+
+## Spatial processes
+
+The following known spatial processes contribute to the spatial pattern of air pollution in Fakelandia:
+
+- Industrial activity increases from west (1) to east (7), and higher industrial activity consistently produces higher levels of air pollution across all counties.
+- Northern counties (A–B) experience stronger winds that disperse pollution, while southern counties (D–E) have stagnant air that allows pollution to accumulate, with moderate conditions in the center (row C).
+- Counties B6, B7, C6, and C7 contain a dense cluster of cities and factories, creating a localized area of especially high pollution.
+- Rainfall increases from east to west, but its effect on air pollution varies across space: precipitation reduces pollution more effectively in southern counties (where pollutants accumulate) than in northern counties (where pollution is already dispersed by wind).
+
+## Map creation
+
+You have been provided with a [template map of Fakelandia's county grid](https://docs.google.com/presentation/d/1gJI9nDWgIWHbMpSfCOlUDey40ln_Q2Jb/edit?usp=sharing&ouid=101338019870957132383&rtpof=true&sd=true). Assign each county an estimated air pollution value based on the spatial processes above, from 1 (low) to 7 (high), and use a seven-class color gradient (for example, light blue to dark blue) to shade the map. Be sure to fill in the legend. Your map should reflect the overall spatial structure implied by the processes, including broad gradients, regional differences, and any localized areas of higher or lower pollution.
+
+## Discussion
+
+In a brief write-up (about ½–1 page), discuss the following questions:
+
+- Where are the highest and lowest air pollution values located, and what overall spatial pattern (e.g., gradients, clusters) do you observe?
+- How do multiple spatial processes interact to produce the pattern you mapped, rather than acting independently?
+- How might the pattern look different if a finer (e.g., neighborhoods) or coarser (e.g., regions) unit of analysis were used, and what variation might be hidden or emphasized at the county level?
+- Identify which process is non-stationary (i.e., its impact varies across space), and explain where and why its effect is stronger or weaker in different parts of Fakelandia.
+
+Submit your map and write-up to the Homework 2 assignment on Canvas.
+
+## Rubric (10 points)
+
+| Part | Points | Criteria |
+|---|---|---|
+| Map creation | 6 | Accurately reflects the main spatial processes (3); shows interaction between processes (2); complete and clear map with values 1–7, color gradient and legend (1) |
+| Discussion | 4 | Clearly describes the spatial pattern (1); explains process interaction and correctly identifies the non-stationary process (2); addresses scale (1) |

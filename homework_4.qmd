@@ -1,0 +1,59 @@
+---
+title: "Homework 4 · Flood and cold-weather risk"
+---
+
+## Overview
+
+For this assignment you will create a well-designed knitted .html report intended for emergency management decision-makers to support natural hazard decision making.
+
+You are an employee at North Carolina Emergency Management (NCEM). You have been asked to use recent and historical environmental data to support preparedness decisions for two hazard scenarios.
+
+## Scenario 1: Flood risk at Bolin Creek
+
+After Hurricane Chantal caused severe flooding along Bolin Creek in July 2025, local officials are reconsidering whether they need a more proactive monitoring plan for periods when repeated high-water days are possible. NCEM wants to know how often unusually high-water conditions occur and whether the likelihood of several flood-risk days within a short period is large enough to justify enhanced monitoring or preparedness measures. (The gauge data end on January 1, 2025, so Chantal itself is not in the record.)
+
+## Scenario 2: Low-temperature risk
+
+NCEM has funding to open one additional warming shelter in North Carolina. The western part of the state is already relatively well-prepared for cold weather, so the new shelter should be located elsewhere. NCEM needs a recommendation for a county that faces meaningful cold-weather risk and has at least one additional vulnerability, exposure, or hazard concern that would make a warming shelter especially useful.
+
+## Task
+
+Create a well-organized knitted .html report for emergency management decision-makers. The report should contain separate sections for the Bolin Creek flood-risk analysis and the statewide cold-temperature analysis. Within each section, integrate analysis, visualization, and interpretation throughout rather than presenting them as separate components. At a minimum, your report should:
+
+- Calculate the empirical probability of a "flood-risk day" at Bolin Creek. A flood-risk day is a day when the water height is more than 1.5 ft higher than the median daily height for the period of record (2015–2025).
+- Use this empirical probability to determine the most likely number of flood-risk days over a 25-day period, and calculate the probability of having more than 3 flood-risk days over a 25-day period.
+- NCEM is considering whether to activate an enhanced flood monitoring protocol during 25-day periods when repeated flood-risk days are possible. Using your probability calculations, evaluate whether the likelihood of more than 3 flood-risk days is high enough to justify additional preparedness measures, and explain how your statistical results support your recommendation.
+- Use the normal distribution to calculate, for each ASOS station, the probability of a January day with a maximum temperature below 32°F, and create a statewide probability map of cold-temperature risk.
+- Recommend one county for a new warming shelter. Your recommendation should combine estimated cold-weather risk, geographic context, and at least one additional vulnerability, exposure, or hazard factor of your choosing. Do not choose a county in the west.
+
+## Data
+
+In your .Rmd, add a chunk for loading libraries and reading in data, and paste in this code:
+
+```{r, eval = FALSE}
+#load libraries
+library(tidyverse)
+library(tmap)
+library(sf)
+library(tigris)
+
+#Bolin Creek gauge readings, 2015-2025
+bolin_creek_data <- read_csv("https://drive.google.com/uc?export=download&id=1eEzriJ5XzR-aS74nJmyiQFVrmV4T3cel")
+
+#January highs at NC ASOS stations, 2000-2019
+asos_jan_data <- read_csv("https://drive.google.com/uc?export=download&id=1_zE1kcC7YY083R6rv20sqeN1l2dCdmhi")
+
+#daily maximum water height at Bolin Creek
+max_bolin_creek <- bolin_creek_data |> group_by(time) |> summarise(max_water = max(value))
+```
+
+When you map the ASOS stations, longitude goes first: `st_as_sf(coords = c("lon", "lat"), crs = 4326)`.
+
+Submit your polished knitted .html to the Homework 4 assignment on Canvas.
+
+## Rubric (10 points)
+
+| Part | Points | Criteria |
+|---|---|---|
+| Analysis and visualizations | 4 | Correctly calculates flood-risk and cold-temperature probabilities (2); appropriate visualizations for the Bolin Creek analysis (0.5); complete, well-designed statewide probability map with clear legend, appropriate classification and readable layout (1); correctly applies probability concepts to the 25-day flood-risk scenario (0.5) |
+| Discussion | 6 | Interprets flood-risk patterns and evaluates whether enhanced monitoring is justified (1.5); describes statewide cold-temperature risk patterns (1); clear, evidence-based warming shelter recommendation that includes additional vulnerability or hazard considerations (1.5); integrates statistics, visualizations and maps into a cohesive discussion (1); polished, well-organized report appropriate for emergency management decision-makers (1) |

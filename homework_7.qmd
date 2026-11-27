@@ -1,0 +1,53 @@
+---
+title: "Homework 7 · Spatial inequality in household income"
+---
+
+## Overview
+
+For this assignment you will create a well-designed knitted .html report that analyzes spatial patterns in median household income across North Carolina census tracts using American Community Survey (ACS) data. The report should demonstrate your ability to identify spatial dependence, compare spatial modeling approaches, and interpret results for a policy-oriented audience.
+
+## Scenario
+
+You are a spatial data analyst working with regional planners in North Carolina to better understand geographic inequality in household income across census tracts. Policymakers are interested in whether socioeconomic factors such as poverty, renting, population density, and educational attainment are associated with median household income, and whether those relationships vary spatially.
+
+Traditional regression models assume observations are independent, but spatial data often violate this assumption because nearby locations tend to resemble one another. In this assignment, you will evaluate whether spatial autocorrelation exists in North Carolina census tract income data, account for it with a spatial regression model, and use geographically weighted regression to see whether relationships change from place to place.
+
+## Task
+
+Create a polished knitted .html report that clearly communicates your spatial analysis findings. You are writing for planners and policymakers, so all outputs should be interpreted in plain language and connected to broader spatial inequality patterns in North Carolina. At a minimum, your report should:
+
+- Introduce spatial inequality in North Carolina and explain why geographic patterns in socioeconomic conditions matter for regional planning and policy, using at least two external research or policy sources.
+- Describe spatial patterns in median household income across North Carolina census tracts using descriptive statistics and maps.
+- Conduct and interpret a global Moran's I test and a Local Indicators of Spatial Association (LISA) analysis on the dependent variable (`median_hh_inc`).
+- Fit and interpret an OLS regression model with `median_hh_inc` as the dependent variable and at least two predictor variables from the ACS data.
+- Test the OLS residuals for spatial autocorrelation and interpret the results.
+- Decide whether a Spatial Lag Model (SLM) or Spatial Error Model (SEM) is more appropriate, and fit that model.
+- Fit a geographically weighted regression (GWR) with the same predictors as your OLS model. Map the local coefficients for at least two predictors and interpret where each relationship is stronger, weaker, or reversed.
+- Compare findings across the OLS, spatial regression, and GWR models, and discuss how spatial modeling changes the interpretation relative to OLS.
+- Include clear, policy-relevant conclusions about spatial inequality in North Carolina.
+
+## Data
+
+In your .Rmd, add a chunk for loading libraries and reading in data, and paste in this code:
+
+```{r, eval = FALSE}
+#load libraries
+library(sf)
+library(tidyverse)
+library(tmap)
+library(spdep)
+library(spatialreg)
+library(GWmodel)
+
+#tract data
+acs_tract_nc <- st_read("https://drive.google.com/uc?export=download&id=1cnz4xgdDRZvlXzN3IyvCxOETRWfrpw-0")
+```
+
+Submit your polished knitted .html to the Homework 7 assignment on Canvas.
+
+## Rubric (10 points)
+
+| Part | Points | Criteria |
+|---|---|---|
+| Analysis and visualizations | 6 | Summarizes and maps income patterns with appropriate statistics and visualizations (1); correctly conducts and interprets global Moran's I and LISA (1); correctly fits and interprets OLS (1); correctly tests OLS residuals for spatial dependence (1); correctly selects and interprets SLM or SEM (1); correctly fits GWR and maps and interprets the local coefficients (1) |
+| Discussion | 4 | Explains spatial inequality in NC with external sources (1); compares findings across OLS, spatial regression and GWR (1); interprets maps and statistics in plain language with planning implications (1); polished report appropriate for planners and policymakers (1) |
