@@ -1,8 +1,37 @@
 # Command Compendium
 
-This chapter is designed to help you easily craft commands.
+[ggplot color options](https://sape.inf.usi.ch/quick-reference/ggplot2/colour)
 
-[ggplot color options](colors%20are%20here:%20https://sape.inf.usi.ch/quick-reference/ggplot2/colour)
+## Getting Started
+
+### Installing and Loading Packages
+
+```{r, eval=F}
+#install a package (only once per computer)
+install.packages("PACKAGE_NAME")
+
+#load a package (every time you start R)
+library(PACKAGE_NAME)
+```
+
+### Reading In Data
+
+```{r, eval=F}
+#read a spatial file (.geojson, .shp, .gpkg) or a Google Drive download link
+DATA <- st_read("FILE_PATH_OR_URL")
+
+#read a csv file
+DATA <- read_csv("FILE_PATH_OR_URL")
+
+#load objects saved in an .RData file
+load("FILE_NAME.RData")
+
+#look at the columns and their types
+glimpse(DATA)
+
+#open the data in a spreadsheet view
+View(DATA)
+```
 
 ## Basic Data Manipulation
 
@@ -80,11 +109,52 @@ summary_data <- DATASET |>
   )
 ```
 
+### Sorting and Picking Rows
+
+```{r, eval=F}
+#sort from smallest to largest (use desc(VARIABLE) for largest to smallest)
+sorted <- DATA |> arrange(VARIABLE)
+
+#keep the first N rows
+first_rows <- DATA |> slice_head(n = N)
+
+#keep the N rows with the largest values of a variable
+top_rows <- DATA |> slice_max(VARIABLE, n = N)
+
+#pull one column out as a vector
+values <- DATA |> pull(VARIABLE)
+
+#keep only unique rows (or unique values of a column)
+unique_rows <- DATA |> distinct(VARIABLE)
+
+#count the number of unique values
+DATA |> summarize(n_unique = n_distinct(VARIABLE))
+```
+
 ### Creating a Spatial Object
 
 ```{r, eval = F}
 #assumes a nonspatial object with a longitude and latitude field
-grouped_pm_sf <- YOUR_NEWOBJECT |> st_as_sf(coords= c("lat", "lon"), crs = 4326)
+grouped_pm_sf <- YOUR_NEWOBJECT |> st_as_sf(coords = c("lon", "lat"), crs = 4326)
+```
+
+### Projecting and Other Spatial Operations
+
+```{r, eval=F}
+#reproject to a new coordinate reference system (e.g. 32119 = NC State Plane in meters)
+DATA_projected <- st_transform(DATA, crs = EPSG_CODE)
+
+#find the center point of each polygon
+centroids <- st_centroid(DATA)
+
+#draw a buffer around features (distance is in the units of the CRS)
+buffered <- st_buffer(DATA, dist = DISTANCE)
+
+#distance between every feature in two datasets
+distances <- st_distance(DATA1, DATA2)
+
+#keep only the features of DATA1 that fall inside DATA2
+inside <- DATA1 |> st_filter(DATA2)
 ```
 
 ## Descriptive Statistics
@@ -197,6 +267,40 @@ ggplot(grouped_data, aes(x=VARIABLE_OF_INTEREST, y=Count)) +
 
 ```
 
+### Density Plot
+
+```{r, eval=F}
+#requires ggplot2 package
+ggplot(DATASET_OBJECT, aes(x = VARIABLE_OF_INTEREST)) +
+  geom_density(fill = "lightgrey")
+```
+
+### Line Chart
+
+```{r, eval=F}
+#requires ggplot2 package
+ggplot(DATASET_OBJECT, aes(x = X_VARIABLE, y = Y_VARIABLE)) +
+  geom_line()
+```
+
+### Cumulative Frequency Plot
+
+```{r, eval=F}
+#requires ggplot2 package
+ggplot(DATASET_OBJECT, aes(x = VARIABLE_OF_INTEREST)) +
+  stat_ecdf()
+```
+
+### Adding a Reference Line
+
+```{r, eval=F}
+#add a vertical line to any ggplot (for example at the mean)
+PLOTCOMMANDS + geom_vline(xintercept = VALUE, linetype = "dashed")
+
+#add a column chart when you already have the heights
+ggplot(DATASET_OBJECT, aes(x = CATEGORY, y = VALUE)) + geom_col()
+```
+
 ## Maps
 
 ```{r, eval = F}
@@ -215,7 +319,7 @@ tm_shape(DATABASE_OBJECT) + tm_dots(fill = "VARIABLE_OF_INTEREST",
                 fill.scale = tm_scale_intervals(values = "brewer.COLORPALETTE", style = "CLASSIFICATION", n= NUMBEROFCLASSES)) 
 
 ##make a basic polygon map
-tm_shape(DATABASE_OBJECT) + tm_polygon(fill = "VARIABLE_OF_INTEREST",
+tm_shape(DATABASE_OBJECT) + tm_polygons(fill = "VARIABLE_OF_INTEREST",
                 fill.scale = tm_scale_intervals(values = "brewer.COLOR_PALETTE", style = "CLASSIFICATION", n= NUMBEROFCLASSES)) 
 
 
@@ -231,8 +335,37 @@ MAPCOMMANDS + tm_title("TITLE")
 
 
 ## Add transparency
-tm_shape(DATABASE_OBJECT) + tm_polygon(fill = "VARIABLE_OF_INTEREST",fill_alpha = VALUE) 
+tm_shape(DATABASE_OBJECT) + tm_polygons(fill = "VARIABLE_OF_INTEREST",fill_alpha = VALUE) 
 
+```
+
+### More Map Types
+
+```{r, eval=F}
+#categorical map
+tm_shape(DATABASE_OBJECT) + tm_polygons(fill = "CATEGORICAL_VARIABLE",
+                fill.scale = tm_scale_categorical(values = "brewer.set2"))
+
+#proportional symbol map (size and optional color)
+tm_shape(DATABASE_OBJECT) + tm_symbols(size = "VARIABLE_OF_INTEREST", fill = "VARIABLE_OF_INTEREST")
+
+#raster map
+tm_shape(RASTER_OBJECT) + tm_raster(col.scale = tm_scale_intervals(values = "carto.sunset_dark", n = 5))
+
+#outline polygons only
+tm_shape(BOUNDARY) + tm_borders()
+
+#bivariate map of two variables
+tm_shape(DATABASE_OBJECT) + tm_polygons(fill = tm_vars(c("VARIABLE1", "VARIABLE2"), multivariate = TRUE),
+              fill.scale = tm_scale_bivariate(values = "bivario.folk_warmth",
+                scale1 = tm_scale_intervals(n = 4, style = "quantile"),
+                scale2 = tm_scale_intervals(n = 4, style = "quantile")))
+
+#add a basemap
+MAPCOMMANDS + tm_basemap("OpenStreetMap")
+
+#add a legend entry by hand (e.g. for a point you added)
+MAPCOMMANDS + tm_add_legend(type = "symbols", labels = "LABEL", fill = "COLOR")
 ```
 
 ## Descriptive Spatial Statistics
@@ -289,6 +422,19 @@ cum_prob <- pbinom(VALUELESSTHAN, TOTALTRIALS, p = p)
 prob <- pnorm(VALUEOFINTEREST, mean =  mean(DATASET$VARIABLE), sd = sd(DATASET$VARIABLE))
 ```
 
+### Plotting a Normal Curve and Checking Normality
+
+```{r, eval=F}
+#draw a histogram with the matching normal curve on top
+ggplot(DATASET, aes(x = VARIABLE)) +
+  geom_histogram(aes(y = after_stat(density)), binwidth = BINWIDTH, fill = "lightgrey") +
+  stat_function(fun = dnorm, args = list(mean = mean(DATASET$VARIABLE), sd = sd(DATASET$VARIABLE)))
+
+#Q-Q plot: points close to the line mean the data are close to normal
+qqnorm(DATASET$VARIABLE)
+qqline(DATASET$VARIABLE)
+```
+
 ## Estimation in Sampling
 
 ### Point Estimate and CI for Mean
@@ -303,6 +449,26 @@ t.test(DATASET$VARIABLE, conf.level = 0.95)
 ```{r, eval = F}
 prop.test(TOTALSUCCESSES, n, conf.level = 0.95)
 
+```
+
+### Critical Values
+
+```{r, eval=F}
+#z critical value for a 95% confidence level
+qnorm(0.975)
+
+#t critical value for a 95% confidence level with n - 1 degrees of freedom
+qt(0.975, df = N - 1)
+```
+
+### Simulating Repeated Samples
+
+```{r, eval=F}
+#take one random sample of size N
+one_sample <- sample(DATASET$VARIABLE, size = N, replace = TRUE)
+
+#repeat that many times and keep each sample mean
+sample_means <- replicate(NUM_SAMPLES, mean(sample(DATASET$VARIABLE, size = N, replace = TRUE)))
 ```
 
 ## Hypothesis Testing
@@ -353,6 +519,13 @@ q_count <- quadratcount(data.ppp, nx = 3, ny = 3)
 
 #run quadrat test with monte carlo sims
 q_test <- quadrat.test(data.ppp, nx = 3, ny = 3, method= "MonteCarlo", nsim=9)
+```
+
+### Intensity
+
+```{r, eval=F}
+#points per unit area
+intensity <- data.ppp$n / area.owin(data.ppp$window)
 ```
 
 ### Kernel Density
@@ -432,6 +605,14 @@ nbw_knn <- nb2listw(nb_knn, style = "W")
 gmoran <- moran.test(DATASET$VARIABLE, NBWMATRIX)
 ```
 
+### Moran's I with a Permutation Test
+
+```{r, eval=F}
+#Monte Carlo test of global Moran's I
+gmoran <- moran.mc(DATA$VARIABLE, nbw, nsim = 99)
+gmoran
+```
+
 ### LISA
 
 ```{r, eval=F}
@@ -457,6 +638,19 @@ DATASET <- DATASET %>%
          ))
 ```
 
+### Ordinary Least Squares (OLS) Regression
+
+```{r, eval=F}
+#fit a linear regression
+fit.ols <- lm(DEPENDENT ~ INDEPENDENT + INDEPENDENT, data = DATA)
+
+#see results
+summary(fit.ols)
+
+#save the residuals to map them or test them for autocorrelation
+DATA$residuals <- resid(fit.ols)
+```
+
 ### Traditional Spatial Models 
 ```{r, eval=F}
 #lag model
@@ -472,27 +666,6 @@ fit.error<-errorsarlm(DEPENDENT ~ INDEPENDENT + INDEPENDENT,
                   listw = nbw)  
 #see results
 summary(fit.error)
-```
-
-### Bayesian Model
-```{r, eval=F}
-nb <- poly2nb(DATA)
-
-nb2INLA("map.adj")
-g <- inla.read.graph(filename = "map.adj")
-
-DATA$re_u <- 1:nrow(DATA)
-
-formula <- DEPENDENT ~ INDEPENDENT + INDEPENDENT +
-  f(re_u, model = "bym2", graph = g)
-
-res <- inla(
-  formula,
-  family = "gaussian",
-  data = DATA,
-  control.predictor = list(compute = TRUE),
-  control.compute = list(return.marginals.predictor = TRUE)
-)
 ```
 
 ## Continuous Surfaces
@@ -526,6 +699,16 @@ r <- rast(idw)
 r_m <- mask(r, BOUNDARY)
 ```
 
+### Cross-Validation
+
+```{r, eval=F}
+#5-fold cross-validation of an interpolation model
+cv <- gstat.cv(object = MODEL, nfold = 5)
+
+#root mean squared error
+sqrt(mean(cv$residual^2))
+```
+
 ### Kriging
 
 ```{r, eval=F}
@@ -534,6 +717,9 @@ v <- variogram(value ~ 1, data = DATA)
 
 #plot empirical variogram
 plot(v)
+
+#see the shapes of the available variogram models
+show.vgms()
 
 #specify an initial variogram model
 vgm_initial <- vgm(

@@ -1,6 +1,5 @@
 file,title,concept,status
 basic_R,Working in R and RStudio,R toolkit,ready
-command,Command compendium,R toolkit,ready
 describing_data,Describing data,Concept 2,ready
 tmap,Mapping with tmap,Concept 3,ready
 describing_spatial_data,Describing spatial data,Concept 3,ready

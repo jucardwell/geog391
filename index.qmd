@@ -11,7 +11,7 @@ body-classes: course-page
 ## Schedule {#schedule}
 
 ::: legend-row
-<span>■ Concept day</span> <span class="s-ws">▲ Lab workshop</span> <span class="s-new">● New this year</span> <span class="s-prep">○ Case study prep</span> <span class="s-cs">★ Case study</span> <span class="muted">— No class</span>
+<span>■ Concept day</span> <span class="s-ws">▲ Homework studio</span> <span class="s-new">● New this year</span> <span class="s-prep">○ Case study prep</span> <span class="s-cs">★ Case study</span> <span class="muted">— No class</span>
 :::
 
 {{< include _generated/schedule.md >}}
@@ -24,6 +24,6 @@ body-classes: course-page
 
 {{< include _generated/readings.md >}}
 
-## Labs {#labs}
+## Homework {#homework}
 
-{{< include _generated/labs.md >}}
+{{< include _generated/homework.md >}}

@@ -1,7 +1,7 @@
 project:
   type: website
   output-dir: _site
-  # Rebuilds the schedule, tutorial index, readings, labs and "This week"
+  # Rebuilds the schedule, tutorial index, readings, homework and "This week"
   # data from course/*.csv, quizzes/*.json and slides/ before every render.
   pre-render: python3 scripts/build_course.py
   # Encrypts the answer key on each tutorial (see scripts/lock_keys.py).
@@ -13,6 +13,7 @@ project:
     - "!syllabus.qmd"
     - "!schedule.qmd"
     - "!ppt.qmd"
+    - "!labs.qmd"
   resources:
     - assets/
     - slides/*.pdf

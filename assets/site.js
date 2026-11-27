@@ -144,12 +144,6 @@
       h1.parentNode.insertBefore(el('span', { 'class': 'concept-line' }, esc(t.concept) + (u ? ' · Unit ' + useRow.unit + ', ' + esc(u.name) : '')), h1);
     }
     if (sidebar) {
-      var grid = '';
-      for (var k = tIdx - 4; k <= tIdx + 4; k++) {
-        var s = tutorials[(k + tutorials.length * 2) % tutorials.length];
-        grid += k === tIdx ? '<span class="here">' + esc(s.title) + '</span>' : '<a href="' + s.file + '.html">' + esc(s.title) + '</a>';
-      }
-      sidebar.insertBefore(sideBlock('Adjoining tutorials', '<div class="adjoining">' + grid + '</div>'), sidebar.firstChild);
       var used = classDays(function (r) { return r.tutorial && r.tutorial.file === t.file; });
       if (used) sidebar.appendChild(sideBlock('Used in class', used));
     }

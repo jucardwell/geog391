@@ -1,7 +1,7 @@
 """Build the course page pieces from the files in course/, quizzes/ and slides/.
 
 Quarto runs this before every render (see pre-render in _quarto.yml), so the
-schedule, tutorial index, readings list, labs list, case study dates and the
+schedule, tutorial index, readings list, homework list, case study dates and the
 data behind "This week" are always rebuilt from the CSV files. Nothing here
 needs to be edited by hand.
 
@@ -56,7 +56,7 @@ def main():
     tutorials = read_csv("tutorials.csv")
     tut_by_file = {t["file"]: t for t in tutorials}
     units = {u["unit_no"]: u for u in read_csv("units.csv")}
-    lab_titles = {l["n"]: l["title"] for l in read_csv("labs.csv")}
+    hw_titles = {h["n"]: h["title"] for h in read_csv("homeworks.csv")}
 
     # A tutorial counts as ready only once its .qmd exists.
     for t in tutorials:
@@ -119,20 +119,22 @@ def main():
             prep = None
     case_of_date = {c["date"]: c["n"] for c in cases}
 
-    # Labs: workshop from the lab column, due date from the due column.
-    labs = {n: {"n": n, "title": lab_titles.get(n, f"Lab {n}"), "workshop": "", "due": ""}
-            for n in lab_titles}
+    # Homework: studio day from the lab column, due date from the due column.
+    def hw_href(n):
+        return f"homework_{n}.html" if (ROOT / f"homework_{n}.qmd").exists() else ""
+    labs = {n: {"n": n, "title": hw_titles.get(n, f"Homework {n}"), "workshop": "", "due": "",
+                "href": hw_href(n)} for n in hw_titles}
     for r in rows:
-        if r["lab"] in labs:
+        if r["lab"] in labs and not labs[r["lab"]]["workshop"]:
             labs[r["lab"]]["workshop"] = r["label"]
-        m = re.match(r"Lab (\d+)", r["due"] or "")
+        m = re.match(r"HW (\d+)", r["due"] or "")
         if m and m.group(1) in labs:
             labs[m.group(1)]["due"] = r["label"]
 
     def due_html(due):
-        m = re.match(r"Lab (\d+)", due or "")
-        if m:
-            return f'<a href="labs.html#lab-{m.group(1)}">Lab {m.group(1)}</a>'
+        m = re.match(r"HW (\d+)", due or "")
+        if m and hw_href(m.group(1)):
+            return f'<a href="{hw_href(m.group(1))}">HW {m.group(1)}</a>'
         return esc(due)
 
     def readings_html(items):
@@ -214,20 +216,19 @@ def main():
     # ---- Labs list --------------------------------------------------------
     out = ['<table class="plain-list"><tbody>']
     for l in labs.values():
-        ws = f'workshop {l["workshop"]}' if l["workshop"] else ""
-        out.append(f'<tr><td class="num">{l["n"]}</td><td><a href="labs.html#lab-{l["n"]}">'
-                   f'{esc(l["title"])}</a></td><td class="muted">{esc(ws)}</td>'
-                   f'<td>{"due " + esc(l["due"]) if l["due"] else ""}</td></tr>')
+        ws = f'studio {l["workshop"]}' if l["workshop"] else ""
+        title = f'<a href="{l["href"]}">{esc(l["title"])}</a>' if l["href"] else esc(l["title"])
+        out.append(f'<tr><td class="num">{l["n"]}</td><td>{title}</td><td class="muted">{esc(ws)}</td>'
+                   f'<td>{("due " + esc(l["due"])).replace("due Exam slot", "due in the exam slot") if l["due"] else ""}</td></tr>')
     out.append("</tbody></table>")
-    (GEN / "labs.md").write_text(raw("\n".join(out)), encoding="utf-8")
+    (GEN / "homework.md").write_text(raw("\n".join(out)), encoding="utf-8")
 
     # ---- Case study legend boxes -----------------------------------------
     for c in cases:
-        ta = " Run by the TA." if "TA" in (c["note"] or "") else ""
         box = (f'<div class="legend-box"><div class="legend-title">Case Study {c["n"]}</div>'
                f'<span class="sym prep">○</span><span>Prep day, {esc(c["prep"])}</span>'
                f'<span class="sym case">★</span><span>Case study, {esc(c["label"])}</span>'
-               f'<span class="sym muted">—</span><span class="muted">In class, closed book.{ta}</span></div>'
+               f'<span class="sym muted">—</span><span class="muted">In class, closed book.{" Guest proctor." if c["note"] else ""}</span></div>'
                f'<p>Covers {esc(c["covers"])}.</p>')
         (GEN / f"case_{c['n']}.md").write_text(raw(box), encoding="utf-8")
 
