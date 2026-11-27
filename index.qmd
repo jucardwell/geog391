@@ -7,23 +7,3 @@ body-classes: course-page
 ---
 
 {{< include _generated/week.md >}}
-
-## Schedule {#schedule}
-
-::: legend-row
-<span>■ Concept day</span> <span class="s-ws">▲ Homework studio</span> <span class="s-new">● New this year</span> <span class="s-prep">○ Case study prep</span> <span class="s-cs">★ Case study</span> <span class="muted">— No class</span>
-:::
-
-{{< include _generated/schedule.md >}}
-
-## Tutorials {#tutorials}
-
-{{< include _generated/tutorials.md >}}
-
-## Readings {#readings}
-
-{{< include _generated/readings.md >}}
-
-## Homework {#homework}
-
-{{< include _generated/homework.md >}}

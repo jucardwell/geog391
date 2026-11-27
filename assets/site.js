@@ -68,7 +68,6 @@
     var monday = addDays(d, 1 - d.getDay());
     var days = wk.querySelector('.week-days');
     var head = wk.querySelector('.week-label');
-    var unitP = wk.querySelector('.week-unit');
     if (d > last) {
       var fin = rows.filter(function (r) { return r.kind === 'final'; })[0];
       head.textContent = 'After the last class';
@@ -95,26 +94,32 @@
             (why ? '<span class="day-sub">' + esc(why) + '</span>' : '');
         } else {
           if (r.kind === 'case') { cls += ' case'; dateTxt += ' ★'; }
-          html = '<span class="day-date">' + dateTxt + '</span><span class="day-topic">' + esc(r.topic) + '</span>';
-          if (r.in_class) html += '<span class="day-sub">' + esc(r.in_class) + '</span>';
+          html = '<span class="day-date">' + dateTxt + '</span>';
           var links = [];
           (r.readings || []).forEach(function (it) {
-            if (it.href) links.push('<a href="' + esc(it.href) + '">' + (it.external ? '' : 'Read: ') + esc(it.title) + '</a>');
-            else if (it.soon) links.push('<span>Read: ' + esc(it.title) + '</span>');
+            if (it.href) {
+              links.push('<a href="' + esc(it.href) + '">' + (it.external ? '' : 'Read: ') + esc(it.title) + '</a>');
+              if (it.slug && C.quizzes[it.slug]) links.push('<a href="' + esc(it.href) + '#reading-quiz">Quiz: ' + esc(it.title) + '</a>');
+            } else {
+              links.push('<span>Read: ' + esc(it.title) + (it.soon ? ' <span class="muted">(coming soon)</span>' : '') + '</span>');
+            }
           });
-          if (r.tutorial && r.tutorial.href) links.push('<a href="' + r.tutorial.href + '">Tutorial</a>');
-          if (r.kind === 'case') links.push('<a href="case_studies.html#case-study-' + caseNo[r.date] + '">Study guide</a>');
+          if (r.tutorial && r.tutorial.href) links.push('<a href="' + r.tutorial.href + '">Tutorial: ' + esc(r.tutorial.title) + '</a>');
+          if (r.kind === 'case') links.push('<a href="case_studies.html#case-study-' + caseNo[r.date] + '">Case Study ' + caseNo[r.date] + ' study guide</a>');
           if (r.slides && r.date <= todayIso) links.push('<a href="' + esc(r.slides) + '">Slides</a>');
           if (links.length) html += '<div class="day-links">' + links.join('') + '</div>';
+          else html += '<span class="day-sub">' + esc(r.topic) + '</span>';
         }
-        if (r && r.due) html += '<span class="day-due' + (html.indexOf('day-links') < 0 ? '" style="margin-top:auto' : '') + '">Due: ' + esc(r.due) + '</span>';
+        if (r && r.due) {
+          var m = /^HW (\d+)/.exec(r.due), hw = m && (C.homeworks || []).filter(function (h) { return h.n === m[1]; })[0];
+          html += '<span class="day-due">Due: ' + (hw && hw.href ? '<a href="' + hw.href + '">' + esc(r.due) + '</a>' : esc(r.due)) + '</span>';
+        }
         days.appendChild(el('div', { 'class': cls }, html));
       });
       var wkNo = anyRow ? anyRow.week : (rowFor(iso(monday)) || {}).week;
       var range = MON[monday.getMonth()] + ' ' + monday.getDate() + '–' +
         (fri.getMonth() !== monday.getMonth() ? MON[fri.getMonth()] + ' ' : '') + fri.getDate();
-      head.textContent = (wkNo ? 'Week ' + wkNo + ' · ' : '') + range;
-      if (anyRow && C.units[anyRow.unit]) unitP.textContent = 'Unit ' + anyRow.unit + ', ' + C.units[anyRow.unit].name;
+      head.textContent = range;
     }
   }
 
@@ -130,7 +135,7 @@
   }
   function classDays(test) {
     return rows.filter(test).map(function (r) {
-      return '<a href="index.html#schedule">' + esc(r.label) + ', ' + esc(r.topic) + '</a>';
+      return '<a href="schedule.html">' + esc(r.label) + ', ' + esc(r.topic) + '</a>';
     }).join('');
   }
 

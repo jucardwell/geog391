@@ -1,0 +1,7 @@
+---
+title: "Homework"
+toc: false
+page-layout: full
+---
+
+{{< include _generated/homework.md >}}

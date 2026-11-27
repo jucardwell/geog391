@@ -127,8 +127,8 @@ code { font-family: $font-family-monospace; }
   .day.case .day-date { color: $red; }
   .day-topic { font-weight: 700; }
   .day-sub { font-size: 15px; color: $muted; }
-  .day-links { margin-top: auto; display: flex; flex-wrap: wrap; gap: 2px 14px; font-size: 15px; }
-  .day-due { font-size: 13px; }
+  .day-links { display: flex; flex-direction: column; gap: 4px; font-size: 15px; margin-top: 4px; }
+  .day-due { font-size: 15px; font-weight: 700; margin-top: auto; padding-top: 8px; }
 }
 @media (max-width: 760px) {
   .this-week .week-days { grid-template-columns: 1fr; }
@@ -250,3 +250,5 @@ form.key-unlock button { border: 1px solid $ink; background: $ink; color: #FFFFF
 .callout { border-radius: 0; }
 #title-block-header:not(:has(h1)) { display: none; }
 .course-page main.content { margin-top: 0; padding-top: 0; } .course-page .this-week { margin-top: -1rem; }
+
+.front-links p { display: flex; flex-wrap: wrap; gap: 8px 28px; font-size: 18px; font-weight: 700; padding: 28px 0 8px; margin: 0; }

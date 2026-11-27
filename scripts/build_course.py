@@ -236,7 +236,7 @@ def main():
     svg = (ROOT / "assets" / "contours.svg").read_text(encoding="utf-8")
     week = (f'<section id="this-week" class="this-week">{svg}'
             '<div class="week-head"><h2>This week</h2><span class="week-label"></span>'
-            '<p class="week-unit muted"></p></div><div class="week-days">'
+            '</div><div class="week-days">'
             '</div></section>')
     (GEN / "week.md").write_text(raw(week), encoding="utf-8")
 
@@ -246,7 +246,8 @@ def main():
         quizzes[p.stem] = json.loads(p.read_text(encoding="utf-8"))
     data = {"rows": rows, "units": units, "cases": cases,
             "readings": list(readings.values()),
-            "tutorials": tutorials, "quizzes": quizzes}
+            "tutorials": tutorials, "quizzes": quizzes,
+            "homeworks": list(labs.values())}
     (ROOT / "assets" / "course.js").write_text(
         "window.COURSE = " + json.dumps(data, ensure_ascii=False) + ";\n", encoding="utf-8")
     print(f"build_course: {meetings} meetings, {len(cases)} case studies, "

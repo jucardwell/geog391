@@ -1,0 +1,7 @@
+---
+title: "Readings"
+toc: false
+page-layout: full
+---
+
+{{< include _generated/readings.md >}}
