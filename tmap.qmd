@@ -130,7 +130,7 @@ tm_shape(triangle) +
               fill.scale = tm_scale_intervals(style = "quantile", n = 5, values = "bu_pu"),
               fill.legend = tm_legend(title = "Median age")) +
   tm_title("Median age by census tract") +
-  tm_basemap("OpenStreetMap")
+  tm_basemap("CartoDB.PositronNoLabels")
 ```
 
 ## Part 2: Partner Practice {#partner-practice}
@@ -223,7 +223,7 @@ tm_shape(meck) +
               fill.scale = tm_scale_intervals(style = "equal", n = 5, values = "brewer.yl_or_rd"),
               fill.legend = tm_legend(title = "Median home value ($)")) +
   tm_title("Median home value, Mecklenburg County (equal interval)") +
-  tm_basemap("OpenStreetMap")
+  tm_basemap("CartoDB.PositronNoLabels")
 
 #### Partner B: quantile ####
 tm_shape(meck) +
@@ -238,5 +238,5 @@ tm_shape(meck) +
               fill.scale = tm_scale_intervals(style = "quantile", n = 5, values = "brewer.yl_or_rd"),
               fill.legend = tm_legend(title = "Median home value ($)")) +
   tm_title("Median home value, Mecklenburg County (quantile)") +
-  tm_basemap("OpenStreetMap")
+  tm_basemap("CartoDB.PositronNoLabels")
 ```
