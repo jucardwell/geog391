@@ -252,7 +252,9 @@ def main():
     quizzes = {}
     for p in sorted((ROOT / "quizzes").glob("*.json")):
         quizzes[p.stem] = json.loads(p.read_text(encoding="utf-8"))
-    data = {"rows": rows, "units": units, "cases": cases,
+    palettes = json.loads((COURSE / "palettes.json").read_text(encoding="utf-8")) if (COURSE / "palettes.json").exists() else {}
+    data = {"rows": rows, "contours": svg,
+            "contourColors": [v["--t-plan-edge"] for v in palettes.values()], "units": units, "cases": cases,
             "readings": list(readings.values()),
             "tutorials": tutorials, "quizzes": quizzes,
             "homeworks": list(labs.values())}

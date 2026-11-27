@@ -185,6 +185,26 @@
     if (sub) { sub.classList.remove('collapse'); tocList.replaceWith(sub); }
   }
 
+  // ---- Contour band behind every page title, in a palette color ----------
+  var tb = document.querySelector('#title-block-header');
+  if (tb && tb.querySelector('h1') && C.contours) {
+    var name = (location.pathname.split('/').pop() || 'index.html');
+    var col = getComputedStyle(document.body).getPropertyValue('--t-plan-edge').trim();
+    if (!col && C.contourColors && C.contourColors.length) {
+      var hsh = 0;
+      for (var ci = 0; ci < name.length; ci++) hsh = (hsh * 31 + name.charCodeAt(ci)) >>> 0;
+      col = C.contourColors[hsh % C.contourColors.length];
+    }
+    var holder = document.createElement('div');
+    holder.innerHTML = C.contours;
+    var svgEl = holder.firstElementChild;
+    if (svgEl) {
+      if (col) svgEl.style.stroke = col;
+      tb.classList.add('has-contours');
+      tb.insertBefore(svgEl, tb.firstChild);
+    }
+  }
+
   // ---- Which page is this? -----------------------------------------------
   var page = (location.pathname.split('/').pop() || 'index.html').replace(/\.html$/, '');
   var tutorials = C.tutorials.filter(function (t) { return t.ready; });
