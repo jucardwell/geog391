@@ -77,7 +77,9 @@ def main():
         for item in filter(None, (field or "").split(";")):
             item = item.strip()
             if item.startswith("text:"):
-                out.append({"title": item[5:], "href": ""})
+                q = item[5:].replace(" article", "")
+                out.append({"title": item[5:], "external": True,
+                            "href": "https://scholar.google.com/scholar?q=" + q.replace(" ", "+")})
             elif item.startswith("link:"):
                 title, _, url = item[5:].partition("|")
                 out.append({"title": title, "href": url, "external": True})
@@ -137,32 +139,35 @@ def main():
             return f'<a href="{hw_href(m.group(1))}">HW {m.group(1)}</a>'
         return esc(due)
 
+    quiz_slugs = {p.stem for p in (ROOT / "quizzes").glob("*.json")}
+
     def readings_html(items):
         parts = []
         for it in items:
             if it["href"]:
-                star = "" if it.get("external") else "★ "
-                parts.append(f'<a href="{esc(it["href"])}">{star}{esc(it["title"])}</a>')
+                parts.append(f'<a href="{esc(it["href"])}">{esc(it["title"])}</a>')
+                if it.get("slug") and it["slug"] in quiz_slugs:
+                    parts.append(f'<a href="{esc(it["href"])}#reading-quiz">Reading quiz</a>')
             elif it.get("soon"):
-                parts.append(f'★ {esc(it["title"])} <span class="muted">(coming soon)</span>')
+                parts.append(f'{esc(it["title"])} <span class="muted">(coming soon)</span>')
             else:
                 parts.append(esc(it["title"]))
         return "<br>".join(parts)
 
     # ---- Schedule table -------------------------------------------------
     out = ['<div class="schedule-scroll"><table class="schedule">',
-           '<thead><tr><th></th><th>Date</th><th></th><th>Topic</th><th>In class</th>'
-           '<th>Read and quiz</th><th>Due</th></tr></thead><tbody>']
+           '<thead><tr><th>Date</th><th></th><th>Topic</th><th>In class</th>'
+           '<th>Read before class</th><th>Due</th></tr></thead><tbody>']
     cur_unit = None
     for r in rows:
         if r["unit"] and r["unit"] != cur_unit and r["kind"] != "final":
             cur_unit = r["unit"]
-            out.append(f'<tr class="unit"><td colspan="7"><span class="unit-no">Unit {esc(cur_unit)}</span> '
+            out.append(f'<tr class="unit"><td colspan="6"><span class="unit-no">Unit {esc(cur_unit)}</span> '
                        f'{esc(units[cur_unit]["name"])}</td></tr>')
         k = r["kind"]
         cls = f"k-{k}"
         if k == "off":
-            out.append(f'<tr class="{cls}"><td class="sym">—</td><td>{esc(r["label"])}</td><td></td>'
+            out.append(f'<tr class="{cls}"><td>{esc(r["label"])}</td><td></td>'
                        f'<td colspan="3"><em>{esc(r["topic"])}</em></td><td>{due_html(r["due"])}</td></tr>')
             continue
         topic = f'<b>{esc(r["topic"])}</b>'
@@ -179,7 +184,7 @@ def main():
         if r["note"]:
             inclass += f' <span class="muted">({esc(r["note"])})</span>'
         concept = esc(r["concept"]) if k != "final" else "Final"
-        out.append(f'<tr class="{cls}" data-date="{r["date"]}"><td class="sym">{SYM[k]}</td>'
+        out.append(f'<tr class="{cls}" data-date="{r["date"]}">'
                    f'<td>{esc(r["label"])}</td><td class="concept">{concept}</td><td>{topic}</td>'
                    f'<td>{inclass}</td><td>{readings_html(r["readings"])}</td>'
                    f'<td>{due_html(r["due"])}</td></tr>')

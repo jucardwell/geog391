@@ -61,7 +61,7 @@
   // tutorials, homework, case studies and slides. Links only.
   function hwLink(h) {
     var t = 'Homework ' + h.n + ': ' + esc(h.title);
-    return h.href ? '<a href="' + esc(h.href) + '">' + t + '</a>' : '<span>' + t + '</span>';
+    return '<a href="' + esc(h.href || 'homework.html') + '">' + t + '</a>';
   }
   function weekList(wrows, monIso, friIso) {
     var groups = [];
@@ -71,7 +71,8 @@
     wrows.forEach(function (r) {
       (r.readings || []).forEach(function (it) {
         var t = esc(it.title) + (it.section ? ', ' + esc(it.section) : '');
-        var body = it.href ? '<a href="' + esc(it.href) + '">' + t + '</a>' : t + (it.soon ? ' <span class="muted">(coming soon)</span>' : '');
+        var body = it.href ? '<a href="' + esc(it.href) + '">' + t + '</a>'
+          : '<a href="readings.html">' + t + '</a>' + (it.soon ? ' <span class="muted">(coming soon)</span>' : '');
         if (it.slug && it.href && C.quizzes[it.slug]) body += '<a href="' + esc(it.href) + '#reading-quiz">Reading quiz</a>';
         read.push(item(r.label, body));
       });
@@ -81,7 +82,7 @@
     var tut = [];
     wrows.forEach(function (r) {
       if (r.tutorial) tut.push(item(r.label, r.tutorial.href ? '<a href="' + r.tutorial.href + '">' + esc(r.tutorial.title) + '</a>'
-        : esc(r.tutorial.title) + ' <span class="muted">(coming soon)</span>'));
+        : '<a href="tutorials.html">' + esc(r.tutorial.title) + '</a> <span class="muted">(coming soon)</span>'));
     });
     if (tut.length) groups.push(['Tutorials', tut]);
 
@@ -158,7 +159,7 @@
           html = '<span class="day-date">' + dateTxt + '</span><span class="day-topic">No class</span>' +
             (why ? '<span class="day-sub">' + esc(why) + '</span>' : '');
         } else {
-          if (r.kind === 'case') { cls += ' case'; dateTxt += ' ★'; }
+          if (r.kind === 'case') { cls += ' case';  }
           html = '<span class="day-date">' + dateTxt + '</span><span class="day-topic">' + esc(r.topic) + '</span>';
           if (r.in_class) html += '<span class="day-sub">' + esc(r.in_class) + '</span>';
           weekRows.push(r);
