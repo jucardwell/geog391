@@ -22,6 +22,7 @@ Create a well-organized knitted .html report that integrates analysis, visualiza
 - Describe the current state of North Carolina absenteeism post-COVID using descriptive statistics and visualizations.
 - Analyze and interpret the differences between rural and non-rural schools, and between high-income and low-income schools, in post-COVID chronic absenteeism using an appropriate hypothesis test. Check assumptions and state a null and alternative hypothesis.
 - Analyze and interpret the change in chronic absenteeism before and after COVID using an appropriate hypothesis test. Check assumptions and state a null and alternative hypothesis.
+- For every test, report the effect size next to the p-value: the size of the difference in its original units (for example, "chronic absenteeism was 4.2 percentage points higher in rural schools").
 - Research existing policies or interventions designed to reduce chronic absenteeism and propose at least one evidence-based policy recommendation supported by both your findings and the research literature.
 
 ## Data
@@ -44,5 +45,5 @@ Submit your polished knitted .html to the Homework 5 assignment on Canvas.
 
 | Part | Points | Criteria |
 |---|---|---|
-| Analysis and visualizations | 4 | Summarizes post-COVID absenteeism with appropriate descriptive statistics and visualizations (1); correctly conducts and interprets the rural/non-rural and high/low-income tests, with hypotheses and assumption checks (1.5); correctly conducts and interprets the before/after COVID test, with hypotheses and assumption checks (1); clear visualizations suited to a policy audience (0.5) |
+| Analysis and visualizations | 4 | Summarizes post-COVID absenteeism with appropriate descriptive statistics and visualizations (1); correctly conducts and interprets the rural/non-rural and high/low-income tests, with hypotheses, assumption checks and effect sizes (1.5); correctly conducts and interprets the before/after COVID test, with hypotheses, assumption checks and effect size (1); clear visualizations suited to a policy audience (0.5) |
 | Discussion | 6 | Explains why chronic absenteeism matters, using external sources (1); interprets results in plain language with policy implications (1.5); evidence-based policy recommendation supported by the analysis and the literature (1.5); integrates statistics, visualizations and interpretation (1); polished report appropriate for the State Board of Education (1) |
