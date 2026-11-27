@@ -1,5 +1,5 @@
 ---
-title: "Homework 6 · Crime patterns in downtown Chapel Hill"
+title: "Homework 6: Crime patterns in downtown Chapel Hill"
 ---
 
 ## Overview

@@ -1,5 +1,5 @@
 ---
-title: "Homework 2 · Predicting a spatial pattern"
+title: "Homework 2: Predicting a spatial pattern"
 ---
 
 ## Overview

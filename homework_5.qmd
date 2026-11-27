@@ -1,5 +1,5 @@
 ---
-title: "Homework 5 · Chronic absenteeism in NC schools"
+title: "Homework 5: Chronic absenteeism in NC schools"
 ---
 
 ## Overview

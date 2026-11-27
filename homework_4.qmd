@@ -1,5 +1,5 @@
 ---
-title: "Homework 4 · Flood and cold-weather risk"
+title: "Homework 4: Flood and cold-weather risk"
 ---
 
 ## Overview

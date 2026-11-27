@@ -1,0 +1,33 @@
+/* Each tutorial page sets its own palette by defining these variables in a
+   <style> block at the top of the page. The defaults match the site. */
+:root {
+  --t-ink: #1A1A1A;
+  --t-title: #1A1A1A;
+  --t-rule: #1A1A1A;
+  --t-link: #2F6EA5;
+  --t-plan-bg: #F4F7FA;   --t-plan-edge: #2F6EA5;
+  --t-why-bg: #F4EFE6;    --t-why-edge: #9C5B2E;
+  --t-read-bg: #F4F7FA;   --t-read-edge: #2F6EA5;
+  --t-a-bg: #FFFFFF;      --t-b-bg: #F7F6F2;
+  --t-deliver-bg: #EEF4E8; --t-deliver-edge: #3E7B2E;
+  --t-code-bg: #F7F6F2;   --t-code-edge: #2F6EA5;
+  --t-key-edge: #1A1A1A;  --t-button: #1A1A1A;
+}
+main a, #TOC .nav-link { color: var(--t-link); }
+#TOC .nav-link.active { color: var(--t-ink); border-left-color: var(--t-rule); }
+#title-block-header { border-bottom: 6px solid var(--t-rule); }
+h1.title { color: var(--t-title); }
+main h2 { color: var(--t-title); }
+.plan { border-left: 6px solid var(--t-plan-edge); background: var(--t-plan-bg); }
+.why { border-left: 6px solid var(--t-why-edge); background: var(--t-why-bg); }
+.reading { border-left: 6px solid var(--t-read-edge); background: var(--t-read-bg); }
+.deliver { border-left: 6px solid var(--t-deliver-edge); background: var(--t-deliver-bg); }
+.partners { border: 2px solid var(--t-rule); }
+.partner + .partner { border-left: 2px solid var(--t-rule); }
+.partner-a { background: var(--t-a-bg); }
+.partner-b { background: var(--t-b-bg); }
+div.sourceCode, pre.sourceCode { border-left: 6px solid var(--t-code-edge); background: var(--t-code-bg); }
+section.answer-key { border: 3px dashed var(--t-key-edge); }
+h2.answer-key { border: 0; padding: 0; margin-top: 0; }
+form.key-unlock[hidden] { display: none; }
+form.key-unlock button { background: var(--t-button); border-color: var(--t-button); }

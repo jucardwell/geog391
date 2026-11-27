@@ -1,6 +1,25 @@
 ---
 title: "Probability"
+css: styles/tutorial.css
 ---
+
+```{=html}
+<style>
+:root {
+  --t-ink: #1E1038;
+  --t-title: #5B1FD1;
+  --t-rule: #FF2E93;
+  --t-link: #5B1FD1;
+  --t-plan-bg: #FFF4A8;   --t-plan-edge: #FF2E93;
+  --t-why-bg: #D8FAF5;    --t-why-edge: #00A99D;
+  --t-read-bg: #EBE2FF;   --t-read-edge: #5B1FD1;
+  --t-a-bg: #FFE2C7;      --t-b-bg: #E6FBB8;
+  --t-deliver-bg: #FFD6EA; --t-deliver-edge: #FF2E93;
+  --t-code-bg: #F4EFFF;   --t-code-edge: #5B1FD1;
+  --t-key-edge: #FF7A00;  --t-button: #FF2E93;
+}
+</style>
+```
 
 ```{r setup, include = FALSE}
 library(tidyverse)
@@ -21,19 +40,17 @@ jan_years <- range(lubridate::year(rdu_jan$date))
 ```
 
 ::: {.plan}
-- **Part 1 · about 15 min.** Read the walkthrough and run the code with your partner.
-- **Part 2 · about 25 min.** Split up. Partner A uses the binomial and Partner B uses the normal model, both on bad-air days in Charlotte.
-- **Part 3 · about 10 min.** Combine your numbers to answer one joint question, and write it on an index card.
+For the first 15 minutes or so, you and your partner will read the walkthrough together and run the code. Then you'll split up for about 25 minutes: Partner A works with the binomial and Partner B works with the normal model, both on bad-air days in Charlotte. In the last 10 minutes you'll put your numbers together to answer one question and write your answer on an index card.
 :::
 
-## Part 1 · Walkthrough {#walkthrough}
+## Part 1: Walkthrough {#walkthrough}
 
 Run each chunk in your own .Rmd. You will reuse this code in Part 2.
 
-### Step 1 · Load the data
+### Step 1: Load the data
 
 ::: {.why}
-Daily rainfall in Chapel Hill (`r rain_years[1]` to `r rain_years[2]`, from the [NC State Climate Office](https://products.climate.ncsu.edu/data/)) and daily January highs at RDU airport (`r jan_years[1]` to `r jan_years[2]`, from the [Iowa Environmental Mesonet](https://mesonet.agron.iastate.edu/request/download.phtml)).
+We'll use daily rainfall in Chapel Hill from `r rain_years[1]` to `r rain_years[2]`, which comes from the [NC State Climate Office](https://products.climate.ncsu.edu/data/), and daily January high temperatures at RDU airport from `r jan_years[1]` to `r jan_years[2]`, which come from the [Iowa Environmental Mesonet](https://mesonet.agron.iastate.edu/request/download.phtml).
 :::
 
 ```{r, eval = FALSE}
@@ -49,7 +66,7 @@ ch_rainfall <- read_csv("https://drive.google.com/uc?export=download&id=1wYLHVVs
 rdu_jan <- read_csv("https://drive.google.com/uc?export=download&id=1ABpiu5ABzAo-WXbYBp9LWgN8-lHuFQR9")
 ```
 
-### Step 2 · Make one row per day
+### Step 2: Make one row per day
 
 ::: {.why}
 Probability counts days, so each row must be one day. The rainfall file has `r format(n_rain_rows, big.mark = ",")` rows but only `r format(n_rain_dates, big.mark = ",")` distinct dates. We keep one row per date and count the day as rainy if either record shows rain.
@@ -65,10 +82,10 @@ ch_daily <- ch_rainfall |>
 ch_daily <- ch_daily |> mutate(rain = ifelse(prec_in > 0, 1, 0))
 ```
 
-### Step 3 · Empirical probability
+### Step 3: Empirical probability
 
 ::: {.why}
-**P(E) = f / n**: the number of days the event happened divided by the number of days observed.
+The empirical probability of an event is **P(E) = f / n**, which is the number of days the event happened divided by the number of days we observed.
 :::
 
 ```{r}
@@ -77,7 +94,7 @@ p_rain <- sum(ch_daily$rain) / nrow(ch_daily)
 p_rain
 ```
 
-### Step 4 · Binomial distribution
+### Step 4: Binomial distribution
 
 ::: {.why}
 The binomial counts "successes" in a fixed number of trials, each with the same probability. Rain isn't really independent from day to day, so treat this as a simplifying model.
@@ -108,7 +125,7 @@ most_likely <- probability_days |> slice_max(probability)
 | more than 3 days | 4 to 10 | `1 - pbinom(3, 10, p_rain)` | `r fmt(1 - pbinom(3, 10, p_rain))` |
 | at least 3 days | 3 to 10 | `1 - pbinom(2, 10, p_rain)` | `r fmt(1 - pbinom(2, 10, p_rain))` |
 
-### Step 5 · Normal distribution
+### Step 5: Normal distribution
 
 ::: {.why}
 A continuous variable can be modelled with a normal curve built from its mean and standard deviation. `pnorm()` gives the share *below* a value, so subtract from 1 for "above".
@@ -135,9 +152,9 @@ ggplot(rdu_jan, aes(x = max_temp)) +
 The model says `r round(100 * (1 - pnorm(60, jan_mean, jan_sd)))`% of January days reach 60°F; the record says `r round(100 * mean(rdu_jan$max_temp >= 60))`%. Compare the model with the data before trusting it, especially in the tails.
 :::
 
-## Part 2 · Partner practice {#partner-practice}
+## Part 2: Partner practice {#partner-practice}
 
-Both partners use daily PM2.5 estimates for 300 North Carolina census tracts, 2016 to 2020, from the [CDC Environmental Public Health Tracking Network](https://ephtracking.cdc.gov/). Each row is one day in one tract. A **bad-air day** is a day with PM2.5 above 9.0 µg/m³, the EPA "moderate" line since 2024. The step to reuse is in parentheses.
+Both partners use daily PM2.5 estimates for 300 North Carolina census tracts, 2016 to 2020, from the [CDC Environmental Public Health Tracking Network](https://ephtracking.cdc.gov/). Each row is one day in one tract. A **bad-air day** is a day with PM2.5 above 9.0 µg/m³, the EPA "moderate" line since 2024. Each task tells you in parentheses which walkthrough step to reuse.
 
 ```{r, eval = FALSE}
 #daily PM2.5 by census tract, 2016-2020 (both partners)
@@ -146,29 +163,29 @@ pm_nc <- read_csv("https://drive.google.com/uc?export=download&id=19Axv5_bv7p4Lb
 
 :::: {.partners}
 ::: {.partner .partner-a}
-### Partner A · Binomial
+### Partner A: Binomial
 
 1. Flag bad-air days, then find the empirical probability of a bad-air day for every tract by grouping on `lat` and `lon`. *(Step 3)*
 2. Map those probabilities with `st_as_sf()`. In `coords`, longitude goes first.
 3. For the tract at `lat` 35.142, `lon` -80.956 (southwest Charlotte), find the most likely number of bad-air days in a 30-day month. *(Step 4)*
 4. Find the probability of **more than 15** bad-air days in a 30-day month for that tract. *(Step 4)*
 
-**Bring to Part 3:** the tract's daily probability and your answer to item 4.
+When you finish, bring the tract's daily probability and your answer to item 4 to Part 3.
 :::
 
 ::: {.partner .partner-b}
-### Partner B · Normal model
+### Partner B: Normal model
 
 1. Keep only the southwest Charlotte tract (`lat` 35.142, `lon` -80.956). Round `lat` and `lon` to 3 decimals inside `filter()` so the match works.
 2. Find the mean and standard deviation of its daily PM2.5. *(Step 5)*
 3. Use the normal model to find the probability that a day is above 9.0 µg/m³, and compare it with the empirical share of days above 9.0. *(Step 5)*
 4. Plot a histogram of daily PM2.5 with the normal curve on top. *(Step 5)*
 
-**Bring to Part 3:** the normal-model probability and one sentence on how well the curve fits.
+When you finish, bring the normal-model probability to Part 3, along with a sentence on how well the curve fits the data.
 :::
 ::::
 
-## Part 3 · Together {#together}
+## Part 3: Together {#together}
 
 1. Partner A runs Partner B's normal-model probability through the binomial: the chance of **more than 15** bad-air days in 30.
 2. Partner B explains to Partner A why the two daily probabilities differ, using the histogram.
@@ -180,7 +197,7 @@ pm_nc <- read_csv("https://drive.google.com/uc?export=download&id=19Axv5_bv7p4Lb
 | Normal model (Partner B) | | |
 
 ::: {.deliver}
-**Index card, one per pair.** Both names, the four numbers from the table, and your two or three sentences. Hand it in on your way out.
+Each pair turns in one index card before leaving. Write both of your names on it, fill in the four numbers from the table, and add two or three sentences saying which estimate the health department should use and why.
 :::
 
 ## Answer key {#answer-key .answer-key}
@@ -216,7 +233,7 @@ more15_norm <- 1 - pbinom(15, 30, p_norm)
 | B: normal-model daily probability | `r fmt(p_norm)` |
 | Joint: P(more than 15 in 30), normal model | `r fmt(more15_norm)` |
 
-**What a good card says.** Daily PM2.5 is right-skewed: most days sit a little below the mean and a few very smoky days pull the mean up. The normal curve is symmetric, so it puts too many days above 9.0 (`r fmt(p_norm)` vs `r fmt(p_emp)`), and that small gap grows to `r fmt(more15_norm)` vs `r fmt(more15_emp)` for more than 15 bad-air days in a month. The empirical estimate is the better one to use here.
+A good card says something like this. Daily PM2.5 is right-skewed: most days sit a little below the mean and a few very smoky days pull the mean up. The normal curve is symmetric, so it puts too many days above 9.0 (`r fmt(p_norm)` vs `r fmt(p_emp)`), and that small gap grows to `r fmt(more15_norm)` vs `r fmt(more15_emp)` for more than 15 bad-air days in a month. The empirical estimate is the better one to use here.
 
 ```{r, eval = FALSE}
 #### Partner A: binomial ####

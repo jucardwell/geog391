@@ -90,8 +90,8 @@ def encrypt(plaintext: str, codeword: str) -> dict:
 def lock_page(path: pathlib.Path, codeword: str | None) -> bool:
     soup = BeautifulSoup(path.read_text(encoding="utf-8"), "html.parser")
     section = soup.find(id=KEY_ID)
-    if section is None:
-        return False
+    if section is None or section.find("form", class_="key-unlock") is not None:
+        return False  # no key, or already locked by an earlier run
     heading = section.find(["h1", "h2", "h3"])
     if heading is not None:
         heading.extract()

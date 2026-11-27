@@ -1,5 +1,5 @@
 ---
-title: "Homework 8 · Uninsured rates and Medicaid outreach"
+title: "Homework 8: Uninsured rates and Medicaid outreach"
 ---
 
 ## Overview

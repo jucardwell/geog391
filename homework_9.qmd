@@ -1,5 +1,5 @@
 ---
-title: "Homework 9 · Mapping summer heat across North Carolina"
+title: "Homework 9: Mapping summer heat across North Carolina"
 ---
 
 ## Overview
