@@ -70,10 +70,16 @@ h3 { font-size: 1.3rem; }
 
 // Left sidebar (table of contents and the boxes site.js adds above and below it)
 #TOC, .sidebar nav[role="doc-toc"] {
-  font-size: 15px;
-  h2, .toc-title { font-size: 15px; font-weight: 700; margin: 0 0 6px; }
-  .nav-link { color: $water; padding: 4px 0; }
-  .nav-link.active { color: $ink; font-weight: 700; border-left-color: $ink; }
+  font-size: 14px;
+  #toc-title, .toc-title { display: none; }
+  > ul { border: 1px solid $ink; padding: 0; margin: 0; background: #FFFFFF; }
+  ul { list-style: none; padding-left: 0; }
+  ul ul { display: none; }
+  li { margin: 0; }
+  li + li { border-top: 1px solid $ink; }
+  .nav-link { display: block; color: $ink; padding: 7px 10px; border-left: 0; line-height: 1.3; margin: 0; }
+  .nav-link:hover { background: $tint; }
+  .nav-link.active, .nav-link.active:hover { background: $ink; color: #FFFFFF !important; font-weight: 700; }
 }
 .side-block { font-size: 15px; line-height: 1.45; margin-bottom: 22px; display: flex; flex-direction: column; gap: 4px; }
 .side-block .side-title { font-weight: 700; }
@@ -122,12 +128,21 @@ code { font-family: $font-family-monospace; }
   .day { padding: 16px; display: flex; flex-direction: column; gap: 6px; min-height: 150px; }
   .day + .day { border-left: 1px solid $ink; }
   .day.off { background: $hatch; }
-  .day-date { font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .day-date { font-weight: 700; font-size: 15px; }
   .day.case .day-date { color: $red; }
   .day-topic { font-weight: 700; }
   .day-sub { font-size: 15px; color: $muted; }
   .day-links { display: flex; flex-direction: column; gap: 4px; font-size: 15px; margin-top: 4px; }
   .day-due { font-size: 15px; font-weight: 700; margin-top: auto; padding-top: 8px; }
+  .week-list {
+    position: relative; flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start;
+  }
+  .wl-group { flex: 1 1 300px; padding: 16px 18px; background: #FFFFFF; border: 1px solid $ink; }
+  .wl-group h3 { font-size: 1.1rem; margin: 0 0 10px; }
+  .wl-group ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+  .wl-group li { display: grid; grid-template-columns: 110px 1fr; gap: 10px; margin: 0; font-size: 15px; line-height: 1.4; }
+  .wl-when { color: $muted; }
+  .wl-what { display: flex; flex-direction: column; gap: 2px; }
 }
 @media (max-width: 760px) {
   .this-week .week-days { grid-template-columns: 1fr; }
