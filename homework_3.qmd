@@ -1,0 +1,53 @@
+---
+title: "Homework 3: COVID-19 Policy Brief"
+---
+
+## Overview
+
+For this assignment you will create a well-designed knitted .html that analyzes the changing distribution of COVID-19 during the beginning of the pandemic. You will use your analysis to write a well-informed policy brief that proposes a strategy of resource allocation.
+
+## Scenario
+
+You are part of a small public health analytics team in Fall 2020 who has been tasked with preparing a policy brief for local decision-makers on how COVID-19 is spreading across the US. Officials need to decide how to distribute limited public health resources across counties based on where the burden of disease is most concentrated and how that concentration has changed over time.
+
+Your team has received cumulative county-level datasets for two dates, April 1, 2020 and July 1, 2020, each with a cumulative cases variable (`cases`) and a cumulative deaths variable (`deaths`), which represent all cases and deaths up to that day. Decision-makers want a clear understanding of how the outbreak is distributed geographically, how it has shifted between April and July, and which regions appear to be most heavily affected.
+
+## Task
+
+Create a well-organized policy brief in the form of a polished knitted .html. The brief should integrate analysis, visualization, and interpretation throughout, rather than presenting them as separate sections. You are writing for decision-makers, so all outputs must be clearly explained and tied to a policy-relevant conclusion. At a minimum your brief should:
+
+- Compute descriptive statistics for cumulative cases and deaths for both dates and interpret key patterns (not just report values).
+- Create at least one non-map visualization for cases and deaths for each date and briefly explain what each shows.
+- Calculate weighted mean centers for cases and deaths for both dates.
+- Create dual-panel maps for April and July showing county-level cases and mean centers (of cases and deaths) using clear and appropriate design choices, and use these maps to interpret shifts.
+- Synthesize your results to describe how the geographic distribution of COVID-19 has changed, and propose a clear, evidence-based strategy for prioritizing counties for resource allocation, noting at least one limitation of your proposed strategy.
+
+## Data
+
+In your .Rmd, add a chunk for loading libraries and reading in data, and paste in this code:
+
+```{r, eval = FALSE}
+#load libraries
+library(tidyverse)
+library(gt)
+library(sf)
+library(e1071)
+library(tmap)
+library(maptiles)
+library(sfdep)
+
+#cumulative covid cases and deaths on April 1, 2020
+covid_deaths_04012020 <- st_read("https://drive.google.com/uc?export=download&id=1spBLqVxa25a7FDo7U7aNDJF2t2N0-uXv")
+
+#cumulative covid cases and deaths on July 1, 2020
+covid_deaths_07012020 <- st_read("https://drive.google.com/uc?export=download&id=1ZNka0ffMXSVAqVDCj1R-oYh37BH9ziAZ")
+```
+
+Submit your polished knitted .html to the Homework 3 assignment on Canvas.
+
+## Rubric (10 Points)
+
+| Part | Points | Criteria |
+|---|---|---|
+| Analysis and visualizations | 3 | Accurately computes and presents descriptive statistics (0.5); creates appropriate non-map visualizations (0.5); correctly calculates weighted mean centers, including shifts over time (1); produces complete, well-designed maps with clear legends, appropriate classification and readable layout (1) |
+| Discussion | 7 | Clearly describes the geographic distribution of cases and deaths and how it changes over time (2); integrates evidence from statistics, visualizations and maps into a cohesive analysis (2); provides a clear, evidence-based strategy for prioritizing counties (1.5); acknowledges at least one limitation or uncertainty (0.5); polished, well-designed document (1) |

@@ -1,0 +1,58 @@
+---
+title: "Homework 9: Mapping Summer Heat Across North Carolina"
+---
+
+## Overview
+
+For this assignment you will create a well-designed knitted .html report that uses spatial interpolation to estimate summer temperatures across North Carolina and to support heat preparedness funding decisions.
+
+## Scenario
+
+You are an analyst at the North Carolina Office of Recovery and Resiliency (NCORR). The office has funding for cooling centers and heat outreach in five counties. Temperature is known only at a set of locations, so to compare counties fairly you need a continuous temperature surface for the whole state, an honest sense of how accurate that surface is, and a way to combine heat with who is most vulnerable to it.
+
+The data are average summer temperatures (°F) at 480 locations across North Carolina for two periods: 2000–2010 and 2010–2020.
+
+## Task
+
+Create a well-organized knitted .html report for the office that integrates analysis, visualization, and interpretation throughout. At a minimum, your report should:
+
+- Introduce heat as a public health hazard in North Carolina, using at least two external research or policy sources.
+- Map the 480 locations and describe the spatial pattern in average summer temperature for 2010–2020.
+- Interpolate 2010–2020 summer temperature across the state with inverse distance weighting (IDW). Try at least two power values and explain how the surface changes.
+- Interpolate the same variable with ordinary kriging. Show and interpret the experimental variogram and your fitted model, and map both the kriging predictions and the kriging variance.
+- Compare IDW and kriging with leave-one-out cross-validation (`krige.cv()`), report the RMSE for each, and choose a surface.
+- Summarize your chosen surface by county (average predicted temperature per county, using the county polygons in `acs_county_nc`) and combine it with at least one vulnerability variable from the same data (for example poverty, median age, or households without a vehicle).
+- Recommend five counties for funding and explain how heat and vulnerability shaped your choice. Note at least one limitation of the interpolation, such as places far from any location or the strong mountain-to-coast trend in the data.
+
+Project the points before interpolating: `st_transform(32119)` (NC State Plane, meters).
+
+## Data
+
+In your .Rmd, add a chunk for loading libraries and reading in data, and paste in this code:
+
+```{r, eval = FALSE}
+#load libraries
+library(tidyverse)
+library(sf)
+library(tmap)
+library(gstat)
+library(terra)
+
+#average summer temperature at 480 locations, 2000-2010 and 2010-2020
+summer_temp <- st_read("https://drive.google.com/uc?export=download&id=1byhsYTBnqegfPGsZWtAHH4pZgGbSTr_s")
+
+#North Carolina state outline (for the interpolation grid)
+nc_boundaries <- st_read("https://drive.google.com/uc?export=download&id=1SNy838Q7f7rvL6TFLmIZm-sKyRO7Htjw")
+
+#2023 ACS estimates and boundaries for NC counties
+acs_county_nc <- st_read("https://drive.google.com/uc?export=download&id=1hXVtKL_33c4QRw6_Z9LlYqjgisdYCRqX")
+```
+
+Submit your polished knitted .html to the Homework 9 assignment on Canvas.
+
+## Rubric (10 Points)
+
+| Part | Points | Criteria |
+|---|---|---|
+| Analysis and visualizations | 6 | Maps and describes the point data (0.5); correctly produces IDW surfaces with at least two powers (1); correctly fits and interprets a variogram and kriging surface, with a variance map (1.5); correctly cross-validates both methods and compares RMSE (1); correctly summarizes the surface by county and joins a vulnerability variable (1); clear, well-designed maps (1) |
+| Discussion | 4 | Explains heat as a health hazard with external sources (1); interprets the surfaces, their differences and their uncertainty (1); gives a clear, evidence-based five-county recommendation that combines heat and vulnerability (1); polished, well-organized report with a stated limitation (1) |

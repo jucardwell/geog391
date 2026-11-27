@@ -1,131 +1,241 @@
-# Describing Spatial Data
+---
+title: "Describing Spatial Data"
+css: styles/tutorial.css
+---
 
-In this chapter, we will build on the descriptive tools we learned in the Describing Data chapter. Spatial descriptive statistics summarize datasets by their spatial characteristics, not their attribute values. Combining traditional descriptive statistics with spatial descriptive statistics can expand our understanding of the dataset.
+```{=html}
+<style>
+:root {
+  --t-ink: #1B2130;
+  --t-title: #3D5ABD;
+  --t-rule: #A8BDF2;
+  --t-link: #3752AE;
+  --t-plan-bg: #EFF3FE;
+  --t-plan-edge: #4A69CE;
+  --t-why-bg: #FCF4D6;
+  --t-why-edge: #9E840E;
+  --t-read-bg: #F3F7FF;
+  --t-read-edge: #8CA3DE;
+  --t-a-bg: #E8EEFD;
+  --t-b-bg: #F9EFC9;
+  --t-deliver-bg: #F4E8BB;
+  --t-deliver-edge: #6F5C07;
+  --t-code-bg: #F4F7FE;
+  --t-code-edge: #6782CE;
+  --t-key-edge: #867003;
+  --t-button: #304AAC;
+}
+</style>
+```
 
-We will use the following spatial datasets:
-
--   US tornado touchdown points from 1954-2022 from [NOAA's Storm Prediction Center](https://www.spc.noaa.gov/gis/svrgis/)
--   North Carolina hospitals from [NCOneMap](nconemap.gov/datasets/hospitals/data)
-
-**To follow along with this tutorial, [download the .Rmd template](https://drive.google.com/uc?export=download&id=1LazbxI3dn9MCMdhWvqbYPz6b3Iv8KIj2) here. The template already includes a code chunk for loading libraries and reading in the data, along with labeled empty chunks for each section of the tutorial. As you work through the code examples below, add each set of commands to the chunk with the matching section heading in your template.**
-
-```{r, include = F}
-library(sf)
-library(tmap)
-library(sfdep)
+```{r setup, include = FALSE}
 library(tidyverse)
+library(sf)
+library(sfdep)
+library(tmap)
 
-torn <- st_read("https://drive.google.com/uc?export=download&id=1K5yFnDthJGKnWPragZPmQyCDpf8seSEI")
-nc_hosp <- st_read("https://drive.google.com/uc?export=download&id=1K7lH1U6oQQ6sWXIqxOeFUYbWjdnxqx5a"
-) |> st_transform(2264)
+#course data (read once for the whole page)
+torn <- st_read("https://drive.google.com/uc?export=download&id=1K5yFnDthJGKnWPragZPmQyCDpf8seSEI", quiet = TRUE)
+nc_hosp <- st_read("https://drive.google.com/uc?export=download&id=1K7lH1U6oQQ6sWXIqxOeFUYbWjdnxqx5a", quiet = TRUE) |>
+  st_transform(2264)
 
+#numbers quoted in the text below come from here, so they stay right if the data changes
+fmt <- function(x, d = 0) formatC(x, format = "f", digits = d, big.mark = ",")
 ```
 
-## Describing Tornadoes
+## Part 1: Walkthrough {#walkthrough}
 
-### Traditional Descriptive Statistics
+Run each chunk in your own .Rmd. You will reuse this code in Part 2.
 
-Open the tornado object by double-clicking it in the environment. Important variables in the dataset are:
+### Step 1: Load the Data
 
-| Field Name | Description |
-|----|----|
-| yr | Year of occurrence |
-| st | State |
-| mag | Rating on [Enhanced Fujita Scale](https://www.weather.gov/oun/efscale) |
-| inj | Number of injuries |
-| fat | Number of fatalities |
-| len | Length in miles |
-| wid | Width in yards |
-
-**Q1. What does each observation (each row) represent? How do you know?**
-
-**Q2. Create a descriptive statistics table for a categorical variable in the dataset. Create one data visualization to compliment the statistics table.**
-
-**Q3. Create a descriptive statistics table for a quantitative variable in the dataset. Create one data visualization to compliment the statistics table.**
-
-### Spatial Descriptive Statistics
-
-#### Mean Center
-
-The mean center of a spatial dataset represents the average location of a set of points and is calculated by taking the average of all the x-coordinates and all the y-coordinates in the dataset.
-
-```{r}
-#calculate mean center of all tornados in dataset
-torn_mean_center <- center_mean(torn)
-
-#map tornadoes and mean center
-tm_shape(torn) + tm_dots() + tm_shape(torn_mean_center) + tm_dots(fill = "blue") + tm_add_legend(
-    type = "symbols",
-    labels = "Mean Center",
-    fill = "blue"
-  )
-
-```
-
-**Q4. What does the location of our mean center tell us about the spatial distribution of tornadoes in the United States?**
-
-#### Weighted Mean Center
-
-The weighted mean center calculates the average location, but allows you to select a variable to weight by. The calculation then gives more influence to features with larger values of that variable. For instance, we could give higher weight to fatal tornadoes
-
-```{r}
-## calculate weighted mean center using "fat" variable
-torn_w_mean_center <- center_mean(torn, weight = torn$fat)
-
-
-##map mean center and weighted mean center
-tm_shape(torn) + tm_dots() + tm_shape(torn_mean_center) + tm_dots(fill = "blue", ) + tm_shape(torn_w_mean_center) + tm_dots(fill = "red") + tm_add_legend(
-    type = "symbols",
-    labels = c("Mean Center", "Weighted Mean Center"),
-    fill = c("blue", "red")
-  )
-
-
-```
-
-**Q5. What does the difference between the mean center and the weighted mean center (weighted by fatalities) tell us about the spatial distribution of fatal tornadoes?**
-
-**Q6. Using the code below, calculate and map the difference in the weighted mean center for tornadoes before 2000 and after 2000. What does this tell us about how the spatial pattern of tornadoes has changed over time?**
+::: {.why}
+We'll use the touchdown points of `r fmt(nrow(torn))` U.S. tornadoes from 1954 to 2022, from [NOAA's Storm Prediction Center](https://www.spc.noaa.gov/gis/svrgis/). Useful columns are `yr` (year), `mag` (Enhanced Fujita rating), `inj` (injuries) and `fat` (fatalities). The data are already projected, so distances are in meters.
+:::
 
 ```{r, eval = FALSE}
-#tornadoes before 2000
-torn_b_2000 <- torn |> filter(yr < 2000)
+#load libraries
+library(tidyverse)
+library(sf)
+library(sfdep)
+library(tmap)
 
-#tornados after 2000
-torn_a_2000 <- torn |> filter(yr >= 2000)
-
+#tornado touchdown points, 1954-2022
+torn <- st_read("https://drive.google.com/uc?export=download&id=1K5yFnDthJGKnWPragZPmQyCDpf8seSEI")
 ```
 
-#### Standard Deviational Ellipse
+### Step 2: Mean Center
 
-The standard deviational ellipse is a method for summarizing the spatial central tendency, dispersion, and directional trends. The ellipse visually represents the spread of the data and the direction of the spread. It is centered on the mean center and its axes represent the standard deviation of the x and y coordinates.
+::: {.why}
+The mean center is the average x coordinate and the average y coordinate of all the points.
+:::
 
 ```{r}
-#calculate standard ellipse values
-std_ellip_torn <- std_dev_ellipse(torn)
+torn_center <- center_mean(torn)
 
-#create an ellipse of those values
-std_ellip_torn <- st_ellipse(geometry =std_ellip_torn,
-                                   sx = std_ellip_torn$sx,
-                                   sy = std_ellip_torn$sy,
-                                   rotation = -std_ellip_torn$theta)
-#map the ellipse with transparency
-tm_shape(torn) + tm_dots() + tm_shape(std_ellip_torn) + tm_polygons(fill_alpha = .5)
+tm_shape(torn) + tm_dots(fill = "grey70") +
+  tm_shape(torn_center) + tm_dots(fill = "blue", size = 1)
 ```
 
-**Q6. What does the standard deviational ellipse tell us about the direction and spread of the tornado dataset?**
+### Step 3: Weighted Mean Center
 
-## Mini-Challenge
+::: {.why}
+A weighted mean center gives more pull to points with larger values of a variable. Weighting by fatalities moves the center toward the places where deadly tornadoes happen.
+:::
 
-This challenge will ask you to calculate a weighted mean center for different for a dataset on North Carolina hospitals. We will focus on a few variables:
+```{r}
+torn_center_fat <- center_mean(torn, weights = torn$fat)
 
-| Field Name | Description                         |
-|------------|-------------------------------------|
-| hgenlic    | Total hospital general beds         |
-| rehabhlic  | Total hospital rehab beds           |
-| psylic     | Total hospital psych beds           |
-| nfgenlic   | Total nursing facility general beds |
+tm_shape(torn) + tm_dots(fill = "grey70") +
+  tm_shape(torn_center) + tm_dots(fill = "blue", size = 1) +
+  tm_shape(torn_center_fat) + tm_dots(fill = "red", size = 1) +
+  tm_add_legend(type = "symbols", labels = c("Mean center", "Weighted by fatalities"), fill = c("blue", "red"))
 
-1.  Open the nc_hosp dataset. What does each row represent?
-2.  Calculate the mean center of all hospitals and the weighted mean center based on the four variables of interest
-3.  Create a map that displays the variability in the mean centers. Make sure to include a legend
+#how far apart are they? (meters, converted to miles)
+st_distance(torn_center, torn_center_fat) / 1609.34
+```
+
+### Step 4: Standard Deviational Ellipse
+
+::: {.why}
+The standard deviational ellipse shows the spread of the points around the mean center and the direction they stretch in. It can be weighted too.
+:::
+
+```{r}
+#calculate the ellipse values, then turn them into a shape
+ellipse_vals <- std_dev_ellipse(torn)
+torn_ellipse <- st_ellipse(geometry = ellipse_vals,
+                           sx = ellipse_vals$sx,
+                           sy = ellipse_vals$sy,
+                           rotation = -ellipse_vals$theta)
+
+tm_shape(torn) + tm_dots(fill = "grey70") +
+  tm_shape(torn_ellipse) + tm_polygons(fill_alpha = 0.4)
+```
+
+## Part 2: Partner Practice {#partner-practice}
+
+Both partners use the `r nrow(nc_hosp)` licensed hospitals in North Carolina, from [NC OneMap](https://www.nconemap.gov/datasets/hospitals). `hgenlic` is the number of general beds and `psylic` is the number of psychiatric beds. The data come in latitude and longitude, so project them to the NC State Plane system (in feet) first. Each task tells you in parentheses which walkthrough step to reuse.
+
+```{r, eval = FALSE}
+#NC hospitals, projected to NC State Plane (feet)
+nc_hosp <- st_read("https://drive.google.com/uc?export=download&id=1K7lH1U6oQQ6sWXIqxOeFUYbWjdnxqx5a") |>
+  st_transform(2264)
+```
+
+:::: {.partners}
+::: {.partner .partner-a}
+### Partner A: General Beds
+
+1. Find the mean center of all hospitals. *(Step 2)*
+2. Find the mean center weighted by `hgenlic`, and the distance between the two centers in miles. Divide feet by 5,280. *(Step 3)*
+3. Make the standard deviational ellipse weighted by `hgenlic`. Pass `weights = nc_hosp$hgenlic` to `std_dev_ellipse()`. *(Step 4)*
+4. Map the hospitals, both centers and the ellipse together.
+
+When you finish, bring the distance between your two centers to Part 3, along with the city your weighted center is closest to and your map.
+:::
+
+::: {.partner .partner-b}
+### Partner B: Psychiatric Beds
+
+1. Count how many hospitals have any psychiatric beds.
+2. Find the mean center weighted by `psylic`, and its distance in miles from the unweighted mean center. Divide feet by 5,280. *(Steps 2 and 3)*
+3. Make the standard deviational ellipse weighted by `psylic`. Pass `weights = nc_hosp$psylic` to `std_dev_ellipse()`. *(Step 4)*
+4. Map the hospitals, both centers and the ellipse together.
+
+When you finish, bring the count from item 1 and the distance between your two centers to Part 3, along with the city your weighted center is closest to and your map.
+:::
+::::
+
+## Part 3: Together {#together}
+
+1. Partner A finds the distance in miles between the general-bed center and the psychiatric-bed center with `st_distance()`.
+2. Put your maps side by side and compare the two ellipses. Which kind of care is more spread out across the state?
+3. North Carolina wants to fund one new psychiatric unit to improve access. Decide together which region it should go in, and why.
+
+| Weighted by | Distance from the unweighted center (miles) | Closest city to the weighted center |
+|---|---|---|
+| General beds (Partner A) | | |
+| Psychiatric beds (Partner B) | | |
+
+::: {.deliver}
+Each pair turns in one index card before leaving. Write both of your names on it, fill in the table, and add the distance between the two weighted centers. Then write two or three sentences saying where the new psychiatric unit should go and why.
+:::
+
+## Answer Key {#answer-key .answer-key}
+
+```{r key-values, include = FALSE}
+c_all <- center_mean(nc_hosp)
+c_gen <- center_mean(nc_hosp, weights = nc_hosp$hgenlic)
+c_psy <- center_mean(nc_hosp, weights = nc_hosp$psylic)
+mi <- function(a, b) as.numeric(st_distance(a, b)) / 5280
+d_gen <- mi(c_all, c_gen); d_psy <- mi(c_all, c_psy); d_gp <- mi(c_gen, c_psy)
+n_psy <- sum(nc_hosp$psylic > 0, na.rm = TRUE)
+e_gen <- std_dev_ellipse(nc_hosp, weights = nc_hosp$hgenlic)
+e_psy <- std_dev_ellipse(nc_hosp, weights = nc_hosp$psylic)
+#nearest hospital city to each weighted center, as a landmark
+near_city <- function(pt) nc_hosp$fcity[st_nearest_feature(st_sf(geometry = pt), nc_hosp)]
+city_gen <- near_city(c_gen); city_psy <- near_city(c_psy)
+area_ratio <- (e_psy$sx * e_psy$sy) / (e_gen$sx * e_gen$sy)
+```
+
+| Item | General beds (A) | Psychiatric beds (B) |
+|---|---|---|
+| Hospitals with beds of this kind | `r sum(nc_hosp$hgenlic > 0, na.rm = TRUE)` | `r n_psy` |
+| Distance from the unweighted center | `r fmt(d_gen, 1)` miles | `r fmt(d_psy, 1)` miles |
+| Nearest hospital city to the weighted center | `r str_to_title(city_gen)` | `r str_to_title(city_psy)` |
+
+The two weighted centers are `r fmt(d_gp, 1)` miles apart. The psychiatric-bed ellipse covers `r fmt(100 * area_ratio)`% of the area of the general-bed ellipse.
+
+A good card says something like this. Only `r n_psy` of the `r nrow(nc_hosp)` hospitals have psychiatric beds, so that center depends on a few large hospitals. The ellipses show how evenly each kind of care is spread across the state. A new psychiatric unit should go where the psychiatric ellipse is thin compared with the general one, which means a region that has general hospitals but few psychiatric beds. The card should name that region and point to the maps as evidence.
+
+```{r, eval = FALSE}
+nc_hosp <- st_read("https://drive.google.com/uc?export=download&id=1K7lH1U6oQQ6sWXIqxOeFUYbWjdnxqx5a") |>
+  st_transform(2264)
+
+#### Partner A: general beds ####
+#A1: mean center (Step 2)
+hosp_center <- center_mean(nc_hosp)
+
+#A2: weighted by general beds, and distance in miles (Step 3)
+gen_center <- center_mean(nc_hosp, weights = nc_hosp$hgenlic)
+st_distance(hosp_center, gen_center) / 5280
+
+#A3: weighted ellipse (Step 4)
+gen_vals <- std_dev_ellipse(nc_hosp, weights = nc_hosp$hgenlic)
+gen_ellipse <- st_ellipse(geometry = gen_vals, sx = gen_vals$sx, sy = gen_vals$sy,
+                          rotation = -gen_vals$theta)
+
+#A4: map
+tm_shape(nc_hosp) + tm_dots(fill = "grey60") +
+  tm_shape(gen_ellipse) + tm_polygons(fill = "orange", fill_alpha = 0.3) +
+  tm_shape(hosp_center) + tm_dots(fill = "blue", size = 1) +
+  tm_shape(gen_center) + tm_dots(fill = "orange", size = 1) +
+  tm_add_legend(type = "symbols", labels = c("Mean center", "Weighted by general beds"),
+                fill = c("blue", "orange"))
+
+#### Partner B: psychiatric beds ####
+#B1: hospitals with any psychiatric beds
+sum(nc_hosp$psylic > 0)
+
+#B2: weighted by psychiatric beds, and distance in miles (Steps 2 and 3)
+hosp_center <- center_mean(nc_hosp)
+psy_center <- center_mean(nc_hosp, weights = nc_hosp$psylic)
+st_distance(hosp_center, psy_center) / 5280
+
+#B3: weighted ellipse (Step 4)
+psy_vals <- std_dev_ellipse(nc_hosp, weights = nc_hosp$psylic)
+psy_ellipse <- st_ellipse(geometry = psy_vals, sx = psy_vals$sx, sy = psy_vals$sy,
+                          rotation = -psy_vals$theta)
+
+#B4: map
+tm_shape(nc_hosp) + tm_dots(fill = "grey60") +
+  tm_shape(psy_ellipse) + tm_polygons(fill = "purple", fill_alpha = 0.3) +
+  tm_shape(hosp_center) + tm_dots(fill = "blue", size = 1) +
+  tm_shape(psy_center) + tm_dots(fill = "purple", size = 1) +
+  tm_add_legend(type = "symbols", labels = c("Mean center", "Weighted by psychiatric beds"),
+                fill = c("blue", "purple"))
+
+#### Part 3: together ####
+st_distance(gen_center, psy_center) / 5280
+```

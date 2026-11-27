@@ -1,0 +1,49 @@
+---
+title: "Homework 5: Chronic Absenteeism in NC Schools"
+---
+
+## Overview
+
+For this assignment you will create a well-designed knitted .html report that analyzes chronic absence rates in North Carolina public schools, intended for review by the North Carolina State Board of Education.
+
+## Scenario
+
+You are an employee at the North Carolina Department of Public Instruction who supports data analysis for statewide policy on public schools. You have been asked to examine chronic absenteeism data from North Carolina public schools to better understand differences across schools and changes that occurred [after COVID-19](https://www.the74million.org/article/chronic-absenteeisms-post-covid-new-normal-research-shows-it-is-more-common-more-extreme/).
+
+Chronic absenteeism is the percent of students who miss more than 10% of school days during the school year.
+
+Your report will be reviewed by the North Carolina State Board of Education before an upcoming policy session. Using the hypothesis testing skills learned in class, you will investigate whether statistically significant differences exist across school groups and across time periods.
+
+## Task
+
+Create a well-organized knitted .html report that integrates analysis, visualization, and interpretation throughout. You are writing for decision-makers, so all outputs must be clearly explained and tied to a policy-relevant conclusion. At a minimum, your report should:
+
+- Introduce chronic absenteeism and explain why it matters for student achievement and school outcomes, using at least two external research sources.
+- Describe the current state of North Carolina absenteeism post-COVID using descriptive statistics and visualizations.
+- Analyze and interpret the differences between rural and non-rural schools, and between high-income and low-income schools, in post-COVID chronic absenteeism using an appropriate hypothesis test. Check assumptions and state a null and alternative hypothesis.
+- Analyze and interpret the change in chronic absenteeism before and after COVID using an appropriate hypothesis test. Check assumptions and state a null and alternative hypothesis.
+- For every test, report the effect size next to the p-value: the size of the difference in its original units (for example, "chronic absenteeism was 4.2 percentage points higher in rural schools").
+- Research existing policies or interventions designed to reduce chronic absenteeism and propose at least one evidence-based policy recommendation supported by both your findings and the research literature.
+
+## Data
+
+In your .Rmd, add a chunk for loading libraries and reading in data, and paste in this code:
+
+```{r, eval = FALSE}
+#load libraries
+library(tidyverse)
+library(tmap)
+library(sf)
+
+#school data
+school_sample <- st_read("https://drive.google.com/uc?export=download&id=10iHcg3hJcTfNHonzlUaEXiC5ob042WgU")
+```
+
+Submit your polished knitted .html to the Homework 5 assignment on Canvas.
+
+## Rubric (10 Points)
+
+| Part | Points | Criteria |
+|---|---|---|
+| Analysis and visualizations | 4 | Summarizes post-COVID absenteeism with appropriate descriptive statistics and visualizations (1); correctly conducts and interprets the rural/non-rural and high/low-income tests, with hypotheses, assumption checks and effect sizes (1.5); correctly conducts and interprets the before/after COVID test, with hypotheses, assumption checks and effect size (1); clear visualizations suited to a policy audience (0.5) |
+| Discussion | 6 | Explains why chronic absenteeism matters, using external sources (1); interprets results in plain language with policy implications (1.5); evidence-based policy recommendation supported by the analysis and the literature (1.5); integrates statistics, visualizations and interpretation (1); polished report appropriate for the State Board of Education (1) |

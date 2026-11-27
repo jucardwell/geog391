@@ -1,0 +1,15 @@
+# Answer-key codewords, one per tutorial page (file name without .html).
+# Change a word here and the next site build uses it. Capital letters don't matter.
+describing_data: dune
+tmap: isthmus
+describing_spatial_data: butte
+probability: sinkhole
+clt: tributary
+estimation_sampling: moraine
+hypothesis_testing: barrier
+ppa: piedmont
+autocorrelation: watershed
+regression: isobar
+continuous_surfaces: esker
+gwr: fjord
+clustering: meander

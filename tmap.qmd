@@ -1,129 +1,242 @@
-# Tmap Interlude
+---
+title: "Mapping with tmap"
+css: styles/tutorial.css
+---
 
-Mapping is an extremely important tool for describing and visualizing spatial data. Maps are particularly useful because they are able to summarize variation in both values and location (space). You (as a newly deputized cartographer) have a lot of control over how a map functions by making decisions on things like classification schemes, colors, layout, and design.
+```{=html}
+<style>
+:root {
+  --t-ink: #1E2414;
+  --t-title: #536F04;
+  --t-rule: #B2C78F;
+  --t-link: #4C6500;
+  --t-plan-bg: #EEF8DF;
+  --t-plan-edge: #607E06;
+  --t-why-bg: #EFF3FF;
+  --t-why-edge: #667CE5;
+  --t-read-bg: #F4F9EE;
+  --t-read-edge: #98AF70;
+  --t-a-bg: #E7F4D4;
+  --t-b-bg: #E9EEFE;
+  --t-deliver-bg: #E0E7FE;
+  --t-deliver-edge: #4354AB;
+  --t-code-bg: #F5F8F1;
+  --t-code-edge: #76923B;
+  --t-key-edge: #5366CE;
+  --t-button: #475F02;
+}
+</style>
+```
 
-This tutorial is designed to introduce you the main functionalities of the tmap package. We will use census block group data to Orange, Durham, and Wake counties. [This file](https://docs.google.com/spreadsheets/d/1aI2YqE_Tc69ekA48e5jmbyVMXv5uszl-/edit?usp=sharing&ouid=101338019870957132383&rtpof=true&sd=true) will tell you what each variable name means.
-
-**To follow along with this tutorial, [download the .Rmd template](https://drive.google.com/uc?export=download&id=1ruOWYlf8zGJ5-KHprfpEO2G-IcJ808qV) here. The template already includes a code chunk for loading libraries and reading in the data, along with labeled empty chunks for each section of the tutorial. As you work through the code examples below, add each set of commands to the chunk with the matching section heading in your template.**
-
-```{r, include=F}
-library(tmap)
+```{r setup, include = FALSE}
 library(tidyverse)
 library(sf)
+library(tmap)
+library(classInt)
+
+#course data (read once for the whole page)
+acs_tract_nc <- st_read("https://raw.githubusercontent.com/jucardwell/geog391/main/data/nc_tract_acs_2023.geojson", quiet = TRUE)
+triangle <- acs_tract_nc |> filter(COUNTYFP %in% c("135", "183", "063"))
+meck <- acs_tract_nc |> filter(COUNTYFP == "119")
+
+#numbers quoted in the text below come from here, so they stay right if the data changes
+fmt <- function(x, d = 0) formatC(x, format = "f", digits = d, big.mark = ",")
+```
+
+## Part 1: Walkthrough {#walkthrough}
+
+Run each chunk in your own .Rmd. You will reuse this code in Part 2.
+
+### Step 1: Load the Data
+
+::: {.why}
+We'll use 2019 to 2023 American Community Survey estimates for the `r nrow(triangle)` census tracts in Orange, Durham and Wake counties. [This file](https://docs.google.com/spreadsheets/d/1aI2YqE_Tc69ekA48e5jmbyVMXv5uszl-/edit?usp=sharing&ouid=101338019870957132383&rtpof=true&sd=true) explains each variable name.
+:::
+
+```{r, eval = FALSE}
+#load libraries
+library(tidyverse)
+library(sf)
+library(tmap)
 library(maptiles)
 
-acs_tract_nc <- st_read("data/nc_tract_acs_2023.geojson") |> filter(COUNTYFP %in% c("135", "183", "063"))
+#ACS census tracts for NC
+acs_tract_nc <- st_read("https://raw.githubusercontent.com/jucardwell/geog391/main/data/nc_tract_acs_2023.geojson")
 
+#keep Orange (135), Durham (063) and Wake (183) counties
+triangle <- acs_tract_nc |> filter(COUNTYFP %in% c("135", "183", "063"))
 ```
 
-## Visual Variables
+### Step 2: Color and Size
 
-### Color
-
-We are already familiar with making a basic tmap using color to visualize patterns:
+::: {.why}
+Color (`fill`) works for rates and averages. Size works for counts, like the number of people in a tract.
+:::
 
 ```{r}
-tm_shape(acs_tract_nc) + tm_polygons(fill = "median_age")
+#color
+tm_shape(triangle) +
+  tm_polygons(fill = "median_age")
 
+#size
+tm_shape(triangle) +
+  tm_polygons() +
+  tm_symbols(size = "total_pop")
 ```
 
-### Size
+### Step 3: Look at the Distribution Before You Classify
 
-We can also represent variables by size
+::: {.why}
+Every choropleth map sorts its values into classes. The right classification depends on the shape of the distribution, so plot a histogram first.
+:::
 
 ```{r}
-tm_shape(acs_tract_nc) + tm_symbols(size = "total_pop")
-
+ggplot(triangle, aes(x = median_age)) +
+  geom_histogram(binwidth = 2, fill = "lightgrey", color = "black") +
+  labs(x = "Median age", y = "Number of tracts")
 ```
 
-### Size and Color
+### Step 4: Choose a Classification and a Palette
 
-Or both!
+::: {.why}
+`style = "equal"` splits the range into classes of the same width, while `style = "quantile"` puts the same number of tracts in each class. Run `cols4all::c4a_gui()` to browse palettes.
+:::
 
 ```{r}
-tm_shape(acs_tract_nc) + tm_symbols(size = "total_pop", fill = "total_pop")
+#equal interval
+tm_shape(triangle) +
+  tm_polygons(fill = "median_age",
+              fill.scale = tm_scale_intervals(style = "equal", n = 5, values = "bu_pu"))
 
+#quantile
+tm_shape(triangle) +
+  tm_polygons(fill = "median_age",
+              fill.scale = tm_scale_intervals(style = "quantile", n = 5, values = "bu_pu"))
 ```
 
-## Color Palettes
+Other useful styles are `"pretty"` and `"fisher"` (natural breaks).
 
-We can also modify the color palette. To see all the available color palettes, you should run the command below
+### Step 5: Finish the Map
 
-```{r, eval=FALSE}
-cols4all::c4a_gui()
+::: {.why}
+`tmap_mode("view")` makes any map interactive, and `tmap_mode("plot")` switches back. A title, some transparency and a basemap make a static map readable on its own. Static basemaps need the `maptiles` package.
+:::
 
+```{r}
+tmap_mode("plot")
+
+tm_shape(triangle) +
+  tm_polygons(fill = "median_age", fill_alpha = 0.6,
+              fill.scale = tm_scale_intervals(style = "quantile", n = 5, values = "bu_pu"),
+              fill.legend = tm_legend(title = "Median age")) +
+  tm_title("Median age by census tract") +
+  tm_basemap("CartoDB.PositronNoLabels")
 ```
 
-```{r, message=F, warning=F}
-tm_shape(acs_tract_nc) + tm_polygons(fill = "median_age", fill.scale = tm_scale_intervals(values = "bu_pu"))
+## Part 2: Partner Practice {#partner-practice}
 
+Both partners map `med_house_val`, the median value of owner-occupied homes, for the `r nrow(meck)` census tracts in Mecklenburg County (Charlotte). Partner A uses equal interval classes and Partner B uses quantile classes. Each task tells you in parentheses which walkthrough step to reuse.
 
+```{r, eval = FALSE}
+#Mecklenburg County tracts (both partners)
+meck <- acs_tract_nc |> filter(COUNTYFP == "119")
 ```
 
-## Classification Schemes
+:::: {.partners}
+::: {.partner .partner-a}
+### Partner A: Equal Interval
 
-One of the biggest decisions we can make is how to classify our data. You can see in the maps above that tmap defaults to an equal interval color scheme. However, this is often not the best way to classify the data. Your decision about classification should be made based on the distribution of the data. Let's look at the distribution of the median age variable
+1. Plot a histogram of `med_house_val`. *(Step 3)*
+2. Map it with 5 equal interval classes and a palette you choose. *(Step 4)*
+3. Write down the class breaks from the legend. Then count the tracts in each class by using those breaks in `cut()` and `table()`.
+4. Add a title, transparency and a basemap. *(Step 5)*
 
-```{r, message = F, warning =F}
-ggplot(acs_tract_nc, aes(x = median_age)) + geom_histogram()
+When you finish, bring your class breaks and the number of tracts in each class to Part 3.
+:::
+
+::: {.partner .partner-b}
+### Partner B: Quantile
+
+1. Plot a histogram of `med_house_val`. *(Step 3)*
+2. Map it with 5 quantile classes and a palette you choose. *(Step 4)*
+3. Write down the class breaks from the legend. Then count the tracts in each class by using those breaks in `cut()` and `table()`.
+4. Add a title, transparency and a basemap. *(Step 5)*
+
+When you finish, bring your class breaks and the number of tracts in each class to Part 3.
+:::
+::::
+
+## Part 3: Together {#together}
+
+1. Put your two maps side by side and fill in the table.
+2. Find a tract that is in the top class on one map but not on the other, and explain why.
+3. A housing nonprofit wants a map that shows where homes are least affordable. Decide together which classification it should use, and why.
+
+| Classification | Class breaks | Tracts in each class |
+|---|---|---|
+| Equal interval (Partner A) | | |
+| Quantile (Partner B) | | |
+
+::: {.deliver}
+Each pair turns in one index card before leaving. Write both of your names on it, copy the class breaks and counts from the table, and add two or three sentences saying which map the nonprofit should use and why.
+:::
+
+## Answer Key {#answer-key .answer-key}
+
+```{r key-values, include = FALSE}
+x <- meck$med_house_val[!is.na(meck$med_house_val)]
+br_eq <- classIntervals(x, n = 5, style = "equal")$brks
+br_q <- classIntervals(x, n = 5, style = "quantile")$brks
+n_eq <- as.vector(table(cut(x, br_eq, include.lowest = TRUE)))
+n_q <- as.vector(table(cut(x, br_q, include.lowest = TRUE)))
+brk_text <- function(b) paste0("$", fmt(b), collapse = ", ")
 ```
 
-Because so much of our variation is between 30-45, using an equal interval color palette makes it difficult to visualize the majority of the variation. See how different the map looks when we use a quantile classification scheme?
+| Item | Equal interval (A) | Quantile (B) |
+|---|---|---|
+| Class breaks | `r brk_text(br_eq)` | `r brk_text(br_q)` |
+| Tracts in each class | `r paste(n_eq, collapse = ", ")` | `r paste(n_q, collapse = ", ")` |
 
-```{r, message=F, warning=F}
-tm_shape(acs_tract_nc) + tm_polygons(fill = "median_age", fill.scale = tm_scale_intervals(values = "bu_pu", style = "quantile"))
+Tracts with no estimate: `r sum(is.na(meck$med_house_val))`. tmap may round the legend breaks a little differently, which is fine.
+
+A good card says something like this. Home values are strongly right-skewed, with most tracts below about $500,000 and a few far above it. Equal interval classes put `r n_eq[1]` of the `r length(x)` tracts in the lowest class, so most of the county looks the same and only a handful of very expensive tracts stand out. Quantile classes put about `r round(length(x) / 5)` tracts in each class, which shows the differences across the whole county. The cost is that the top class stretches from `r paste0("$", fmt(br_q[5]))` to `r paste0("$", fmt(br_q[6]))`. For showing where homes are least affordable, the quantile map is the better choice, as long as the legend makes the wide top class clear.
+
+```{r, eval = FALSE}
+#### both partners ####
+meck <- acs_tract_nc |> filter(COUNTYFP == "119")
+
+ggplot(meck, aes(x = med_house_val)) +
+  geom_histogram(binwidth = 50000, fill = "lightgrey", color = "black") +
+  labs(x = "Median home value ($)", y = "Number of tracts")
+
+#### Partner A: equal interval ####
+tm_shape(meck) +
+  tm_polygons(fill = "med_house_val",
+              fill.scale = tm_scale_intervals(style = "equal", n = 5, values = "brewer.yl_or_rd"))
+
+#breaks and counts (classInt is installed with tmap)
+breaks_eq <- classInt::classIntervals(na.omit(meck$med_house_val), n = 5, style = "equal")$brks
+table(cut(meck$med_house_val, breaks_eq, include.lowest = TRUE))
+
+tm_shape(meck) +
+  tm_polygons(fill = "med_house_val", fill_alpha = 0.6,
+              fill.scale = tm_scale_intervals(style = "equal", n = 5, values = "brewer.yl_or_rd"),
+              fill.legend = tm_legend(title = "Median home value ($)")) +
+  tm_title("Median home value, Mecklenburg County (equal interval)") +
+  tm_basemap("CartoDB.PositronNoLabels")
+
+#### Partner B: quantile ####
+tm_shape(meck) +
+  tm_polygons(fill = "med_house_val",
+              fill.scale = tm_scale_intervals(style = "quantile", n = 5, values = "brewer.yl_or_rd"))
+
+breaks_q <- classInt::classIntervals(na.omit(meck$med_house_val), n = 5, style = "quantile")$brks
+table(cut(meck$med_house_val, breaks_q, include.lowest = TRUE))
+
+tm_shape(meck) +
+  tm_polygons(fill = "med_house_val", fill_alpha = 0.6,
+              fill.scale = tm_scale_intervals(style = "quantile", n = 5, values = "brewer.yl_or_rd"),
+              fill.legend = tm_legend(title = "Median home value ($)")) +
+  tm_title("Median home value, Mecklenburg County (quantile)") +
+  tm_basemap("CartoDB.PositronNoLabels")
 ```
-
-The following classification schemes will cover most of your uses:
-
--   equal
--   pretty
--   quantile
--   fisher (natural breaks)
-
-## Interactive Mapping
-
-So far, we have only made static maps. However, tmap has the availability to make interactive maps as well.
-
-```{r, message=F, warning=F}
-## make an interactive map
-tmap_mode(mode = "view")
-
-tm_shape(acs_tract_nc) + tm_polygons(fill = "median_age", fill.scale = tm_scale_intervals(values = "bu_pu", style = "quantile"))
-```
-
-## Formatting
-
-### Map 1: Adding Transparency and additional classes
-
-```{r, message=F, warning=F}
-tm_shape(acs_tract_nc) + tm_polygons(fill = "median_age", fill_alpha = .3, fill.scale = tm_scale_intervals(values = "bu_pu", style = "quantile", n = 7))
-```
-
-### Map 2: Adding a Basemap and a Title
-
-```{r, message=F, warning=F}
-#change back to static plot
-tmap_mode(mode = "plot")
-
-tm_shape(acs_tract_nc) + tm_polygons(fill = "median_age",fill.scale = tm_scale_intervals(values = "bu_pu", style = "quantile", n = 5), fill_alpha = .3) +
-tm_title("Median Age by Census Block Group") + tm_basemap("OpenStreetMap")
-
-```
-
-The following basemaps will cover most of your uses:
-
--   "CartoDB.VoyagerOnlyLabels" - Labels Only
--   "CartoDB.PositronNoLabels"- No Labels
--   "OpenStreetMap" - Labeled Basemap
--   "Esri.WorldImagery" - Satellite
-
-## Mini Challenge
-
-Using two different variable in the ACS data, create two well-designed maps where you select a classification scheme, and add transparency, a title, and a basemap. For one map, use size and color. For the other map, use color.
-
-Create an interactive and static version of each map.
-
-Then, figure out how to display the maps side by side (two-panel).
-
-[Use this documentation to help](https://tmap.geocompx.org/)

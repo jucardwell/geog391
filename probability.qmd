@@ -1,203 +1,287 @@
-# Probability and Probability Distributions
+---
+title: "Probability"
+css: styles/tutorial.css
+---
 
-In this chapter we will calculate empirical probability and apply discrete and continuous theoretical probability distributions to estimate probability (based on empirical estimates). We will also practice writing basic R commands for data manipulation. We will use two different probability distributions:
+```{=html}
+<style>
+:root {
+  --t-ink: #2F1C1B;
+  --t-title: #AC3037;
+  --t-rule: #EDAAA7;
+  --t-link: #9E2B32;
+  --t-plan-bg: #FEF0EF;
+  --t-plan-edge: #BD4045;
+  --t-why-bg: #E7F6FF;
+  --t-why-edge: #0D92C4;
+  --t-read-bg: #FEF4F3;
+  --t-read-edge: #D78E8B;
+  --t-a-bg: #FCE9E8;
+  --t-b-bg: #DEF2FD;
+  --t-deliver-bg: #CEEDFE;
+  --t-deliver-edge: #06668A;
+  --t-code-bg: #FEF4F4;
+  --t-code-edge: #C46665;
+  --t-key-edge: #017CA7;
+  --t-button: #9B1D29;
+}
+</style>
+```
 
--   **Binomial Distribution:** The Binomial Distribution is a discrete probability distribution (i.e. each trial has only two possible outcomes). It models the number of "successes" in a fixed number of independent trials.
--   **Normal Distribution:** The Normal Distribution is a continuous probability distribution that describes a variable that arises from the sum of many small, approximately independent effects, each with some random variation.
-
-Both of these probability distributions are theoretical. A theoretical distribution is a mathematically defined model that describes how outcomes of a probabilistic process are expected to behave. We can use them with empirical data because they let us approximate the underlying pattern, calculate probabilities for events we haven’t observed, and make predictions or inferences about the entire population, even from a limited sample.
-
-We will use the following spatial datasets:
-
--   Daily rainfall in Chapel Hill from 1891-2025 from [North Carolina State Climate Office](https://products.climate.ncsu.edu/data/?_gl=1*1rch6v1*_ga*MzM4Mjc0NzM3LjE3NTc5NDI0MjA.*_ga_QY6TV8YFE4*czE3NjMxMzY3NjAkbzEkZzAkdDE3NjMxMzY3NjAkajYwJGwwJGgw)
--   Daily particulate matter 2.5 across North Carolina from 2016-2020 from the [CDC National Environmental Public Health Tracking Network](https://ephtracking.cdc.gov/)
--   January maximum daily temperatures at RDU from ASOS weather station monitoring from [Iowa Environmental Mesonet](https://mesonet.agron.iastate.edu/request/download.phtml)
-
-**To follow along with this tutorial, make a new .Rmd document. As you move through the tutorial add chunks, headers, and relevant text to your document.**
-
-## Reading in Data
-
-Paste the following code into a chunk at the top of your document
-
-```{r, include = F}
+```{r setup, include = FALSE}
 library(tidyverse)
 library(sf)
 library(tmap)
-library(stars)
-library(gstat)
-library(terra)
-library(sp)
-library(tigris)
 
-#read in rainfall data
-ch_rainfall <- read_csv("https://drive.google.com/uc?export=download&id=1wYLHVVsemxQVjsdsmSzV9m0G6eLR_YK4")
-  
-#read in pm data
-pm_nc <- read_csv("https://drive.google.com/uc?export=download&id=19Axv5_bv7p4LbDWNDs4TmdFi3gfYeNXc")
+#course data (read once for the whole page)
+ch_rainfall <- read_csv("https://drive.google.com/uc?export=download&id=1wYLHVVsemxQVjsdsmSzV9m0G6eLR_YK4", show_col_types = FALSE)
+rdu_jan <- read_csv("https://drive.google.com/uc?export=download&id=1ABpiu5ABzAo-WXbYBp9LWgN8-lHuFQR9", show_col_types = FALSE)
+pm_nc <- read_csv("https://drive.google.com/uc?export=download&id=19Axv5_bv7p4LbDWNDs4TmdFi3gfYeNXc", show_col_types = FALSE)
 
-#read in january data
-rdu_jan <- read_csv("https://drive.google.com/uc?export=download&id=1ABpiu5ABzAo-WXbYBp9LWgN8-lHuFQR9")
-
+#numbers quoted in the text below come from here, so they stay right if the data changes
+fmt <- function(x, d = 3) formatC(x, format = "f", digits = d)
+n_rain_rows <- nrow(ch_rainfall)
+n_rain_dates <- n_distinct(ch_rainfall$date)
+rain_years <- range(lubridate::year(ch_rainfall$date))
+jan_years <- range(lubridate::year(rdu_jan$date))
 ```
 
-```{r, eval = F}
+## Part 1: Walkthrough {#walkthrough}
+
+Run each chunk in your own .Rmd. You will reuse this code in Part 2.
+
+### Step 1: Load the Data
+
+::: {.why}
+We'll use daily rainfall in Chapel Hill from `r rain_years[1]` to `r rain_years[2]`, which comes from the [NC State Climate Office](https://products.climate.ncsu.edu/data/), and daily January high temperatures at RDU airport from `r jan_years[1]` to `r jan_years[2]`, which come from the [Iowa Environmental Mesonet](https://mesonet.agron.iastate.edu/request/download.phtml).
+:::
+
+```{r, eval = FALSE}
+#load libraries
 library(tidyverse)
 library(sf)
 library(tmap)
-library(stars)
-library(gstat)
-library(terra)
-library(sp)
-library(tigris)
 
-#read in rainfall data
+#daily rainfall in Chapel Hill
 ch_rainfall <- read_csv("https://drive.google.com/uc?export=download&id=1wYLHVVsemxQVjsdsmSzV9m0G6eLR_YK4")
-  
-#read in pm data
-pm_nc <- read_csv("https://drive.google.com/uc?export=download&id=19Axv5_bv7p4LbDWNDs4TmdFi3gfYeNXc")
 
-#read in january data
+#daily January high temperatures at RDU
 rdu_jan <- read_csv("https://drive.google.com/uc?export=download&id=1ABpiu5ABzAo-WXbYBp9LWgN8-lHuFQR9")
-
 ```
 
-## Calculating Empirical Probability of Poor Air Quality
+### Step 2: Make One Row per Day
 
-Empirical probability is the likelihood of an event based on data from an actual experiment or observational data. To calculate empirical probability, we can use the simple formula:
-
-**P(E)** (probability of an event) **=** **f** (number of times the event occurred) / **n** (total number of trials or observations)
-
-Let's practice some basic data manipulation and calculate the empirical probability of a moderate or worse air quality at locations across North Carolina.
-
-**Q1. What does each observation (each row) in the pm_nc object represent? How do you know?**
-
-**Q2. Based on Q1, what needs to happen to the data for us to be able to apply the empirical probability formula?**
+::: {.why}
+Probability counts days, so each row must be one day. The rainfall file has `r format(n_rain_rows, big.mark = ",")` rows but only `r format(n_rain_dates, big.mark = ",")` distinct dates. We keep one row per date and count the day as rainy if either record shows rain.
+:::
 
 ```{r}
-# flag for moderate or worse (1 if moderate or worse 0 if not)
-flagged_pm <- pm_nc |> mutate(aq_flag = ifelse( pm_val > 12, 1, 0))
+#one row per date, keeping the larger rainfall value
+ch_daily <- ch_rainfall |>
+  group_by(date) |>
+  summarise(prec_in = max(prec_in))
+
+#flag rainy days (1 = any rain, 0 = none)
+ch_daily <- ch_daily |> mutate(rain = ifelse(prec_in > 0, 1, 0))
 ```
 
-Now that we know, for each observation (date) at each location (lat, lon), whether or not the observation qualifies as an event, we can group the data to get the f (number of times the event occurred) and the n (total observations)
+### Step 3: Empirical Probability
 
-```{r, message = F, warning= F}
-#group by lat/lon point and summarize
-grouped_pm <- flagged_pm |> group_by(lat, lon) |> summarise(tot_flag = sum(aq_flag), tot_ob = n())
-
-```
-
-**Q3. Create a new object called `pm_prob` and calculate a new field that calculates the empirical probability of a moderate or worse air quality day at each lat/lon location. You will use the `mutate`** **command.**
-
-**Q4. Use this command `grouped_pm_sf <- YOUR_NEWOBJECT |> st_as_sf(coords= c("lat", "lon"), crs = 4326)` to turn the data into a spatial object.**
-
-**Q5.** **Create a histogram of probability values. Then make a map of probability across the state.**
-
-## Applying the Binomial Distribution to Chapel Hill Precipitation Data
-
-The binomial distribution is a **theoretical probability model** that helps us predict how many times an event (a “success”) will happen in a fixed number of trials. The model assumes each trial is independent and the probability of success is the same each time. In reality, we often don’t know the true probability of an event. But we can get a good estimate of that probability using empirical data.
-
-In this part of the tutorial, we will calculate the empirical probability of rainfall on a given day in Chapel Hill using daily data from 1891-2025 (*note that this is a major simplifying assumption; in reality rainfall probability varies by season and weather patterns, so the independence and constant-probability assumptions aren't met)* to answer questions like:
-
-**Over 10 days in Chapel Hill, what’s the most likely number of rainy days?**
-
-**Over 10 days in Chapel Hill, what's the probability that we have 0 rainy days?**
-
-We start by creating a new variable with a binary outcome (rain = 1, no rain = 0) and using basic R commands to calculate the empirical probability
+::: {.why}
+The empirical probability of an event is **P(E) = f / n**, which is the number of days the event happened divided by the number of days we observed.
+:::
 
 ```{r}
-#create binary object
-ch_rainfall_binary <- ch_rainfall |> mutate(rain = ifelse(prec_in > 0, 1, 0))
-
-#calculate empirical probability
-total_days <- length(ch_rainfall_binary$date)
-total_rainfall_days <- sum(ch_rainfall_binary$rain)
-
-p_rain <- total_rainfall_days / total_days
+#share of days with any rain
+p_rain <- sum(ch_daily$rain) / nrow(ch_daily)
+p_rain
 ```
 
-Now we know that the empirical probability of any amount of rain on a given day is .337, or 33.7%. Using this probability, we can apply the binomial distribution and plot the results.
+### Step 4: Binomial Distribution
+
+::: {.why}
+The binomial counts "successes" in a fixed number of trials, each with the same probability. Rain isn't really independent from day to day, so treat this as a simplifying model.
+:::
 
 ```{r}
+#probability of 0 through 10 rainy days in 10 days
 probability_days <- tibble(
   num_days = 0:10,
-  #here is the main probability function
   probability = dbinom(x = 0:10, size = 10, prob = p_rain)
 )
 
-#plotting probability by day
 ggplot(probability_days, aes(x = num_days, y = probability)) +
-  geom_line() +  scale_x_continuous(breaks = 0:10)
+  geom_col() +
+  scale_x_continuous(breaks = 0:10)
 ```
 
-**Q6. Based on the outcome of the binomial distribution, what are the answers to the questions above?**
+```{r, include = FALSE}
+most_likely <- probability_days |> slice_max(probability)
+```
 
-We can also use the binomial distribution to calculate cumulative probabilities. For instance, if we wanted to know the probability that we would have 3 days or less, we could calculate that probability by using the `pbinom` function (which calculates cumulative probability), instead of the `dbinom` function
+`pbinom(q, size, p)` gives the probability of **q or fewer**, so translate the question's wording first:
+
+| Question says | Which outcomes | Code | Answer |
+|---|---|---|---|
+| most likely number | the tallest bar | `slice_max(probability_days, probability)` | `r most_likely$num_days` days (`r fmt(most_likely$probability)`) |
+| 3 days or fewer | 0 to 3 | `pbinom(3, 10, p_rain)` | `r fmt(pbinom(3, 10, p_rain))` |
+| more than 3 days | 4 to 10 | `1 - pbinom(3, 10, p_rain)` | `r fmt(1 - pbinom(3, 10, p_rain))` |
+| at least 3 days | 3 to 10 | `1 - pbinom(2, 10, p_rain)` | `r fmt(1 - pbinom(2, 10, p_rain))` |
+
+### Step 5: Normal Distribution
+
+::: {.why}
+A continuous variable can be modelled with a normal curve built from its mean and standard deviation. `pnorm()` gives the share *below* a value, so subtract from 1 for "above".
+:::
 
 ```{r}
-less3_days <- pbinom(3, 10, p = p_rain)
+jan_mean <- mean(rdu_jan$max_temp)
+jan_sd <- sd(rdu_jan$max_temp)
+
+#normal model: probability of a high of 60 or above
+1 - pnorm(60, mean = jan_mean, sd = jan_sd)
+
+#empirical check: share of observed days at 60 or above
+mean(rdu_jan$max_temp >= 60)
+
+#histogram with the normal curve on top
+ggplot(rdu_jan, aes(x = max_temp)) +
+  geom_histogram(aes(y = after_stat(density)), binwidth = 4, boundary = 0) +
+  stat_function(fun = dnorm, args = list(mean = jan_mean, sd = jan_sd)) +
+  geom_vline(xintercept = 60, linetype = "dashed")
 ```
 
-To calculate the probability of having more than 3 days we could calculate it by taking the complement
+::: {.reading}
+The normal model gives `r round(100 * (1 - pnorm(60, jan_mean, jan_sd)))`% of January days at 60°F or above. In the RDU record, `r round(100 * mean(rdu_jan$max_temp >= 60))`% of January days reached 60°F.
+:::
 
-```{r}
-more3_days <- 1 - less3_days
+## Part 2: Partner Practice {#partner-practice}
+
+Both partners use daily PM2.5 estimates for 300 North Carolina census tracts, 2016 to 2020, from the [CDC Environmental Public Health Tracking Network](https://ephtracking.cdc.gov/). Each row is one day in one tract. A **bad-air day** is a day with PM2.5 above 9.0 µg/m³, the EPA "moderate" line since 2024. Each task tells you in parentheses which walkthrough step to reuse.
+
+```{r, eval = FALSE}
+#daily PM2.5 by census tract, 2016-2020 (both partners)
+pm_nc <- read_csv("https://drive.google.com/uc?export=download&id=19Axv5_bv7p4LbDWNDs4TmdFi3gfYeNXc")
 ```
 
-## Mini Challenge
+:::: {.partners}
+::: {.partner .partner-a}
+### Partner A: Binomial
 
-Using the script above, use the binomial distribution and geometric distribution to answer the following questions:
+1. Flag bad-air days, then find the empirical probability of a bad-air day for every tract by grouping on `lat` and `lon`. *(Step 3)*
+2. Map those probabilities with `st_as_sf()`. In `coords`, longitude goes first.
+3. For the tract at `lat` 35.142, `lon` -80.956 (southwest Charlotte), find the most likely number of bad-air days in a 30-day month. *(Step 4)*
+4. Find the probability of **more than 15** bad-air days in a 30-day month for that tract. *(Step 4)*
 
--   Over 10 days in Chapel Hill, what's the most likely number of days with rain over .5 inches?
--   What is the cumulative probability that Chapel Hill will get at least 3 days of rain over .5 inches in the next 10 days?
+When you finish, bring the tract's daily probability and your answer to item 4 to Part 3.
+:::
 
-## The Normal Distribution
+::: {.partner .partner-b}
+### Partner B: Normal Model
 
-The normal distribution is a theoretical model that describes how continuous data tend to cluster around an average, forming a smooth, symmetric, bell-shaped curve. Although no real dataset is perfectly normal, many natural variables behave approximately this way because they are influenced by many small, additive, approximately independent factors. January temperatures at a specific location (in our case, RDU airport) are a good example: most days fall near the typical mid-winter temperature, with fewer extremely warm or cold days. By estimating the mean and standard deviation from actual January data, we can use the normal distribution to model and predict temperature patterns.
+1. Keep only the southwest Charlotte tract (`lat` 35.142, `lon` -80.956). Round `lat` and `lon` to 3 decimals inside `filter()` so the match works.
+2. Find the mean and standard deviation of its daily PM2.5. *(Step 5)*
+3. Use the normal model to find the probability that a day is above 9.0 µg/m³, and compare it with the empirical share of days above 9.0. *(Step 5)*
+4. Plot a histogram of daily PM2.5 with the normal curve on top. *(Step 5)*
 
-When we plot January daily maximum temperatures, we can see that the output is ***approximately*** normal (in a vague sense).
+When you finish, bring the normal-model probability to Part 3, along with a sentence on how well the curve fits the data.
+:::
+::::
 
-```{r, warning=F, message=F}
-#density plot of max_temp variable
-ggplot(rdu_jan, aes(x = max_temp)) + geom_density()
+## Part 3: Together {#together}
+
+1. Partner A runs Partner B's normal-model probability through the binomial: the chance of **more than 15** bad-air days in 30.
+2. Partner B explains to Partner A why the two daily probabilities differ, using the histogram.
+3. Decide together which estimate the county health department should use, and why.
+
+| Daily probability from | Probability per day | P(more than 15 days in 30) |
+|---|---|---|
+| Empirical (Partner A) | | |
+| Normal model (Partner B) | | |
+
+::: {.deliver}
+Each pair turns in one index card before leaving. Write both of your names on it, fill in the four numbers from the table, and add two or three sentences saying which estimate the health department should use and why.
+:::
+
+## Answer Key {#answer-key .answer-key}
+
+```{r key-values, include = FALSE}
+#Partner A
+pm_prob <- pm_nc |>
+  mutate(bad_air = ifelse(pm_val > 9, 1, 0)) |>
+  group_by(lat, lon) |>
+  summarise(p_bad_air = sum(bad_air) / n(), .groups = "drop")
+tract <- pm_prob |> filter(round(lat, 3) == 35.142, round(lon, 3) == -80.956)
+p_emp <- tract$p_bad_air
+mode_emp <- which.max(dbinom(0:30, 30, p_emp)) - 1
+more15_emp <- 1 - pbinom(15, 30, p_emp)
+top_tract <- pm_prob |> slice_max(p_bad_air, n = 1, with_ties = FALSE)
+
+#Partner B
+charlotte <- pm_nc |> filter(round(lat, 3) == 35.142, round(lon, 3) == -80.956)
+pm_mean <- mean(charlotte$pm_val)
+pm_sd <- sd(charlotte$pm_val)
+p_norm <- 1 - pnorm(9, mean = pm_mean, sd = pm_sd)
+more15_norm <- 1 - pbinom(15, 30, p_norm)
 ```
 
-If the data was perfectly normal, the distribution would look like this:
+| Item | Value |
+|---|---|
+| A: tracts mapped | `r nrow(pm_prob)` |
+| A: chance of a bad-air day, lowest to highest tract | `r fmt(min(pm_prob$p_bad_air))` to `r fmt(max(pm_prob$p_bad_air))` |
+| A: southwest Charlotte, empirical daily probability | `r fmt(p_emp)` |
+| A: most likely number of bad-air days in 30 | `r mode_emp` |
+| A: P(more than 15 in 30), empirical | `r fmt(more15_emp)` |
+| B: mean and sd of daily PM2.5 | `r fmt(pm_mean, 2)` and `r fmt(pm_sd, 2)` µg/m³ |
+| B: normal-model daily probability | `r fmt(p_norm)` |
+| Joint: P(more than 15 in 30), normal model | `r fmt(more15_norm)` |
 
-```{r}
-#create normal distribution
-jan_norm <- tibble(
-  temp = seq(min(rdu_jan$max_temp), max(rdu_jan$max_temp)),
-  density = dnorm(temp, mean(rdu_jan$max_temp), sd(rdu_jan$max_temp))
-)
-#plot normal distribution
-ggplot(jan_norm, aes(x = temp, y = density)) +
-  geom_line() 
+A good card says something like this. Daily PM2.5 is right-skewed: most days sit a little below the mean and a few very smoky days pull the mean up. The normal curve is symmetric, so it puts too many days above 9.0 (`r fmt(p_norm)` vs `r fmt(p_emp)`), and that small gap grows to `r fmt(more15_norm)` vs `r fmt(more15_emp)` for more than 15 bad-air days in a month. The empirical estimate is the better one to use here.
 
+```{r, eval = FALSE}
+#### Partner A: binomial ####
+#A1: flag bad-air days and find the empirical probability for every tract (Step 3)
+pm_prob <- pm_nc |>
+  mutate(bad_air = ifelse(pm_val > 9, 1, 0)) |>
+  group_by(lat, lon) |>
+  summarise(p_bad_air = sum(bad_air) / n())
+
+#A2: map it (longitude goes first)
+pm_prob_sf <- st_as_sf(pm_prob, coords = c("lon", "lat"), crs = 4326)
+tm_shape(pm_prob_sf) +
+  tm_dots(fill = "p_bad_air", size = 0.3,
+          fill.legend = tm_legend(title = "P(bad-air day)"))
+
+#A3: most likely number of bad-air days in 30 for southwest Charlotte (Step 4)
+p_charlotte <- pm_prob |>
+  filter(round(lat, 3) == 35.142, round(lon, 3) == -80.956) |>
+  pull(p_bad_air)
+bad_air_days <- tibble(num_days = 0:30,
+                       probability = dbinom(0:30, size = 30, prob = p_charlotte))
+bad_air_days |> slice_max(probability)
+
+#A4: probability of MORE THAN 15 bad-air days in 30 (Step 4)
+1 - pbinom(15, size = 30, prob = p_charlotte)
+
+#### Partner B: normal model ####
+#B1: keep the southwest Charlotte tract
+charlotte <- pm_nc |> filter(round(lat, 3) == 35.142, round(lon, 3) == -80.956)
+
+#B2: mean and standard deviation (Step 5)
+pm_mean <- mean(charlotte$pm_val)
+pm_sd <- sd(charlotte$pm_val)
+
+#B3: normal-model probability of a day above 9.0, and the empirical check
+1 - pnorm(9, mean = pm_mean, sd = pm_sd)
+mean(charlotte$pm_val > 9)
+
+#B4: histogram with the normal curve
+ggplot(charlotte, aes(x = pm_val)) +
+  geom_histogram(aes(y = after_stat(density)), binwidth = 1, boundary = 0) +
+  stat_function(fun = dnorm, args = list(mean = pm_mean, sd = pm_sd)) +
+  geom_vline(xintercept = 9, linetype = "dashed")
+
+#### Part 3: together ####
+p_normal <- 1 - pnorm(9, mean = pm_mean, sd = pm_sd)
+1 - pbinom(15, size = 30, prob = p_normal)
 ```
-
-A Q–Q plot is a common tool for assessing whether a dataset follows a normal distribution. In a Q–Q plot, data that are normally distributed should fall roughly along the reference line. In our case, the points align reasonably well in the center of the distribution, but the tails show clear deviations from the line. This indicates that while the bulk of the data is approximately normal, the extreme values do not follow the normal distribution as closely.
-
-Because of this, using the normal distribution may still provide reasonable approximations for probabilities near the center of the distribution, but estimates involving the tails (especially rare events) should be interpreted with caution. Tail deviations suggest that the normal distribution may underestimate or overestimate the likelihood of extreme outcomes, so empirical or alternative distributional methods may be more appropriate for modeling rare events.
-
-```{r}
-qqnorm(rdu_jan$max_temp, pch = 1, frame = FALSE)
-qqline(rdu_jan$max_temp, col = "steelblue", lwd = 2)
-```
-
-To apply the normal distribution, we could calculate the probability that a day in January has a maximum temperature of 60 or above by calculating the cumulative density function.
-
-```{r}
-#pnorm calculates the CDF up to the value. So we need to do 1-pnorm to get the probability above that value
-prob <- 1 - pnorm(60, mean =  mean(rdu_jan$max_temp), sd = sd(rdu_jan$max_temp))
-
-```
-
-This model estimates a 22.4% probability that a January day at RDU exceeds 60 degrees.
-
-## Mini Challenge
-
-Using the code above, calculate the probability that a day has a maximum temperature of 83 degrees or above using the normal distribution. Then calculate the empirical probability using the observed values. Discuss the following questions:
-
--   How do the theoretical and empirical probabilities differ?
--   Why might this be the case?
--   What are potential problems in applying the normal distribution to estimate rare events in this dataset?
