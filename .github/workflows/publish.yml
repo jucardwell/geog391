@@ -68,6 +68,11 @@ jobs:
             soffice --headless --convert-to pdf --outdir slides slides/*.pptx
           fi
 
+      # Quarto reads the include files before its pre-render step runs,
+      # so build them once here first.
+      - name: Build course pages from course/*.csv
+        run: python scripts/build_course.py
+
       - name: Render site
         env:
           GEOG391_KEY_CODEWORDS: ${{ secrets.GEOG391_KEY_CODEWORDS }}
