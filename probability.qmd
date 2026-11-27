@@ -9,7 +9,7 @@ library(tmap)
 
 #course data (read once for the whole page)
 ch_rainfall <- read_csv("https://drive.google.com/uc?export=download&id=1wYLHVVsemxQVjsdsmSzV9m0G6eLR_YK4", show_col_types = FALSE)
-pm_nc <- read_csv("https://drive.google.com/uc?export=download&id=19Axv5_bv7p4LbDWNDs4TmdFi3gfYeNXc", show_col_types = FALSE)
+pm_nc <- read_csv("data/pm_analysis_dataset.csv", show_col_types = FALSE)
 rdu_jan <- read_csv("https://drive.google.com/uc?export=download&id=1ABpiu5ABzAo-WXbYBp9LWgN8-lHuFQR9", show_col_types = FALSE)
 
 #numbers quoted in the text below come from here, so they stay right if the data changes
@@ -46,7 +46,7 @@ library(tmap)
 ch_rainfall <- read_csv("https://drive.google.com/uc?export=download&id=1wYLHVVsemxQVjsdsmSzV9m0G6eLR_YK4")
 
 #daily PM2.5 across North Carolina, 2016-2020
-pm_nc <- read_csv("https://drive.google.com/uc?export=download&id=19Axv5_bv7p4LbDWNDs4TmdFi3gfYeNXc")
+pm_nc <- read_csv("https://raw.githubusercontent.com/jucardwell/geog391/main/data/pm_analysis_dataset.csv")
 
 #daily January high temperatures at RDU
 rdu_jan <- read_csv("https://drive.google.com/uc?export=download&id=1ABpiu5ABzAo-WXbYBp9LWgN8-lHuFQR9")
@@ -91,7 +91,7 @@ p_rain
 ### Step 4 · Empirical probability at many places
 
 ::: {.why}
-The same formula works for every location at once if we group first. Here each row of `pm_nc` is one day at one monitoring location, so we flag days with moderate or worse air quality (a daily PM2.5 above 9.0 µg/m³, the EPA "moderate" line since 2024), then count f and n for each location.
+The same formula works for every location at once if we group first. Here each row of `pm_nc` is one day in one census tract (a modelled estimate at the tract centre), so we flag days with moderate or worse air quality (a daily PM2.5 above 9.0 µg/m³, the EPA "moderate" line since 2024), then count f and n for each location.
 :::
 
 ```{r, message = FALSE}
@@ -118,7 +118,7 @@ pm_range <- range(pm_prob$p_bad_air)
 ```
 
 ::: {.reading}
-**What it tells us.** Across `r format(nrow(pm_prob), big.mark = ",")` locations, the chance of a moderate or worse air day ranges from `r fmt(pm_range[1])` to `r fmt(pm_range[2])`. If the points don't fall in North Carolina, check the order inside `coords =`: longitude comes first.
+**What it tells us.** Across `r format(nrow(pm_prob), big.mark = ",")` tracts, the chance of a moderate or worse air day ranges from `r fmt(pm_range[1])` to `r fmt(pm_range[2])`. If the points don't fall in North Carolina, check the order inside `coords =`: longitude comes first.
 :::
 
 ### Step 5 · Binomial distribution
