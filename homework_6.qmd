@@ -1,24 +1,26 @@
 ---
-title: "Homework 6: Crime Patterns in Downtown Chapel Hill"
+title: "Homework 6: Wind Turbine Siting in Iowa"
 ---
 
 ## Overview
 
-For this assignment you will create a well-designed knitted .html report that analyzes changes in the location of crimes in downtown Chapel Hill.
+For this assignment you will create a well-designed knitted .html report that analyzes how the locations of wind turbines in Iowa have changed over time.
 
 ## Scenario
 
-You are an employee at the Town of Chapel Hill who supports data analysis for the spatial data collected by the town. You have been asked to look at patterns in the location and density of crime points across downtown Chapel Hill and to create a cohesive document for the Town Council about these patterns and how they changed over time.
+You are an analyst for the Iowa Economic Development Authority. Iowa gets more of its electricity from wind than almost any other state, and the Authority wants to understand how turbine siting has changed as the industry has grown. You have been asked to look at patterns in the location and density of wind turbines across Iowa and to create a cohesive document for the Authority's board about these patterns and how they changed over time.
 
-The data include the locations of police reports written in downtown Chapel Hill over two time periods: 2010–2014 and 2020–2025.
+The data include the location of every wind turbine in Iowa from the [U.S. Wind Turbine Database](https://energy.usgs.gov/uswtdb/), with the year its project came online (`p_year`). Compare two periods: turbines built before 2012 and turbines built in 2012 or later.
 
 ## Task
 
-The report should integrate narrative interpretation, spatial analysis, and visualizations to describe how crime locations are distributed across downtown Chapel Hill and how these patterns differ between the two periods. For each time period, use point pattern analysis to evaluate first-order and second-order spatial structure. Connect the observed patterns to features of Chapel Hill's urban environment, such as land use, transportation corridors, nightlife areas, or institutional presence, and state clear hypotheses about the processes generating the patterns.
+The report should integrate narrative interpretation, spatial analysis, and visualizations to describe how wind turbines are distributed across Iowa and how these patterns differ between the two periods. For each period, use point pattern analysis to evaluate first-order and second-order spatial structure. Connect the observed patterns to features of Iowa's landscape and infrastructure, such as wind resources, transmission lines, farmland, or population centers, and state clear hypotheses about the processes generating the patterns.
 
-Then compare the two time periods to assess how the spatial structure of crime has changed, including shifts in intensity, clustering, or spatial concentration. Ground this comparison in contextual changes in downtown Chapel Hill, supported by external research on factors such as redevelopment, demographic or student population changes, policy or policing shifts, and broader urban development trends. You may need additional visualizations (such as a tmap with a basemap) for the comparison.
+Then compare the two periods to assess how the spatial structure of turbine siting has changed, including shifts in intensity, clustering, or spatial concentration. Ground this comparison in contextual changes, supported by external research on factors such as federal tax credits, utility investment, larger turbine technology, transmission expansion, or local siting rules. You may need additional visualizations (such as a tmap with a basemap) for the comparison.
 
-**Duplicate locations.** Police reports are geocoded to street addresses, so most points share their exact location with at least one other report. Nearest-neighbor distances of zero break the nearest-neighbor and K/L-function analyses. Before the second-order analysis, either jitter the points slightly with `rjitter()` or analyze the unique locations with `unique()`, and say in your report which you chose and why.
+**Window and units.** Use the Iowa outline as the window for your point patterns (`as.owin(iowa)`). Both files are projected to UTM zone 15N, so distances are in meters.
+
+**Duplicate locations.** A handful of turbines share exact coordinates, and nearest-neighbor distances of zero break the nearest-neighbor and K/L-function analyses. Before the second-order analysis, analyze the unique locations with `unique()`, or jitter the points slightly with `rjitter()`.
 
 ## Data
 
@@ -28,13 +30,19 @@ In your .Rmd, add a chunk for loading libraries and reading in data, and paste i
 #load libraries
 library(tidyverse)
 library(tmap)
+library(maptiles)
 library(spatstat)
 library(sf)
 
-#crime point data (CRS units are feet)
-early_period <- st_read("https://drive.google.com/uc?export=download&id=16MANlBpAi1AwhvlDXizeCH6zkmQML-LU")
+#wind turbines in Iowa (CRS units are meters)
+turbines <- st_read("https://raw.githubusercontent.com/jucardwell/geog391/main/data/iowa_wind_turbines.geojson")
 
-late_period <- st_read("https://drive.google.com/uc?export=download&id=1AGwEaKKKPVgv7xzs_PUsWmptl6aqRTcc")
+#Iowa outline, to use as the window
+iowa <- st_read("https://raw.githubusercontent.com/jucardwell/geog391/main/data/iowa_boundary.geojson")
+
+#the two periods
+early_period <- turbines |> filter(p_year < 2012)
+late_period <- turbines |> filter(p_year >= 2012)
 ```
 
 Submit your polished knitted .html to the Homework 6 assignment on Canvas.
@@ -44,4 +52,4 @@ Submit your polished knitted .html to the Homework 6 assignment on Canvas.
 | Part | Points | Criteria |
 |---|---|---|
 | Analysis and visualizations | 4 | Correctly applies point pattern analysis to both periods, with clear interpretation of first-order and second-order structure for each (2); appropriate, well-designed visualizations that support interpretation and comparison (2) |
-| Discussion | 6 | Explains spatial crime patterns and change over time in plain language for a policy audience (2); compares the periods with plausible, evidence-based explanations grounded in Chapel Hill context and external research (2); integrates analysis, visualizations and interpretation into a cohesive, well-structured report with citations (2) |
+| Discussion | 6 | Explains turbine siting patterns and change over time in plain language for a policy audience (2); compares the periods with plausible, evidence-based explanations grounded in Iowa context and external research (2); integrates analysis, visualizations and interpretation into a cohesive, well-structured report with citations (2) |
