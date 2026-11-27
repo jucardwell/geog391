@@ -93,3 +93,8 @@ Today, geography includes quantitative, qualitative, and mixed-methods approache
 - **Spatial statistics:** Many of the methods in this course (spatial autocorrelation, point pattern analysis, spatial regression, interpolation) were developed or refined by geographers and statisticians working in the tradition of the Quantitative Revolution.
 - **Critical quantitative geography:** Many geographers now argue that quantitative methods and critical perspectives are not opposites. Mei-Po Kwan's work on feminist visualization and GIS, for example, showed how quantitative tools could be used to study the everyday lives of women and immigrants. Critical quantitative geographers use numbers and models while also asking who collected the data, what assumptions are built in, and who the results serve.
 - **Computational and data-driven geography:** The explosion of "new school" spatial data (see Introduction to Space) has led to new fields like geographic data science, which in many ways continue the Quantitative Revolution's goals with much larger datasets and much more computing power.
+
+## Reading Quiz {.unnumbered}
+
+::: {.reading-quiz data-quiz="quantitative-revolution"}
+:::

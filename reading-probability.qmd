@@ -115,8 +115,7 @@ Second, geographers are often interested in explaining the processes that genera
 
 Because of these two features, probabilistic reasoning remains central in geography even when researchers are not working with traditional random samples. Statistical inference is therefore often used to evaluate whether observed spatial relationships are likely to reflect broader systematic processes rather than random variation alone.
 
-## Reading quiz {.unnumbered}
+## Reading Quiz {.unnumbered}
 
 ::: {.reading-quiz data-quiz="probability"}
-The quiz needs JavaScript. If it does not load, refresh the page.
 :::

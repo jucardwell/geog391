@@ -1,0 +1,179 @@
+{
+ "reading": "describing-data",
+ "questions": [
+  {
+   "q": "Land cover class (forest, water, developed) is measured at which level?",
+   "options": [
+    "Nominal",
+    "Ordinal",
+    "Interval",
+    "Ratio"
+   ],
+   "answer": 0,
+   "why": "The categories have no inherent order. Even NLCD's numeric codes are only labels."
+  },
+  {
+   "q": "Hurricane category (1 to 5) is...",
+   "options": [
+    "nominal",
+    "ordinal",
+    "interval",
+    "ratio"
+   ],
+   "answer": 1,
+   "why": "The categories are ordered, but the distance between categories isn't consistent."
+  },
+  {
+   "q": "Why is 80°F not \"twice as hot\" as 40°F?",
+   "options": [
+    "Fahrenheit is ordinal",
+    "Fahrenheit is interval: differences are meaningful, but there's no true zero",
+    "Temperature is nominal",
+    "It is twice as hot"
+   ],
+   "answer": 1,
+   "why": "0°F doesn't mean an absence of temperature, so ratios aren't meaningful."
+  },
+  {
+   "q": "Which of these is ratio data?",
+   "options": [
+    "Survey response from strongly disagree to strongly agree",
+    "Temperature in Celsius",
+    "Distance to the nearest hospital",
+    "County name"
+   ],
+   "answer": 2,
+   "why": "Distance has a true zero, so it's meaningful to say one place is twice as far as another."
+  },
+  {
+   "q": "Converting median household income into income categories...",
+   "options": [
+    "gains information",
+    "makes the data easier to communicate but always loses information",
+    "turns ratio data into nominal data",
+    "is never allowed"
+   ],
+   "answer": 1,
+   "why": "Moving to a lower level of measurement (ratio to ordinal) simplifies the data at the cost of detail."
+  },
+  {
+   "q": "Why does the Census Bureau report median household income rather than the mean?",
+   "options": [
+    "The median is easier to calculate",
+    "The median isn't affected by extreme values, and income is skewed",
+    "The mean can't be calculated for income",
+    "The median uses every value"
+   ],
+   "answer": 1,
+   "why": "A few very high incomes pull the mean upward. The median depends only on the order of the values."
+  },
+  {
+   "q": "What is the only measure of central tendency you can use for nominal data?",
+   "options": [
+    "Mean",
+    "Median",
+    "Mode"
+   ],
+   "answer": 2,
+   "why": "With unordered categories, you can only ask which category is most common."
+  },
+  {
+   "q": "A variable's mean is much larger than its median. The distribution most likely...",
+   "options": [
+    "is symmetric",
+    "has a long tail of high values (positive skew)",
+    "has a long tail of low values (negative skew)",
+    "has no outliers"
+   ],
+   "answer": 1,
+   "why": "Extreme high values pull the mean above the median."
+  },
+  {
+   "q": "Which measure of spread is resistant to outliers and pairs with the median?",
+   "options": [
+    "Range",
+    "Standard deviation",
+    "Interquartile range (IQR)",
+    "Variance"
+   ],
+   "answer": 2,
+   "why": "The IQR is the spread of the middle 50% (Q3 minus Q1). It's the box in a boxplot."
+  },
+  {
+   "q": "Why are the differences from the mean squared when calculating the variance?",
+   "options": [
+    "To make the numbers bigger",
+    "So positive and negative differences don't cancel each other out",
+    "To convert to the original units",
+    "To remove outliers"
+   ],
+   "answer": 1,
+   "why": "Without squaring, deviations above and below the mean would sum to zero. The square root then returns to the original units."
+  },
+  {
+   "q": "You want to compare whether rainfall varies more in the NC mountains or on the coast, where average rainfall differs a lot. Which measure fits best?",
+   "options": [
+    "Range",
+    "Standard deviation",
+    "Coefficient of variation",
+    "Mode"
+   ],
+   "answer": 2,
+   "why": "The CV divides the standard deviation by the mean, so variability is expressed as a percentage of the mean and can be compared."
+  },
+  {
+   "q": "Life expectancy, where most places have high values and a few have much lower values, is likely...",
+   "options": [
+    "symmetric",
+    "positively skewed",
+    "negatively skewed"
+   ],
+   "answer": 2,
+   "why": "The long tail is on the low side, which pulls the mean below the median."
+  },
+  {
+   "q": "A distribution with high kurtosis (leptokurtic) has...",
+   "options": [
+    "a flatter peak and lighter tails than the normal distribution",
+    "a sharper peak and heavier tails, meaning more extreme values",
+    "no tails",
+    "the same shape as the normal distribution"
+   ],
+   "answer": 1,
+   "why": "Kurtosis is about how much of the data is in the tails compared to a normal distribution."
+  },
+  {
+   "q": "Why might you take the natural log of population density before an analysis?",
+   "options": [
+    "To make a strongly skewed distribution more symmetric",
+    "To remove the spatial component",
+    "To convert it to ordinal data",
+    "To increase the variance"
+   ],
+   "answer": 0,
+   "why": "Many methods assume roughly normal data or residuals, and a log transformation pulls in a long right tail."
+  },
+  {
+   "q": "Going from NC zip codes to counties, which statistic changes the most for percent poverty?",
+   "options": [
+    "The mean",
+    "The standard deviation and the range",
+    "Neither; aggregation has no effect",
+    "The level of measurement"
+   ],
+   "answer": 1,
+   "why": "Aggregating averages out local variation. Central tendency stays fairly stable while dispersion and the min and max shrink. This is the scale effect of the MAUP."
+  },
+  {
+   "q": "The mean income across census tracts treats a tract of 1,500 people the same as a tract of 8,000. To describe the typical person, you should use...",
+   "options": [
+    "the mode",
+    "a population-weighted mean",
+    "the range",
+    "the unweighted median of tracts"
+   ],
+   "answer": 1,
+   "why": "Describing places and describing people are different questions. Weighting by population answers the question about people."
+  }
+ ]
+}

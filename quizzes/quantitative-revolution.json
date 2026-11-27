@@ -1,0 +1,181 @@
+{
+ "reading": "quantitative-revolution",
+ "questions": [
+  {
+   "q": "Before the Quantitative Revolution, geography was mostly...",
+   "options": [
+    "a descriptive field documenting what places were like and how they differed",
+    "a branch of statistics",
+    "focused on building computer models",
+    "concerned with general laws of space"
+   ],
+   "answer": 0,
+   "why": "For most of its history geography described places. The Quantitative Revolution of the 1950s and 1960s pushed it to be more scientific and mathematical."
+  },
+  {
+   "q": "Environmental determinism claimed that...",
+   "options": [
+    "people shape their environments",
+    "the physical environment, especially climate, directly determines human behavior, culture and development",
+    "every region is unique",
+    "near things are more related than distant things"
+   ],
+   "answer": 1,
+   "why": "Semple and Huntington used it to rank societies by climate. It justified racist hierarchies and colonial rule and was discredited by the mid-20th century."
+  },
+  {
+   "q": "In regional geography (chorology), the goal was to...",
+   "options": [
+    "find general laws that hold everywhere",
+    "describe and synthesize the unique character of individual regions",
+    "test hypotheses with statistics",
+    "build gravity models"
+   ],
+   "answer": 1,
+   "why": "Hartshorne's The Nature of Geography (1939) framed geography as the study of areal differentiation, so general laws weren't the goal."
+  },
+  {
+   "q": "What was the main criticism of regional geography?",
+   "options": [
+    "It used too much math",
+    "It didn't produce knowledge that could be generalized or tested",
+    "It ignored physical geography",
+    "It relied on computers"
+   ],
+   "answer": 1,
+   "why": "Its descriptions were rich, but critics said they couldn't be generalized beyond the region or tested."
+  },
+  {
+   "q": "Fred K. Schaefer's 1953 article \"Exceptionalism in Geography\" argued that geography should...",
+   "options": [
+    "stay focused on unique places",
+    "be a science like any other, aimed at discovering general laws of spatial arrangement",
+    "give up on maps",
+    "become a humanities discipline"
+   ],
+   "answer": 1,
+   "why": "Schaefer rejected the idea that geography was an \"exceptional\" discipline that could only describe unique places."
+  },
+  {
+   "q": "Positivism, which the Quantitative Revolution borrowed from, holds that knowledge should be built through...",
+   "options": [
+    "personal experience of place",
+    "observation, measurement and the testing of hypotheses",
+    "historical archives",
+    "political critique"
+   ],
+   "answer": 1,
+   "why": "In practice this meant hypothesis testing, generalization, models and theory, and quantification."
+  },
+  {
+   "q": "How did World War II help bring about the Quantitative Revolution?",
+   "options": [
+    "It ended all geographic research",
+    "Geographers worked on applied problems for the government and met operations research, and postwar science funding and the GI Bill expanded research",
+    "It made regional geography more popular",
+    "It introduced GIS software"
+   ],
+   "answer": 1,
+   "why": "OSS work pushed geographers toward applied, mathematical problem solving, and the NSF (1950) and the GI Bill fueled the shift after the war."
+  },
+  {
+   "q": "Which university is usually considered the center of the Quantitative Revolution in the late 1950s?",
+   "options": [
+    "University of Iowa",
+    "Lund University",
+    "University of Washington",
+    "Cambridge"
+   ],
+   "answer": 2,
+   "why": "William Garrison's students at Washington, the \"space cadets,\" included Berry, Bunge, Morrill, Marble, Nystuen, Dacey and Tobler. The other three were also important centers."
+  },
+  {
+   "q": "Von Thünen's model predicts that perishable, heavy goods like dairy are produced...",
+   "options": [
+    "farthest from the market town",
+    "closest to the market town",
+    "in a hexagonal pattern",
+    "wherever labor is cheapest"
+   ],
+   "answer": 1,
+   "why": "Transport cost drives the concentric rings, so goods that spoil or are expensive to move are produced near the market."
+  },
+  {
+   "q": "Gravity models propose that interaction between two places is...",
+   "options": [
+    "the same everywhere",
+    "proportional to the size of the places and inversely proportional to the distance between them",
+    "determined by climate",
+    "random"
+   ],
+   "answer": 1,
+   "why": "The idea borrows from Newton. Ravenstein had already noticed in the 1880s that most migrants travel short distances."
+  },
+  {
+   "q": "Why does the reading say Hägerstrand's spatial diffusion work matters for this course?",
+   "options": [
+    "It invented the census",
+    "It was one of the first uses of simulation (Monte Carlo methods) in geography",
+    "It created central place theory",
+    "It ended the Quantitative Revolution"
+   ],
+   "answer": 1,
+   "why": "You'll use Monte Carlo simulation later in the course, for example to test point patterns against randomness."
+  },
+  {
+   "q": "Which assumption did the early spatial models share?",
+   "options": [
+    "A flat, uniform landscape (an isotropic plain), rational cost-minimizing decision makers and perfect information",
+    "Every place is unique",
+    "Data are always crowdsourced",
+    "Distance doesn't matter"
+   ],
+   "answer": 0,
+   "why": "These assumptions made the models mathematically tractable, and they became the main target of later critiques."
+  },
+  {
+   "q": "Humanistic geographers like Yi-Fu Tuan argued that the Quantitative Revolution...",
+   "options": [
+    "didn't use enough data",
+    "stripped geography of human experience; people experience places full of meaning, memory and emotion",
+    "should have used more computers",
+    "was correct about environmental determinism"
+   ],
+   "answer": 1,
+   "why": "Humanistic geography emphasized qualitative methods and the subjective experience of place."
+  },
+  {
+   "q": "A radical geography critique of a model that explains segregation as the result of individual housing choices would say it...",
+   "options": [
+    "is too complicated",
+    "ignores why the pattern exists and who benefits, such as racism, redlining and capitalist land markets",
+    "uses the wrong projection",
+    "should use a raster"
+   ],
+   "answer": 1,
+   "why": "Radical geographers like David Harvey asked why patterns exist and who benefits from them, not just what the pattern looks like."
+  },
+  {
+   "q": "Feminist geographers criticized transportation models built around the commute to work because they...",
+   "options": [
+    "used too few observations",
+    "ignored complex trip chains like school drop-offs, errands and caregiving that fall disproportionately on women",
+    "were too expensive",
+    "assumed people walk"
+   ],
+   "answer": 1,
+   "why": "The \"rational economic actor\" in many models was implicitly a white, middle-class man, and the questions and data reflected that."
+  },
+  {
+   "q": "Critical quantitative geography holds that...",
+   "options": [
+    "quantitative methods should be abandoned",
+    "quantitative methods and critical perspectives can work together, asking who collected the data, what assumptions are built in and who the results serve",
+    "only qualitative methods are valid",
+    "GIS is a neutral tool"
+   ],
+   "answer": 1,
+   "why": "Mei-Po Kwan's feminist GIS work is the reading's example. Ground Truth (1995) had argued that GIS is not neutral."
+  }
+ ]
+}

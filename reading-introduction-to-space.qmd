@@ -294,8 +294,7 @@ Aggregating data into larger units can smooth out local variation and reduce var
 
 Because of the MAUP, we need to be careful when interpreting aggregated data, given that patterns observed at one scale or within a particular zoning scheme may not hold at another. Since spatial patterns are often scale-dependent, one way to mitigate the effects of the MAUP is to align the selection of areal units with the hypothesized scale of the underlying process. Robustness can also be assessed by comparing results across similar spatial units-- for example, examining patterns at the census block group level versus the census tract level, or testing slightly different zoning schemes. Additionally, advanced methods such as hierarchical or multiscale modeling can explicitly account for variations across scales, providing a more accurate understanding of spatial dynamics.
 
-## Reading quiz {.unnumbered}
+## Reading Quiz {.unnumbered}
 
 ::: {.reading-quiz data-quiz="introduction-to-space"}
-The quiz needs JavaScript. If it does not load, refresh the page.
 :::

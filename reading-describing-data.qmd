@@ -133,3 +133,8 @@ All of the descriptive statistics in this chapter can be calculated for spatial 
 This happens because aggregating data to larger units averages out local variation. Measures of central tendency are often relatively stable across scales, but measures of dispersion and the minimum and maximum values are not. When reporting descriptive statistics for areal data, you should always state the spatial unit, and when possible, compare results across more than one unit.
 
 Another issue to be aware of is the difference between describing **places** and describing **people**. The mean of a variable across census tracts gives each tract equal weight, regardless of how many people live there. A rural tract with 1,500 residents counts the same as an urban tract with 8,000 residents. If the goal is to describe the typical *person*, a population-weighted mean is more appropriate.
+
+## Reading Quiz {.unnumbered}
+
+::: {.reading-quiz data-quiz="describing-data"}
+:::

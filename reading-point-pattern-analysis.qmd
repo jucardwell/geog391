@@ -179,8 +179,7 @@ The K-function is highly sensitive to edge effects because points near the bound
 
 We can use Monte Carlo simulation to generate envelopes that demonstrate different realizations of CSR to formalize inferential testing. By simulating many realizations of the null model, we can empirically estimate the range of expected values at each distance and determine whether the observed pattern deviates significantly from randomness. However, we will only use simulation envelopes for testing homogeneous point pattern analysis because the inhomogeneous K-function depends on an estimated intensity surface, typically obtained using a kernel density estimate (KDE). While the inhomogeneous K-function can adjust for first-order intensity variation descriptively, uncertainty in the KDE propagates into simulations, making the null model partly determined by estimation choices rather than a clearly specified stochastic process.
 
-## Reading quiz {.unnumbered}
+## Reading Quiz {.unnumbered}
 
 ::: {.reading-quiz data-quiz="point-pattern-analysis"}
-The quiz needs JavaScript. If it does not load, refresh the page.
 :::

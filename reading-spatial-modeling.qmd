@@ -162,8 +162,7 @@ $\lambda$= spatial error coefficient\
 $W$= spatial weights matrix\
 $\epsilon$= independent error
 
-## Reading quiz {.unnumbered}
+## Reading Quiz {.unnumbered}
 
 ::: {.reading-quiz data-quiz="spatial-modeling"}
-The quiz needs JavaScript. If it does not load, refresh the page.
 :::

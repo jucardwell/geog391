@@ -85,8 +85,7 @@ Kriging also provides an estimate of uncertainty, called the kriging variance, w
 
 In the two approaches explored in this reading, estimates at unsampled locations are based entirely on spatial autocorrelation (i.e. we can guess these values based on the values that are nearby since we know that they are related). However, we often have additional information, such as environmental variables or underlying gradients, that can improve our predictions. For example, factors like elevation, temperature, land cover, or soil type may influence the values we are trying to predict. These factors can be included as covariates in more advanced kriging methods. By including covariates, we can move beyond relying only on spatial proximity and instead model both spatial structure and explanatory relationships. Methods such as regression kriging or universal kriging combine a regression component (which captures the relationship between the response and covariates) with a kriging component (which models the spatial correlation in the residuals). This allows us to first explain large-scale trends using covariates and then account for remaining spatial dependence, resulting in more accurate and informative predictions than using spatial autocorrelation alone.
 
-## Reading quiz {.unnumbered}
+## Reading Quiz {.unnumbered}
 
 ::: {.reading-quiz data-quiz="continuous-surfaces"}
-The quiz needs JavaScript. If it does not load, refresh the page.
 :::
