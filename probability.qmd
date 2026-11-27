@@ -9,7 +9,7 @@ library(tmap)
 
 #course data (read once for the whole page)
 ch_rainfall <- read_csv("https://drive.google.com/uc?export=download&id=1wYLHVVsemxQVjsdsmSzV9m0G6eLR_YK4", show_col_types = FALSE)
-pm_nc <- read_csv("data/pm_analysis_dataset.csv", show_col_types = FALSE)
+pm_nc <- read_csv("https://drive.google.com/uc?export=download&id=19Axv5_bv7p4LbDWNDs4TmdFi3gfYeNXc", show_col_types = FALSE)
 rdu_jan <- read_csv("https://drive.google.com/uc?export=download&id=1ABpiu5ABzAo-WXbYBp9LWgN8-lHuFQR9", show_col_types = FALSE)
 
 #numbers quoted in the text below come from here, so they stay right if the data changes
@@ -46,7 +46,7 @@ library(tmap)
 ch_rainfall <- read_csv("https://drive.google.com/uc?export=download&id=1wYLHVVsemxQVjsdsmSzV9m0G6eLR_YK4")
 
 #daily PM2.5 across North Carolina, 2016-2020
-pm_nc <- read_csv("https://raw.githubusercontent.com/jucardwell/geog391/main/data/pm_analysis_dataset.csv")
+pm_nc <- read_csv("https://drive.google.com/uc?export=download&id=19Axv5_bv7p4LbDWNDs4TmdFi3gfYeNXc")
 
 #daily January high temperatures at RDU
 rdu_jan <- read_csv("https://drive.google.com/uc?export=download&id=1ABpiu5ABzAo-WXbYBp9LWgN8-lHuFQR9")
