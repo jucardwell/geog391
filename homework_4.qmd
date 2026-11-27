@@ -1,5 +1,5 @@
 ---
-title: "Homework 4: Flood and cold-weather risk"
+title: "Homework 4: Flood and Cold-Weather Risk"
 ---
 
 ## Overview
@@ -8,11 +8,11 @@ For this assignment you will create a well-designed knitted .html report intende
 
 You are an employee at North Carolina Emergency Management (NCEM). You have been asked to use recent and historical environmental data to support preparedness decisions for two hazard scenarios.
 
-## Scenario 1: Flood risk at Bolin Creek
+## Scenario 1: Flood Risk at Bolin Creek
 
 After Hurricane Chantal caused severe flooding along Bolin Creek in July 2025, local officials are reconsidering whether they need a more proactive monitoring plan for periods when repeated high-water days are possible. NCEM wants to know how often unusually high-water conditions occur and whether the likelihood of several flood-risk days within a short period is large enough to justify enhanced monitoring or preparedness measures. (The gauge data end on January 1, 2025, so Chantal itself is not in the record.)
 
-## Scenario 2: Low-temperature risk
+## Scenario 2: Low-Temperature Risk
 
 NCEM has funding to open one additional warming shelter in North Carolina. The western part of the state is already relatively well-prepared for cold weather, so the new shelter should be located elsewhere. NCEM needs a recommendation for a county that faces meaningful cold-weather risk and has at least one additional vulnerability, exposure, or hazard concern that would make a warming shelter especially useful.
 
@@ -51,7 +51,7 @@ When you map the ASOS stations, longitude goes first: `st_as_sf(coords = c("lon"
 
 Submit your polished knitted .html to the Homework 4 assignment on Canvas.
 
-## Rubric (10 points)
+## Rubric (10 Points)
 
 | Part | Points | Criteria |
 |---|---|---|

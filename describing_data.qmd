@@ -1,5 +1,5 @@
 ---
-title: "Describing data"
+title: "Describing Data"
 css: styles/tutorial.css
 ---
 
@@ -48,15 +48,11 @@ n_normals <- nrow(climate_normals)
 ruca_mode <- rurality |> st_drop_geometry() |> count(ruca_code) |> slice_max(n, n = 1)
 ```
 
-::: {.plan}
-For the first 15 minutes or so, you and your partner will read the walkthrough together and run the code. Then you'll split up for about 25 minutes. Partner A describes the share of households without a vehicle in North Carolina's counties, and Partner B describes the same variable in its census tracts. In the last 10 minutes you'll compare what the two scales show and write your answer on an index card.
-:::
-
 ## Part 1: Walkthrough {#walkthrough}
 
 Run each chunk in your own .Rmd. You will reuse this code in Part 2.
 
-### Step 1: Load the data
+### Step 1: Load the Data
 
 ::: {.why}
 We'll use rurality codes (RUCA) for `r fmt(n_tracts, 0)` North Carolina census tracts from the [USDA Economic Research Service](https://www.ers.usda.gov/data-products/rural-urban-commuting-area-codes), and 1991 to 2020 summer temperature normals at `r fmt(n_normals, 0)` locations across the U.S. from [NOAA](https://www.ncei.noaa.gov/cdo-web/). Both are already summaries: the normals are 30-year averages, so anything we calculate from them describes data that has already been averaged once.
@@ -77,7 +73,7 @@ rurality <- st_read("https://raw.githubusercontent.com/jucardwell/geog391/main/d
 climate_normals <- st_read("https://raw.githubusercontent.com/jucardwell/geog391/main/data/climate_normals.geojson")
 ```
 
-### Step 2: Describe a categorical variable
+### Step 2: Describe a Categorical Variable
 
 ::: {.why}
 `ruca_code` is nominal, so the only descriptive statistics that make sense are counts and the mode. A bar chart shows the counts.
@@ -101,7 +97,7 @@ ggplot(ruca_counts, aes(x = ruca_code, y = n)) +
 
 The mode is **`r ruca_mode$ruca_code`**, with `r fmt(ruca_mode$n, 0)` tracts.
 
-### Step 3: Map it
+### Step 3: Map It
 
 ```{r}
 #map the raw tract data, not the counts
@@ -109,7 +105,7 @@ tm_shape(rurality) +
   tm_polygons(fill = "ruca_code", fill.scale = tm_scale_categorical(values = "paired"))
 ```
 
-### Step 4: Describe a numeric variable
+### Step 4: Describe a Numeric Variable
 
 ::: {.why}
 For an interval or ratio variable, describe the center (mean, median), the spread (standard deviation, range) and the shape (skewness). Always count the missing values first.
@@ -134,7 +130,7 @@ climate_normals |>
   fmt_number(columns = Value, decimals = 2)
 ```
 
-### Step 5: Plot the distribution
+### Step 5: Plot the Distribution
 
 ::: {.why}
 A histogram shows the shape of the distribution. A boxplot shows the median, the quartiles and any outliers.
@@ -152,7 +148,7 @@ ggplot(climate_normals, aes(y = summer_temp)) +
   labs(y = "Summer temperature (°F)")
 ```
 
-## Part 2: Partner practice {#partner-practice}
+## Part 2: Partner Practice {#partner-practice}
 
 Both partners describe `pct_no_veh`, the percent of households without a vehicle, from the 2019 to 2023 [American Community Survey](https://data.census.gov/). Partner A uses North Carolina's 100 counties and Partner B uses its census tracts. Each task tells you in parentheses which walkthrough step to reuse.
 
@@ -177,7 +173,7 @@ When you finish, bring the mean, median, standard deviation and maximum to Part 
 :::
 
 ::: {.partner .partner-b}
-### Partner B: Census tracts
+### Partner B: Census Tracts
 
 1. Make a descriptive statistics table for `pct_no_veh`. Count the missing values. *(Step 4)*
 2. Plot a histogram and a boxplot. *(Step 5)*
@@ -203,7 +199,7 @@ When you finish, bring the mean, median, standard deviation and maximum to Part 
 Each pair turns in one index card before leaving. Write both of your names on it, fill in the eight numbers from the table, and add two or three sentences saying which scale the transit agency should use and why.
 :::
 
-## Answer key {#answer-key .answer-key}
+## Answer Key {#answer-key .answer-key}
 
 ```{r key-values, include = FALSE}
 describe <- function(d) {

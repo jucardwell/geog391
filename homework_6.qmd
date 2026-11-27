@@ -1,5 +1,5 @@
 ---
-title: "Homework 6: Crime patterns in downtown Chapel Hill"
+title: "Homework 6: Crime Patterns in Downtown Chapel Hill"
 ---
 
 ## Overview
@@ -39,7 +39,7 @@ late_period <- st_read("https://drive.google.com/uc?export=download&id=1AGwEaKKK
 
 Submit your polished knitted .html to the Homework 6 assignment on Canvas.
 
-## Rubric (10 points)
+## Rubric (10 Points)
 
 | Part | Points | Criteria |
 |---|---|---|

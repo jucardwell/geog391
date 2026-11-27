@@ -1,5 +1,5 @@
 ---
-title: "Homework 3: COVID-19 policy brief"
+title: "Homework 3: COVID-19 Policy Brief"
 ---
 
 ## Overview
@@ -45,7 +45,7 @@ covid_deaths_07012020 <- st_read("https://drive.google.com/uc?export=download&id
 
 Submit your polished knitted .html to the Homework 3 assignment on Canvas.
 
-## Rubric (10 points)
+## Rubric (10 Points)
 
 | Part | Points | Criteria |
 |---|---|---|

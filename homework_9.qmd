@@ -1,5 +1,5 @@
 ---
-title: "Homework 9: Mapping summer heat across North Carolina"
+title: "Homework 9: Mapping Summer Heat Across North Carolina"
 ---
 
 ## Overview
@@ -50,7 +50,7 @@ acs_county_nc <- st_read("https://drive.google.com/uc?export=download&id=1hXVtKL
 
 Submit your polished knitted .html to the Homework 9 assignment on Canvas.
 
-## Rubric (10 points)
+## Rubric (10 Points)
 
 | Part | Points | Criteria |
 |---|---|---|

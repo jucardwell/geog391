@@ -1,5 +1,5 @@
 ---
-title: "Homework 5: Chronic absenteeism in NC schools"
+title: "Homework 5: Chronic Absenteeism in NC Schools"
 ---
 
 ## Overview
@@ -40,7 +40,7 @@ school_sample <- st_read("https://drive.google.com/uc?export=download&id=10iHcg3
 
 Submit your polished knitted .html to the Homework 5 assignment on Canvas.
 
-## Rubric (10 points)
+## Rubric (10 Points)
 
 | Part | Points | Criteria |
 |---|---|---|

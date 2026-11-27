@@ -1,5 +1,5 @@
 ---
-title: "Homework 7: Spatial inequality in household income"
+title: "Homework 7: Spatial Inequality in Household Income"
 ---
 
 ## Overview
@@ -43,7 +43,7 @@ acs_tract_nc <- st_read("https://drive.google.com/uc?export=download&id=1cnz4xgd
 
 Submit your polished knitted .html to the Homework 7 assignment on Canvas.
 
-## Rubric (10 points)
+## Rubric (10 Points)
 
 | Part | Points | Criteria |
 |---|---|---|

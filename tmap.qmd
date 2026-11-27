@@ -43,15 +43,11 @@ meck <- acs_tract_nc |> filter(COUNTYFP == "119")
 fmt <- function(x, d = 0) formatC(x, format = "f", digits = d, big.mark = ",")
 ```
 
-::: {.plan}
-For the first 15 minutes or so, you and your partner will read the walkthrough together and run the code. Then you'll split up for about 25 minutes. Both of you will map median home values in Mecklenburg County, but Partner A will use equal interval classes and Partner B will use quantile classes. In the last 10 minutes you'll compare the two maps and write your answer on an index card.
-:::
-
 ## Part 1: Walkthrough {#walkthrough}
 
 Run each chunk in your own .Rmd. You will reuse this code in Part 2.
 
-### Step 1: Load the data
+### Step 1: Load the Data
 
 ::: {.why}
 We'll use 2019 to 2023 American Community Survey estimates for the `r nrow(triangle)` census tracts in Orange, Durham and Wake counties. [This file](https://docs.google.com/spreadsheets/d/1aI2YqE_Tc69ekA48e5jmbyVMXv5uszl-/edit?usp=sharing&ouid=101338019870957132383&rtpof=true&sd=true) explains each variable name.
@@ -62,6 +58,7 @@ We'll use 2019 to 2023 American Community Survey estimates for the `r nrow(trian
 library(tidyverse)
 library(sf)
 library(tmap)
+library(maptiles)
 
 #ACS census tracts for NC
 acs_tract_nc <- st_read("https://raw.githubusercontent.com/jucardwell/geog391/main/data/nc_tract_acs_2023.geojson")
@@ -70,7 +67,7 @@ acs_tract_nc <- st_read("https://raw.githubusercontent.com/jucardwell/geog391/ma
 triangle <- acs_tract_nc |> filter(COUNTYFP %in% c("135", "183", "063"))
 ```
 
-### Step 2: Color and size
+### Step 2: Color and Size
 
 ::: {.why}
 Color (`fill`) works for rates and averages. Size works for counts, like the number of people in a tract.
@@ -87,7 +84,7 @@ tm_shape(triangle) +
   tm_symbols(size = "total_pop")
 ```
 
-### Step 3: Look at the distribution before you classify
+### Step 3: Look at the Distribution Before You Classify
 
 ::: {.why}
 Every choropleth map sorts its values into classes. The right classification depends on the shape of the distribution, so plot a histogram first.
@@ -99,7 +96,7 @@ ggplot(triangle, aes(x = median_age)) +
   labs(x = "Median age", y = "Number of tracts")
 ```
 
-### Step 4: Choose a classification and a palette
+### Step 4: Choose a Classification and a Palette
 
 ::: {.why}
 `style = "equal"` splits the range into classes of the same width, while `style = "quantile"` puts the same number of tracts in each class. Run `cols4all::c4a_gui()` to browse palettes.
@@ -119,10 +116,10 @@ tm_shape(triangle) +
 
 Other useful styles are `"pretty"` and `"fisher"` (natural breaks).
 
-### Step 5: Finish the map
+### Step 5: Finish the Map
 
 ::: {.why}
-`tmap_mode("view")` makes any map interactive, and `tmap_mode("plot")` switches back. A title, some transparency and a basemap make a static map readable on its own.
+`tmap_mode("view")` makes any map interactive, and `tmap_mode("plot")` switches back. A title, some transparency and a basemap make a static map readable on its own. Static basemaps need the `maptiles` package.
 :::
 
 ```{r}
@@ -133,10 +130,10 @@ tm_shape(triangle) +
               fill.scale = tm_scale_intervals(style = "quantile", n = 5, values = "bu_pu"),
               fill.legend = tm_legend(title = "Median age")) +
   tm_title("Median age by census tract") +
-  tm_basemap("CartoDB.PositronNoLabels")
+  tm_basemap("OpenStreetMap")
 ```
 
-## Part 2: Partner practice {#partner-practice}
+## Part 2: Partner Practice {#partner-practice}
 
 Both partners map `med_house_val`, the median value of owner-occupied homes, for the `r nrow(meck)` census tracts in Mecklenburg County (Charlotte). Partner A uses equal interval classes and Partner B uses quantile classes. Each task tells you in parentheses which walkthrough step to reuse.
 
@@ -147,7 +144,7 @@ meck <- acs_tract_nc |> filter(COUNTYFP == "119")
 
 :::: {.partners}
 ::: {.partner .partner-a}
-### Partner A: Equal interval
+### Partner A: Equal Interval
 
 1. Plot a histogram of `med_house_val`. *(Step 3)*
 2. Map it with 5 equal interval classes and a palette you choose. *(Step 4)*
@@ -184,7 +181,7 @@ When you finish, bring your class breaks and the number of tracts in each class 
 Each pair turns in one index card before leaving. Write both of your names on it, copy the class breaks and counts from the table, and add two or three sentences saying which map the nonprofit should use and why.
 :::
 
-## Answer key {#answer-key .answer-key}
+## Answer Key {#answer-key .answer-key}
 
 ```{r key-values, include = FALSE}
 x <- meck$med_house_val[!is.na(meck$med_house_val)]
@@ -226,7 +223,7 @@ tm_shape(meck) +
               fill.scale = tm_scale_intervals(style = "equal", n = 5, values = "brewer.yl_or_rd"),
               fill.legend = tm_legend(title = "Median home value ($)")) +
   tm_title("Median home value, Mecklenburg County (equal interval)") +
-  tm_basemap("CartoDB.PositronNoLabels")
+  tm_basemap("OpenStreetMap")
 
 #### Partner B: quantile ####
 tm_shape(meck) +
@@ -241,5 +238,5 @@ tm_shape(meck) +
               fill.scale = tm_scale_intervals(style = "quantile", n = 5, values = "brewer.yl_or_rd"),
               fill.legend = tm_legend(title = "Median home value ($)")) +
   tm_title("Median home value, Mecklenburg County (quantile)") +
-  tm_basemap("CartoDB.PositronNoLabels")
+  tm_basemap("OpenStreetMap")
 ```

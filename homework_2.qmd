@@ -1,5 +1,5 @@
 ---
-title: "Homework 2: Predicting a spatial pattern"
+title: "Homework 2: Predicting a Spatial Pattern"
 ---
 
 ## Overview
@@ -12,7 +12,7 @@ We live in the rapidly industrializing nation of Fakelandia. Despite our country
 
 Fakelandia is divided into square counties arranged in a rectangular grid (A–E from north to south, 1–7 from west to east).
 
-## Spatial processes
+## Spatial Processes
 
 The following known spatial processes contribute to the spatial pattern of air pollution in Fakelandia:
 
@@ -21,7 +21,7 @@ The following known spatial processes contribute to the spatial pattern of air p
 - Counties B6, B7, C6, and C7 contain a dense cluster of cities and factories, creating a localized area of especially high pollution.
 - Rainfall increases from east to west, but its effect on air pollution varies across space: precipitation reduces pollution more effectively in southern counties (where pollutants accumulate) than in northern counties (where pollution is already dispersed by wind).
 
-## Map creation
+## Map Creation
 
 You have been provided with a [template map of Fakelandia's county grid](https://docs.google.com/presentation/d/1gJI9nDWgIWHbMpSfCOlUDey40ln_Q2Jb/edit?usp=sharing&ouid=101338019870957132383&rtpof=true&sd=true). Assign each county an estimated air pollution value based on the spatial processes above, from 1 (low) to 7 (high), and use a seven-class color gradient (for example, light blue to dark blue) to shade the map. Be sure to fill in the legend. Your map should reflect the overall spatial structure implied by the processes, including broad gradients, regional differences, and any localized areas of higher or lower pollution.
 
@@ -36,7 +36,7 @@ In a brief write-up (about ½–1 page), discuss the following questions:
 
 Submit your map and write-up to the Homework 2 assignment on Canvas.
 
-## Rubric (10 points)
+## Rubric (10 Points)
 
 | Part | Points | Criteria |
 |---|---|---|

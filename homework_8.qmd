@@ -1,5 +1,5 @@
 ---
-title: "Homework 8: Uninsured rates and Medicaid outreach"
+title: "Homework 8: Uninsured Rates and Medicaid Outreach"
 ---
 
 ## Overview
@@ -46,7 +46,7 @@ acs_tract_nc <- st_read("https://raw.githubusercontent.com/jucardwell/geog391/ma
 
 Submit your polished knitted .html to the Homework 8 assignment on Canvas.
 
-## Rubric (10 points)
+## Rubric (10 Points)
 
 | Part | Points | Criteria |
 |---|---|---|
