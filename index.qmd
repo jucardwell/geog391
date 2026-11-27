@@ -1,9 +1,24 @@
 ---
-title: "GEOG 391 · Quantitative Methods in Geography"
-pagetitle: "GEOG 391 · Spring 2027"
+title: "Course information"
 toc: false
-page-layout: full
-body-classes: course-page
 ---
 
-{{< include _generated/week.md >}}
+::: facts
+Class meetings
+: {{< var meetings >}} in {{< var room >}}
+
+Instructor
+: {{< var instructor >}}
+
+Office hours
+: {{< var office_hours >}}, {{< var office >}}
+
+Course material
+: Everything is on this website. Canvas is only for turning in homework.
+
+Policies and grading
+: [How this course works](how_this_course_works.qmd)
+
+Case studies
+: [Dates and study guides](case_studies.qmd)
+:::
