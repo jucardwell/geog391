@@ -1,222 +1,269 @@
-# Point Pattern Analysis
+---
+title: "Point Pattern Analysis"
+css: styles/tutorial.css
+---
 
-Point Pattern Analysis (PPA) is a set of methods that can help us interpret the spatial distribution of events (represented as points) in a defined study area/region. The goal is to identify deviations from the null hypothesis (complete spatial randomness modeled by a homogeneous Poisson distribution) that can be related to mechanistic processes at the first-order and the second-order:
+```{=html}
+<style>
+:root {
+  --t-ink: #1D2415;
+  --t-title: #4E7006;
+  --t-rule: #AFC891;
+  --t-link: #466702;
+  --t-plan-bg: #EDF8E0;
+  --t-plan-edge: #59800B;
+  --t-why-bg: #FEF0ED;
+  --t-why-edge: #D5584D;
+  --t-read-bg: #F4F9EE;
+  --t-read-edge: #94B072;
+  --t-a-bg: #E6F5D5;
+  --t-b-bg: #FDE9E6;
+  --t-deliver-bg: #FDE0DC;
+  --t-deliver-edge: #9D352D;
+  --t-code-bg: #F5F8F1;
+  --t-code-edge: #71943F;
+  --t-key-edge: #BD4238;
+  --t-button: #426003;
+}
+</style>
+```
 
--   A first-order process means the pattern of points is determined by external factors or a trend in the environment
--   A second-order process means the pattern is determined by interaction (attraction or repulsion) between the points themselves
-
-For this tutorial, we will use two different simulated datasets. You will need to download the simulated datasets from this [link](https://drive.google.com/file/d/1DUtKbB0ZCraWibsB1Hh7gdpdxVUPRa1b) and put it in the folder that your tutorial is saved in.
-
-**To follow along with this tutorial, make a new .Rmd document. As you move through the tutorial add chunks, headers, and relevant text to your document.**
-
-## Reading in Data
-
-```{r, include = F}
-library(sf)
+```{r setup, include = FALSE}
 library(tidyverse)
+library(sf)
 library(spatstat)
 
+#course data (read once for the whole page)
+nc_counties <- st_read("https://drive.google.com/uc?export=download&id=1hXVtKL_33c4QRw6_Z9LlYqjgisdYCRqX", quiet = TRUE) |>
+  st_transform(2264)
+stations <- st_read("https://drive.google.com/uc?export=download&id=1bjAeEaoVZUjf9VLJTKl_anABwznioAoa", quiet = TRUE)
+nc_hosp <- st_read("https://drive.google.com/uc?export=download&id=1K7lH1U6oQQ6sWXIqxOeFUYbWjdnxqx5a", quiet = TRUE) |>
+  st_transform(2264)
+schools <- st_read("https://drive.google.com/uc?export=download&id=1i-C2PF3ajbpHTlavh3m1QbWNObpobprZ", quiet = TRUE)
 
-#load simulated datasets
-load("point_patterns.RData")
-
-set.seed(123)
+#numbers quoted in the text below come from here, so they stay right if the data changes
+fmt <- function(x, d = 2) formatC(x, format = "f", digits = d, big.mark = ",")
 ```
 
-```{r, warning = F, eval = F}
-library(sf)
+## Part 1: Walkthrough {#walkthrough}
+
+Run each chunk in your own .Rmd. You will reuse this code in Part 2.
+
+### Step 1: Load the Data and Make a Point Pattern
+
+::: {.why}
+We'll use fire station locations in Forsyth, Guilford and Alamance counties (Winston-Salem, Greensboro and Burlington). `spatstat` needs a point pattern (`ppp`): the points plus a window, which is the area where points could have been. Here the window is the three counties. The data are in NC State Plane (feet), so `rescale.ppp()` turns the units into miles.
+:::
+
+```{r, eval = FALSE}
+#load libraries
 library(tidyverse)
+library(sf)
 library(spatstat)
 
-#load simulated datasets
-load("point_patterns.RData")
+#NC counties, projected to NC State Plane (feet)
+nc_counties <- st_read("https://drive.google.com/uc?export=download&id=1hXVtKL_33c4QRw6_Z9LlYqjgisdYCRqX") |>
+  st_transform(2264)
 
-set.seed(123)
+#fire stations (already in NC State Plane)
+stations <- st_read("https://drive.google.com/uc?export=download&id=1bjAeEaoVZUjf9VLJTKl_anABwznioAoa")
 ```
-
-## Analyzing Global Structure
-
-### Quadrat Analyis
-
-Quadrat analysis is a count-based method used to assess the global structure of a spatial pattern. In this method, the study area is divided into a grid of equally-sized cells (quadrats), and the number of points falling into each cell is counted. The results are then compared to the outcome of a Poisson distribution (which we use to model CSR).
-
-The number of quadrats is highly dependent on the size of the study region and the number of events.
-
-A very simple rule of thumb for choosing the number of quadrats in a quadrat test is to ensure that each quadrat contains enough points for the chi-square approximation to be valid. At a minimum, each quadrat should have at least 5 observations. However, for patterns that show clear clustering, this might not be possible. In that case, you can use Monte Carlo estimation for more robust estimates. For example, for our `sample_pattern_1` dataset, 16 quadrats is too few because many quadrats have 5 or fewer. However, even with 9 quadrats, there are low numbers (because this dataset likely shows clustering). Therefore, we might choose to continue with 9 quadrats but add a Monte Carlo estimation.
-
-```{r, message = F, warning=F}
-plot(sample_pattern_1)
-#create a quadrat count with 9 quadrats
-q_count <- quadratcount(sample_pattern_1, nx = 3, ny = 3)
-
-#plot counts
-plot(q_count)
-
-#calculate variance to mean ratio
-var(as.vector(q_count)) /
-mean(as.vector(q_count))
-
-#run q test with simulations
-q_test <- quadrat.test(sample_pattern_1, nx=3, ny=3, method= "MonteCarlo", nsim=99)
-
-#plot
-q_test
-plot(q_test)
-
-```
-If you explore the plot of the quadrat test, the first number (top-left) is the number of events in the quadrat. The second number (top-right) is the expected number of events under CSR. The third number (bottom) is the residual, which is based on how different the top two values are. A larger residual indicates a larger difference.
-
-**Q2: Based on the residuals, which quadrats differ the most from expected values. What does this tell us about the spatial pattern?**
-
-For `sample_pattern_1` our variance-to-mean ratio is 3.5, which indicates clustering. A Poisson (random) distribution has a variance-to-mean ratio of 1, meaning the variance equals the mean. Values greater than 1 indicate clustering, while values less than 1 indicate dispersion. The small p-value of the X2 quadrat test allows us to reject the null hypothesis of spatial randomness in favor of the alternative that the observed pattern is non-random and clustered.
-
- 
-```{r, messsage = F, warning = F}
-plot(sample_pattern_2)
-
-#create a quadrat count with 9 quadrats
-q_count <- quadratcount(sample_pattern_2, nx = 3, ny = 3)
-
-#plot counts
-plot(q_count)
-
-#calculate variance to mean ratio
-var(as.vector(q_count)) /
-mean(as.vector(q_count))
-
-#run q test with simulations
-q_test <- quadrat.test(sample_pattern_2, nx=3, ny=3, method= "MonteCarlo", nsim=999)
-
-#plot
-q_test
-plot(q_test)
-
-```
-On the other hand, our quadrat test for `sample_pattern_2` indicates that we fail to reject the null hypothesis of complete spatial randomness, suggesting the observed spatial pattern does not differ significantly from a random distribution.
-
-
-### Kernel Density
-
-Kernel Density Estimation (KDE) is a simple way to create a smooth map of where points are most concentrated. Instead of dividing the study area into fixed quadrats and counting how many events fall in each one (like the quadrat test), KDE places an “influence curve” over every point in the dataset (kernel). When using a Guassian kernel, this curve is highest at the point itself and gradually taper off with distance. When all of these curves are added together, they form a continuous surface where high peaks show areas with many nearby points and lower areas show places with fewer points. Because KDE is only a descriptive smoothing technique, it does not involve a statistical model or a test of randomness like a quadrat test does. However, it can capture more local variability and is not sensitive to size/placement of the window of analysis like quadrat tests.In addition, KDE can be a useful input for accounting for intensity in second-order testing of spatial patterns. 
-
-The main parameter of the KDE is bandwidth. The bandwidth controls the width of each kernel. A large bandwidth (each point has broader influence) is better at capturing global variation and a small bandwidth is better at capturing local variation.
-
-In R, the `density()` function defaults to a gaussian kernel with a nrd0 bandwidth selector, a variation of Silverman's Rule of Thumb that uses the minimum of the standard deviation and the scaled interquartile range to determine smoothness. 
-
-We can create a kernel density estimation for our two patterns:
-
-```{r, warning= F, message=F}
-
-#create KDE
-kernel_density1 <- density.ppp(sample_pattern_1)
-#plot 
-plot(kernel_density1)
-
-kernel_density2 <- density.ppp(sample_pattern_2)
-#plot 
-plot(kernel_density2)
-```
-
-## Analyzing Local Structure
-
-### Average Nearest Neighbor (ANN)
-The ANN statistic is a distance-based method for summarizing local spatial structure in a point pattern. ANN is focused specifically on the distance of each point to its nearest neighbor. Therefore, ANN is useful for identifying very local clustering. 
 
 ```{r}
-#compute observed ANN
-ANN_obs1 <- mean(nndist(sample_pattern_1))
+#the three counties are the window
+triad <- nc_counties |>
+  filter(county_name %in% c("Forsyth County, North Carolina",
+                            "Guilford County, North Carolina",
+                            "Alamance County, North Carolina"))
 
-nsim <- 999
-ANN_sim1 <- numeric(nsim)
+#keep the stations inside the window
+stations <- st_filter(stations, triad)
 
-#MC simulations
-for(i in 1:nsim){
-  sim <- rpoispp(kernel_density1) #simulate inhomogeneous Poisson using our KDE
-  ANN_sim1[i] <- mean(nndist(sim))
-}
-
-#monte Carlo p-value (two-sided)
-N_greater1 <- sum(ANN_sim1 >= ANN_obs1)
-p_value1 <- 2 * min((N_greater1 + 1)/(nsim + 1), (nsim - N_greater1 + 1)/(nsim + 1))
-
-p_value1
-
-# 1f. Plot ANN null distribution
-hist(ANN_sim1,
-     main = "Monte Carlo Distribution of ANN (sample_pattern_1)",
-     xlab = "Average Nearest Neighbor Distance")
-abline(v = ANN_obs1, col="red", lwd=2)
-
-ANN_sim2 <- numeric(nsim)
-
-#observed ANN
-ANN_obs2 <- mean(nndist(sample_pattern_2))
-
-#compute average intensity (lambda) for homogeneous Poisson
-lambda2 <- sample_pattern_2$n / area.owin(sample_pattern_2$window)
-
-for(i in 1:nsim){
-  sim <- rpoispp(lambda2, win = sample_pattern_2$window)  # simulate CSR
-  ANN_sim2[i] <- mean(nndist(sim))
-}
-
-#monte Carlo p-value (two-sided)
-N_greater2 <- sum(ANN_sim2 >= ANN_obs2)
-p_value2 <- 2 * min((N_greater2 + 1)/(nsim + 1), (nsim - N_greater2 + 1)/(nsim + 1))
-
-p_value2
-
-
-#plot ANN null distribution
-hist(ANN_sim2,
-     main = "Monte Carlo Distribution of ANN (sample_pattern_2)",
-     xlab = "Average Nearest Neighbor Distance")
-abline(v = ANN_obs2, col="red", lwd=2)
-
+#make the point pattern, convert feet to miles, and drop exact duplicates
+station_pp <- as.ppp(st_geometry(stations), W = as.owin(st_union(triad)))
+station_pp <- rescale.ppp(station_pp, 5280, "mile")
+station_pp <- unique(station_pp)
+station_pp
 ```
 
-Both of our point patterns do not indicate deviation from the null process, meaning there is no evidence of significant local clustering or dispersion; consequently, the observed spatial arrangements are statistically indistinguishable from their respective Poisson processes.
+### Step 2: Look at Intensity (First Order)
 
-### L- Function
-The L-Function is a transformation of Ripley’s K-Function used to diagnose local spatial structure by analyzing how a spatial point pattern deviates from randomness across different distance scales. It evaluates whether points tend to occur closer together or farther apart than would be expected if they were randomly distributed.
+::: {.why}
+First-order structure is about how the intensity, the number of points per square mile, changes across the window. A kernel density map shows it.
+:::
 
-The L-function measures the number of neighboring points within increasing distances of each point and applies a transformation that makes deviations from randomness easier to interpret. To understand the results, the observed L-function is compared to the expected values from a reference model, typically a homogeneous Poisson process (Complete Spatial Randomness, CSR). If the data show large-scale variation in intensity, an inhomogeneous Poisson process is used instead so that underlying global structure is accounted for and the results can focus on local structure.
-
-If observed values are greater than the expected values, the pattern indicates clustering at that distance; if they are smaller, the pattern suggests regular spacing or inhibition; and if they are similar, the pattern is consistent with randomness. Examining the L-function across distances allows researchers to identify the spatial scales at which clustering or dispersion occurs.
-
-
-```{r, message=F, warning=F}
-
-#first point pattern demonstrated global structure, therefore we use an inhomogenous Poisson as comparison. Correction corrects for edge effects. 
-l_funct_pattern1 <- envelope(
-  sample_pattern_1,
-  fun = Linhom, #inhomogenous
-  nsim = 99,
-  funargs = list(correction = "iso"),
-  transform = expression(. - r)   # subtract r from obs and simulated
-)
-
-#plot
-plot(l_funct_pattern1, legend = FALSE)
-
-
-#use homogenous for pattern 2 since it demonstrated no global structure
-l_funct_pattern2 <- envelope(
-  sample_pattern_2,
-  fun = Lest,#homogenous
-  nsim = 99,
-  funargs = list(correction = "iso"),
-  transform = expression(. - r)   # subtract r from obs and simulated
-)
-
-plot(l_funct_pattern2, legend = F)
-
-
-
+```{r, fig.alt = "Kernel density map of fire stations in Forsyth, Guilford and Alamance counties, with the stations drawn as points. Density is highest in central Greensboro and central Winston-Salem and lowest in the rural edges of the counties."}
+plot(density(station_pp), main = "Fire stations per square mile")
+plot(station_pp, add = TRUE, pch = 16, cex = 0.5)
 ```
-In these plots, the grey indicates the simulation envelope, the red line is CSR (or inhomogenous point pattern estimated from KDE) and the black line is the dataset value. 
 
-For the first pattern, the inhomogeneous L-function shows values close to zero across all distances, indicating that once the global variation in intensity is accounted for, the points are distributed roughly as expected under an inhomogeneous Poisson process. This suggests there is no significant local clustering or regularity beyond what is explained by the overall trend, so the observed spatial structure is largely due to the global inhomogeneity rather than local interactions between points.
+### Step 3: Quadrat Test
 
-For the second pattern, the centered L-function rises above zero for intermediate distances, approximately from 0.07 to 0.25 of the unit window. This positive deviation indicates that points are closer together than expected under a homogeneous Poisson process, revealing local clustering at that scale.
+::: {.why}
+Split the window into quadrats and count the points in each. Under complete spatial randomness (CSR), each quadrat expects a count in proportion to its area, and for equal-sized quadrats the variance-to-mean ratio (VMR) is about 1. A VMR well above 1 means uneven intensity. The Monte Carlo test compares the counts with 999 random patterns.
+:::
 
+```{r, fig.alt = "The three-county window split into six quadrats, with the number of fire stations printed in each. The counts range widely, with the most stations in the quadrats that hold Greensboro and Winston-Salem."}
+set.seed(391)
+
+station_q <- quadratcount(station_pp, nx = 3, ny = 2)
+plot(station_pp, pch = 16, cex = 0.5, main = "Fire stations per quadrat")
+plot(station_q, add = TRUE, col = "black", cex = 1.4)
+
+#variance-to-mean ratio
+var(as.vector(station_q)) / mean(as.vector(station_q))
+
+quadrat.test(station_pp, nx = 3, ny = 2, method = "MonteCarlo", nsim = 999)
+```
+
+### Step 4: Average Nearest Neighbor (Second Order)
+
+::: {.why}
+Second-order structure is about how points relate to each other. The average nearest neighbor (ANN) ratio divides the observed mean distance to the nearest point by the distance expected under CSR. A ratio below 1 means clustered, about 1 means random and above 1 means dispersed. `clarkevans.test()` gives the same ratio (R) and a p-value from 999 random patterns in the same window.
+:::
+
+```{r}
+set.seed(391)
+
+#observed and expected mean nearest-neighbor distance (miles)
+ann_obs <- mean(nndist(station_pp))
+ann_exp <- 0.5 / sqrt(npoints(station_pp) / area.owin(Window(station_pp)))
+ann_obs / ann_exp
+
+clarkevans.test(station_pp, correction = "none", alternative = "two.sided",
+                method = "MonteCarlo", nsim = 999)
+```
+
+```{r, include = FALSE}
+set.seed(391)
+st_q <- quadratcount(station_pp, nx = 3, ny = 2)
+st_qt <- quadrat.test(station_pp, nx = 3, ny = 2, method = "MonteCarlo", nsim = 999)
+set.seed(391)
+st_ce <- clarkevans.test(station_pp, correction = "none", alternative = "two.sided", method = "MonteCarlo", nsim = 999)
+```
+
+The two tests answer different questions. The VMR is `r fmt(var(as.vector(st_q)) / mean(as.vector(st_q)), 1)` (p = `r fmt(st_qt$p.value, 3)`), so stations are not spread evenly across the three counties. The ANN ratio is `r fmt(st_ce$statistic)` (p = `r fmt(st_ce$p.value, 2)`), so the distance from each station to its nearest neighbor is about what CSR would give, or a little larger.
+
+## Part 2: Partner Practice {#partner-practice}
+
+Both partners use all of North Carolina as the window. Partner A analyzes the `r nrow(nc_hosp)` licensed hospitals from [NC OneMap](https://www.nconemap.gov/datasets/hospitals), and Partner B analyzes the `r nrow(schools)` public high schools that reported an average SAT score. Each task tells you in parentheses which walkthrough step to reuse.
+
+```{r, eval = FALSE}
+#the North Carolina window (both partners)
+nc_outline <- st_union(nc_counties)
+
+#Partner A: hospitals, projected to NC State Plane (feet)
+nc_hosp <- st_read("https://drive.google.com/uc?export=download&id=1K7lH1U6oQQ6sWXIqxOeFUYbWjdnxqx5a") |>
+  st_transform(2264)
+
+#Partner B: public high schools (already in NC State Plane)
+schools <- st_read("https://drive.google.com/uc?export=download&id=1i-C2PF3ajbpHTlavh3m1QbWNObpobprZ")
+```
+
+:::: {.partners}
+::: {.partner .partner-a}
+### Partner A: Hospitals
+
+1. Make a point pattern of the hospitals in the North Carolina window, in miles, with duplicates dropped. *(Step 1)*
+2. Map the kernel density with the points on top. *(Step 2)*
+3. Run `set.seed(391)`, then a quadrat test with `nx = 6, ny = 2`, and find the VMR. *(Step 3)*
+4. Run `set.seed(391)`, then find the ANN ratio and its p-value. *(Step 4)*
+
+When you finish, bring your number of points, VMR, quadrat p-value, ANN ratio and ANN p-value to Part 3.
+:::
+
+::: {.partner .partner-b}
+### Partner B: High Schools
+
+1. Make a point pattern of the schools in the North Carolina window, in miles, with duplicates dropped. *(Step 1)*
+2. Map the kernel density with the points on top. *(Step 2)*
+3. Run `set.seed(391)`, then a quadrat test with `nx = 6, ny = 2`, and find the VMR. *(Step 3)*
+4. Run `set.seed(391)`, then find the ANN ratio and its p-value. *(Step 4)*
+
+When you finish, bring your number of points, VMR, quadrat p-value, ANN ratio and ANN p-value to Part 3.
+:::
+::::
+
+## Part 3: Together {#together}
+
+1. Fill in the table.
+2. Compare your density maps. Where is each pattern most intense?
+3. Both patterns have uneven intensity, but only one is clustered by the nearest-neighbor test. Write one hypothesis for each pattern about the process that places hospitals or schools where they are.
+
+| Pattern | Points | VMR | Quadrat p-value | ANN ratio | ANN p-value |
+|---|---|---|---|---|---|
+| Hospitals (Partner A) | | | | | |
+| High schools (Partner B) | | | | | |
+
+::: {.deliver}
+Each pair turns in one index card before leaving. Write both of your names on it, copy the table, and add two or three sentences describing the first-order and second-order structure of each pattern, with one process hypothesis for each.
+:::
+
+## Answer Key {#answer-key .answer-key}
+
+```{r key-values, include = FALSE}
+nc_outline <- st_union(nc_counties)
+make_pp <- function(pts) unique(rescale.ppp(as.ppp(st_geometry(pts), W = as.owin(nc_outline)), 5280, "mile"))
+run_all <- function(pp) {
+  set.seed(391); q <- quadratcount(pp, nx = 6, ny = 2)
+  qt <- quadrat.test(pp, nx = 6, ny = 2, method = "MonteCarlo", nsim = 999)
+  set.seed(391); ce <- clarkevans.test(pp, correction = "none", alternative = "two.sided", method = "MonteCarlo", nsim = 999)
+  list(n = npoints(pp), vmr = var(as.vector(q)) / mean(as.vector(q)), qp = qt$p.value, r = ce$statistic, rp = ce$p.value)
+}
+ka <- run_all(make_pp(nc_hosp))
+kb <- run_all(make_pp(schools))
+```
+
+| Pattern | Points | VMR | Quadrat p-value | ANN ratio | ANN p-value |
+|---|---|---|---|---|---|
+| Hospitals | `r ka$n` | `r fmt(ka$vmr, 1)` | `r fmt(ka$qp, 3)` | `r fmt(ka$r)` | `r fmt(ka$rp, 3)` |
+| High schools | `r kb$n` | `r fmt(kb$vmr, 1)` | `r fmt(kb$qp, 3)` | `r fmt(kb$r)` | `r fmt(kb$rp, 3)` |
+
+Monte Carlo p-values can shift slightly with a different seed or R version, and 0.002 is the smallest possible value with 999 simulations.
+
+A good card says something like this. Both patterns have strong first-order structure: intensity is highest around Charlotte, the Triad and the Triangle, where most people live, and both quadrat tests reject CSR. At the second order they differ. Hospitals have an ANN ratio close to 1, so once you account for their number, each hospital is about as far from its nearest neighbor as a random pattern would give. One hypothesis is that hospitals serve whole counties or regions, which spaces them out. High schools are clustered (ANN ratio about `r fmt(kb$r)`), because cities need many schools close together, and districts build them where students live.
+
+```{r, eval = FALSE}
+nc_outline <- st_union(nc_counties)
+
+#### Partner A: hospitals ####
+nc_hosp <- st_read("https://drive.google.com/uc?export=download&id=1K7lH1U6oQQ6sWXIqxOeFUYbWjdnxqx5a") |>
+  st_transform(2264)
+
+hosp_pp <- as.ppp(st_geometry(nc_hosp), W = as.owin(nc_outline))
+hosp_pp <- rescale.ppp(hosp_pp, 5280, "mile")
+hosp_pp <- unique(hosp_pp)
+
+plot(density(hosp_pp), main = "Hospitals per square mile")
+plot(hosp_pp, add = TRUE, pch = 16, cex = 0.5)
+
+set.seed(391)
+hosp_q <- quadratcount(hosp_pp, nx = 6, ny = 2)
+var(as.vector(hosp_q)) / mean(as.vector(hosp_q))
+quadrat.test(hosp_pp, nx = 6, ny = 2, method = "MonteCarlo", nsim = 999)
+
+set.seed(391)
+mean(nndist(hosp_pp)) / (0.5 / sqrt(npoints(hosp_pp) / area.owin(Window(hosp_pp))))
+clarkevans.test(hosp_pp, correction = "none", alternative = "two.sided",
+                method = "MonteCarlo", nsim = 999)
+
+#### Partner B: high schools ####
+schools <- st_read("https://drive.google.com/uc?export=download&id=1i-C2PF3ajbpHTlavh3m1QbWNObpobprZ")
+
+school_pp <- as.ppp(st_geometry(schools), W = as.owin(nc_outline))
+school_pp <- rescale.ppp(school_pp, 5280, "mile")
+school_pp <- unique(school_pp)
+
+plot(density(school_pp), main = "High schools per square mile")
+plot(school_pp, add = TRUE, pch = 16, cex = 0.5)
+
+set.seed(391)
+school_q <- quadratcount(school_pp, nx = 6, ny = 2)
+var(as.vector(school_q)) / mean(as.vector(school_q))
+quadrat.test(school_pp, nx = 6, ny = 2, method = "MonteCarlo", nsim = 999)
+
+set.seed(391)
+mean(nndist(school_pp)) / (0.5 / sqrt(npoints(school_pp) / area.owin(Window(school_pp))))
+clarkevans.test(school_pp, correction = "none", alternative = "two.sided",
+                method = "MonteCarlo", nsim = 999)
+```
