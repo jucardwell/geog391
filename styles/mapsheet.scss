@@ -245,9 +245,8 @@ table.plain-list {
 .case-main h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 0.5rem; }
 .case-main h3 { font-size: 1.25rem; font-weight: 700; margin: 1.5rem 0 0.5rem; }
 .legend-box {
-  border: 1px solid $ink; padding: 12px 14px; display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 6px 8px;
+  border: 1px solid $ink; padding: 12px 14px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px;
   .legend-title { grid-column: 1 / -1; font-weight: 700; text-align: center; border-bottom: 1px solid $ink; padding-bottom: 6px; margin-bottom: 2px; }
-  .sym.prep, .sym.case { color: $red; }
 }
 .case-side p { margin: 0; }
 .case-downloads { display: flex; flex-direction: column; gap: 3px; }
