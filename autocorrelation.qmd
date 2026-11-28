@@ -1,255 +1,374 @@
-# Spatial Autocorrelation
+---
+title: "Spatial Autocorrelation"
+css: styles/tutorial.css
+---
 
-Tobler's First Law of Geography reminds us that everything is related to everything else, but near things are more related than distant things. Spatial autocorrelation describes how a variable is correlated with itself across geographic space. In other words, spatial autocorrelation can tell us *how* related near things are to each other in our dataset.
+```{=html}
+<style>
+:root {
+  --t-ink: #0F252B;
+  --t-title: #016F82;
+  --t-rule: #7FCBDE;
+  --t-link: #046677;
+  --t-plan-bg: #E0F9FF;
+  --t-plan-edge: #067F94;
+  --t-why-bg: #FEF1E6;
+  --t-why-edge: #C36D05;
+  --t-read-bg: #ECFAFD;
+  --t-read-edge: #5AB3C8;
+  --t-a-bg: #D4F5FE;
+  --t-b-bg: #FEEADB;
+  --t-deliver-bg: #FFE2CB;
+  --t-deliver-edge: #8A4B01;
+  --t-code-bg: #F0F9FB;
+  --t-code-edge: #0A96AF;
+  --t-key-edge: #A65C03;
+  --t-button: #0C6070;
+}
+</style>
+```
 
-Point pattern analysis is focused on the *location* of events. In point patterns, the source of randomness is the location itself. In assessing autocorrelation, we are considering whether the *value* at locations is random.
-
-There are two general scenarios in which we might want to analyze autocorrelation:
-
--   **Areal units**: Many sources of geographical data come aggregated into zones that may or may not be meaningful. For instance, census data is aggregated from the individual household level to statistical units (like census tracts). In these cases, the location of the units is pre-determined, so it is not meaningful to analyze location. Instead, it is useful to consider values at these fixed locations to determine if there are spatial patterns in the variable.
--   **Locations:** For some datasets, we might be interested both in the pattern of location AND the pattern in value. In these cases, both the location and value are meaningful– for instance, our lightning strike dataset. In this case, we might be interested in both where the lightning strikes are and something about the the strikes when they occur (for instance, are more powerful strikes located near each other).
-
-Just like point pattern analysis, quantifying autocorrelation is useful because it helps us understand the spatial pattern/structure of our data, which helps us in generating hypotheses about the processes that generate the pattern.
-
-In addition, spatial autocorrelation allows us to understand how spatially dependent our variable is. Spatial dependence can be a serious problem for applying traditional statistical methods because these methods generally have an assumption of independence. Measuring the strength of spatial dependence helps us evaluate how serious this issue is and decide whether we need to adjust our approach- for example, by modifying our sampling design, using methods that account for spatial structure, or interpreting results with greater caution.
-
-In this chapter, we will explore autocorrelation in the Median Household Income variable from the 2023 American Community Survey for North Carolina census tracts and chronic absences at North Carolina public schools.
-
-**To follow along with this tutorial, make a new .Rmd document. As you move through the tutorial add chunks, headers, and relevant text to your document.**
-
-## Reading in Data
-
-```{r, include = F}
-library(tmap)
+```{r setup, include = FALSE}
 library(tidyverse)
-library(spdep)
 library(sf)
-
-#Note that the crs 
-#of the datasets is NAD83/ North Carolina, meaning that the units are feet
-tracts_sf <- st_read("https://drive.google.com/uc?export=download&id=1mUxk0R_lqcfuJppw_A-1vy-pcB9XdCnS")
-
-schools_sf <- st_read("https://drive.google.com/uc?export=download&id=1_X3s6sTw5zeIuXa6wDQ61r8Px7_tI7Nr")
-
-```
-
-```{r, eval=F}
+library(spdep)
 library(tmap)
+
+#course data (read once for the whole page)
+nc_counties <- st_read("https://drive.google.com/uc?export=download&id=1hXVtKL_33c4QRw6_Z9LlYqjgisdYCRqX", quiet = TRUE) |>
+  st_transform(2264)
+pm <- st_read("https://drive.google.com/uc?export=download&id=1zf1xk-7pOoSnEwGvGsNVa6XejFoPFzdJ", quiet = TRUE) |>
+  st_transform(2264)
+schools <- st_read("https://drive.google.com/uc?export=download&id=1i-C2PF3ajbpHTlavh3m1QbWNObpobprZ", quiet = TRUE)
+schools <- schools |> filter(!duplicated(st_coordinates(schools)))
+
+#numbers quoted in the text below come from here, so they stay right if the data changes
+fmt <- function(x, d = 2) formatC(x, format = "f", digits = d, big.mark = ",")
+lisa_colors <- c("High-High" = "#B2182B", "Low-Low" = "#2166AC", "High-Low" = "#F4A582",
+                 "Low-High" = "#92C5DE", "Not significant" = "#E5E5E5")
+```
+
+This tutorial runs over two class days. Day 1 covers neighbors and global Moran's I, and Day 2 covers local Moran's I (LISA). Each day has its own walkthrough, partner practice and index card.
+
+## Day 1 Walkthrough: Global Moran's I {#walkthrough}
+
+Run each chunk in your own .Rmd. You will reuse this code in the Day 1 partner practice.
+
+### Step 1: Load and Map the Data
+
+::: {.why}
+We'll use `pct_pov`, the percent of people below the poverty line, for North Carolina's 100 counties from the 2019 to 2023 [American Community Survey](https://www.census.gov/programs-surveys/acs.html). Spatial autocorrelation asks whether nearby places have similar values.
+:::
+
+```{r, eval = FALSE}
+#load libraries
 library(tidyverse)
-library(spdep)
 library(sf)
+library(spdep)
+library(tmap)
 
-#Note that the crs 
-#of the datasets is NAD83/ North Carolina, meaning that the units are feet
-tracts_sf <- st_read("https://drive.google.com/uc?export=download&id=1mUxk0R_lqcfuJppw_A-1vy-pcB9XdCnS")
-
-schools_sf <- st_read("https://drive.google.com/uc?export=download&id=1_X3s6sTw5zeIuXa6wDQ61r8Px7_tI7Nr")
+#NC counties, projected to NC State Plane (feet)
+nc_counties <- st_read("https://drive.google.com/uc?export=download&id=1hXVtKL_33c4QRw6_Z9LlYqjgisdYCRqX") |>
+  st_transform(2264)
 ```
 
-## Defining Neighbors
+```{r, fig.alt = "Map of percent of people in poverty by North Carolina county in five quantile classes, with a legend. The highest poverty rates are in the northeast and in Robeson and nearby counties in the southeast, and the lowest are around Raleigh and Charlotte and on parts of the coast."}
+tm_shape(nc_counties) +
+  tm_polygons(fill = "pct_pov",
+              fill.scale = tm_scale_intervals(style = "quantile", n = 5, values = "brewer.or_rd"),
+              fill.legend = tm_legend(title = "People in poverty (%)"))
+```
 
-In order to quantify spatial autocorrelation, we need to define each observation's "spatial neighborhood" so that we can see how related an observation is to the observations near it. There are many ways to define neighbors, and the decision about what definition to use should reflect the processes you hypothesize might be shaping the spatial pattern. For example, if you are studying the spread of a disease, it may be appropriate to define neighbors based on travel networks or adjacency of regions. If you are examining soil properties, a distance-based neighborhood might better reflect how conditions diffuse across space. Some neighborhood definitions can be used for both areal and point datasets and some are specific to the unit of analysis.
+### Step 2: Define Neighbors
 
-We can explore three different neighborhood definitions using our datasets:
+::: {.why}
+Moran's I needs a definition of who counts as a neighbor. Queen contiguity makes two counties neighbors if they share any border or corner. For points, k-nearest neighbors makes each point's k closest points its neighbors.
+:::
 
-### Distance Threshold (Point and Areal)
+```{r, fig.alt = "Map of North Carolina county outlines with a line connecting the center of each county to the center of every county that shares a border or corner with it."}
+#queen contiguity
+county_nb <- poly2nb(nc_counties, queen = TRUE)
+summary(county_nb)
 
-One way to determine neighbors is to set a distance threshold. Any observations within a set distance would be considered a neighbor. For our census tracts, we could set a distance of 3 miles. The code below demonstrates the neighborhood for the census tract that campus is in.
+#draw the links between neighbors
+plot(st_geometry(nc_counties), border = "grey")
+plot(county_nb, st_coordinates(st_centroid(st_geometry(nc_counties))), add = TRUE, col = "black")
+
+#for points, k-nearest neighbors (here k = 6) would look like this:
+#knn2nb(knearneigh(points_sf, k = 6))
+```
+
+### Step 3: Weights and Moran's I
+
+::: {.why}
+`nb2listw()` turns neighbors into weights. `style = "W"` gives each county's neighbors weights that add to 1. `moran.mc()` compares the observed Moran's I with 999 random shuffles of the values. I near 0 means no autocorrelation, positive means similar values are near each other, and negative means unlike values are near each other.
+:::
 
 ```{r}
-#isolate ch tract
-ch_tract <- tracts_sf |> filter(GEOID == 37135011400)
+county_w <- nb2listw(county_nb, style = "W")
 
-#get 10 mile radius
-neighborhood_rad <- ch_tract |> st_buffer(15840)
-
-#get neighbors
-neighbors <- st_filter(tracts_sf, neighborhood_rad)
-tm_shape(neighbors) + tm_polygons() + tm_shape(ch_tract) + tm_polygons(fill = "blue")
+set.seed(391)
+moran.mc(nc_counties$pct_pov, county_w, nsim = 999)
 ```
 
-For our school dataset, we could say that any school within 20 miles is a neighbor
+### Step 4: Moran Scatterplot
+
+::: {.why}
+The scatterplot puts each county's value on the x-axis and the average of its neighbors (the spatial lag) on the y-axis. The slope of the line is Moran's I.
+:::
+
+```{r, fig.alt = "Moran scatterplot of county poverty rate against the average poverty rate of neighboring counties. The points slope upward from lower left to upper right, showing positive spatial autocorrelation."}
+moran.plot(nc_counties$pct_pov, county_w,
+           xlab = "People in poverty (%)", ylab = "Neighbors' average (%)")
+```
+
+```{r, include = FALSE}
+set.seed(391)
+pov_moran <- moran.mc(nc_counties$pct_pov, nb2listw(poly2nb(nc_counties)), nsim = 999)
+```
+
+Moran's I is `r fmt(pov_moran$statistic)` with a p-value of `r fmt(pov_moran$p.value, 3)`, so high-poverty counties tend to sit near other high-poverty counties.
+
+## Day 1 Partner Practice {#partner-practice}
+
+Partner A uses mean PM2.5 (µg/m³) from 2016 to 2020 for `r fmt(nrow(pm), 0)` North Carolina census tracts, from the [CDC Environmental Public Health Tracking Network](https://ephtracking.cdc.gov/). Partner B uses `avg_sat_score` for `r nrow(schools)` North Carolina public high schools. Each task tells you in parentheses which walkthrough step to reuse.
+
+```{r, eval = FALSE}
+#Partner A: census tract PM2.5, projected to NC State Plane (feet)
+pm <- st_read("https://drive.google.com/uc?export=download&id=1zf1xk-7pOoSnEwGvGsNVa6XejFoPFzdJ") |>
+  st_transform(2264)
+
+#Partner B: public high school SAT scores, with schools that share a location dropped
+schools <- st_read("https://drive.google.com/uc?export=download&id=1i-C2PF3ajbpHTlavh3m1QbWNObpobprZ")
+schools <- schools |> filter(!duplicated(st_coordinates(schools)))
+```
+
+:::: {.partners}
+::: {.partner .partner-a}
+### Partner A: PM2.5 in Census Tracts
+
+1. Map `meanpm_2016_2020` with a legend. Use `col_alpha = 0` in `tm_polygons()` to hide the tract borders. *(Step 1)*
+2. Make queen contiguity neighbors. *(Step 2)*
+3. Make the weights, run `set.seed(391)`, and run `moran.mc()`. *(Step 3)*
+4. Make the Moran scatterplot. *(Step 4)*
+
+When you finish, bring your Moran's I, its p-value and your scatterplot to Day 1 Together.
+:::
+
+::: {.partner .partner-b}
+### Partner B: SAT Scores at High Schools
+
+1. Map `avg_sat_score` with `tm_dots()` and a legend. *(Step 1)*
+2. Make k-nearest neighbors with k = 6. *(Step 2)*
+3. Make the weights, run `set.seed(391)`, and run `moran.mc()`. *(Step 3)*
+4. Make the Moran scatterplot. *(Step 4)*
+
+When you finish, bring your Moran's I, its p-value and your scatterplot to Day 1 Together.
+:::
+::::
+
+## Day 1 Together {#together}
+
+1. Fill in the table.
+2. Both results are significant. Which variable is more strongly autocorrelated, and how can you tell from the scatterplots?
+3. Give one reason PM2.5 might be so much more autocorrelated than SAT scores.
+
+| Variable | Neighbors | Moran's I | p-value |
+|---|---|---|---|
+| PM2.5 in tracts (Partner A) | Queen contiguity | | |
+| SAT scores at schools (Partner B) | 6 nearest | | |
+
+::: {.deliver}
+Each pair turns in one index card before leaving. Write both of your names on it, copy the table, and add two or three sentences comparing the strength of autocorrelation in the two variables and explaining why they differ.
+:::
+
+## Day 2 Walkthrough: Local Moran's I (LISA) {#walkthrough-2}
+
+Use the county data, neighbors and weights from Day 1.
+
+### Step 1: Local Moran's I
+
+::: {.why}
+Global Moran's I gives one number for the whole map. Local Moran's I gives one for each county and tests it against 999 random shuffles. `localmoran_perm()` returns a matrix, and its `quadr` attribute says which quadrant of the Moran scatterplot each county falls in.
+:::
 
 ```{r}
-#isolate Chapel Hill High School
-chhs <- schools_sf |> filter(school_nam == "Chapel Hill High")
-
-#get 5 mile radius
-chhs_neighborhood_rad <- chhs |> st_buffer(26400)
-
-#get neighbors
-chhs_neighbors <- st_filter(schools_sf, chhs_neighborhood_rad)
-
-
-tm_shape(chhs_neighbors) + tm_dots() + tm_shape(chhs) + tm_dots(fill = "blue")
+set.seed(391)
+county_lisa <- localmoran_perm(nc_counties$pct_pov, county_w, nsim = 999)
+head(county_lisa)
 ```
 
-### Queens Case (Areal)
+### Step 2: Classify the Clusters
 
-The Queens Case neighborhood definition is extremely common in spatial statistics that consider contiguous aerial units (like census tracts). The Queens neighborhood selects neighbors based on any contact (including corners) with the feature of interest. We can't use contiguity based neighbors for points since they do not touch. The Queens neighborhood for Chapel Hill would look this this:
+::: {.why}
+A county is High-High if it is high and its neighbors are high, and Low-Low if both are low. High-Low and Low-High are outliers. Counties with a p-value of 0.05 or more are labeled not significant. Because we run one test per county, a few counties will be significant by chance alone.
+:::
 
 ```{r}
-queen_neighbors <- tracts_sf |> st_filter(ch_tract, .predicates = st_intersects) 
+nc_counties <- nc_counties |>
+  mutate(lisa_p = county_lisa[, "Pr(z != E(Ii)) Sim"],
+         lisa_quad = as.character(attr(county_lisa, "quadr")$mean),
+         lisa_cluster = ifelse(lisa_p < 0.05, lisa_quad, "Not significant"))
 
-tm_shape(queen_neighbors) + tm_polygons() + tm_shape(ch_tract) + tm_polygons(fill = "blue")
+table(nc_counties$lisa_cluster)
 ```
 
-## K-Nearest Neighbors (Areal and Point)
+### Step 3: Map the Clusters
 
-The k-nearest neighbor definition selects the nearest neighbors based on a set number of neighbors. For instance, for our Chapel Hill High point, we could set number of neighbors to 3.
+::: {.why}
+Give each cluster type a fixed color, and keep the legend so the map can be read without relying on color alone.
+:::
 
-```{r}
-#calculate distances
-calc_dist <- chhs_neighbors |> st_distance(chhs)
+```{r, fig.alt = "LISA cluster map of county poverty rates with a legend. A High-High cluster of high poverty covers counties in the northeast, such as Bertie, Northampton, Martin, Edgecombe and Pitt, and in the southeast around Robeson, Hoke and Scotland. A Low-Low cluster covers Mecklenburg, Cabarrus and Iredell, with one High-Low county beside it. Most counties are not significant."}
+lisa_colors <- c("High-High" = "#B2182B", "Low-Low" = "#2166AC", "High-Low" = "#F4A582",
+                 "Low-High" = "#92C5DE", "Not significant" = "#E5E5E5")
 
-#assign distances as a variable
-chhs_neighbors$distance <- calc_dist
-
-#get 3 closest neighbors (we say 4 since CHHS will be the first closest (0ft))
-neighbors <- chhs_neighbors |> arrange(distance) |> slice_head(n = 4)
-
-tm_shape(neighbors) + tm_dots() + tm_shape(chhs) + tm_dots(fill = "blue")
+tm_shape(nc_counties) +
+  tm_polygons(fill = "lisa_cluster",
+              fill.scale = tm_scale_categorical(values = lisa_colors),
+              fill.legend = tm_legend(title = "LISA cluster"))
 ```
 
-## Calculating Global Autocorrelation
-
-To calculate global autocorrelation, we can use Moran's I. Moran's I gives an indication of how clustered, random, or dispersed a dataset value is across space. It goes from -1 (perfect dispersion) to 1 (perfect clustering). Let's start by making a basic map of our variable of interest.
-
-The main parameter for calculating Moran's I is the neighborhood definition.
-
-### Global Autocorrelation in Median Household Income
-
-We can start by making a basic map of our variable of interest.
-
-```{r}
-tm_shape(tracts_sf) + tm_polygons(fill = "med_hh_inc", fill.scale = tm_scale_intervals(style = "fisher"), col_alpha = 0)
+```{r, include = FALSE}
+set.seed(391)
+k_lisa <- localmoran_perm(nc_counties$pct_pov, nb2listw(poly2nb(nc_counties)), nsim = 999)
+k_clus <- ifelse(k_lisa[, "Pr(z != E(Ii)) Sim"] < 0.05, as.character(attr(k_lisa, "quadr")$mean), "Not significant")
 ```
 
-**Q1: Just by looking at the values on the map, do you see evidence of a spatial pattern?**
+`r sum(k_clus == "High-High")` counties are High-High and `r sum(k_clus == "Low-Low")` are Low-Low. The other `r sum(!k_clus %in% c("High-High", "Low-Low"))` are outliers or not significant.
 
-We can formalize this by calculating Moran's I using Queens Case neighbors
+## Day 2 Partner Practice {#partner-practice-2}
 
-```{r}
-#calculate neighborhoods
-nb <- poly2nb(tracts_sf, queen = TRUE) # queen shares point or border
+Each partner keeps the same data, neighbors and weights from Day 1. Each task tells you in parentheses which Day 2 step to reuse.
 
-#if you wanted to do k nearest neighbors
-coords <- st_coordinates(st_centroid(tracts_sf))
-knn <- knearneigh(coords, k = 5) #number of neighbors
-nb_k5 <- knn2nb(knn) #put in nbw command below
+:::: {.partners}
+::: {.partner .partner-a}
+### Partner A: PM2.5 Clusters
 
-#if you wanted to do fixed distance then put nb_d in nbw command
-nb_d <- dnearneigh(coords, d1 = 0, d2 = 50000) #d2 is how far in units (in our case ft)
+1. Run `set.seed(391)`, then local Moran's I on `meanpm_2016_2020`. *(Step 1)*
+2. Classify the clusters and count each type with `table()`. *(Step 2)*
+3. Map the clusters with the fixed colors, a legend and `col_alpha = 0`. *(Step 3)*
+4. Write down which parts of the state are High-High and which are Low-Low.
 
-#set neighborhood weight matrix
-nbw <- nb2listw(nb, style = "W", zero.policy = T)
+When you finish, bring your counts and your map to Day 2 Together.
+:::
 
-#calculate Morans I
-gmoran <- moran.mc(tracts_sf$med_hh_inc, nbw, nsim = 99)
-gmoran
+::: {.partner .partner-b}
+### Partner B: SAT Score Clusters
 
+1. Run `set.seed(391)`, then local Moran's I on `avg_sat_score`. *(Step 1)*
+2. Classify the clusters and count each type with `table()`. *(Step 2)*
+3. Map the clusters with `tm_dots()`, the fixed colors and a legend. *(Step 3)*
+4. Write down which parts of the state are High-High and which are Low-Low.
 
+When you finish, bring your counts and your map to Day 2 Together.
+:::
+::::
+
+## Day 2 Together {#together-2}
+
+1. Fill in the table.
+2. Put your maps side by side. Do any High-High PM2.5 areas line up with Low-Low SAT areas, or the other way around?
+3. What share of each dataset is in a significant cluster? How does that match what you found with global Moran's I on Day 1?
+
+| Variable | High-High | Low-Low | High-Low | Low-High | Not significant |
+|---|---|---|---|---|---|
+| PM2.5 in tracts (Partner A) | | | | | |
+| SAT scores at schools (Partner B) | | | | | |
+
+::: {.deliver}
+Each pair turns in one index card before leaving. Write both of your names on it, copy the table, and add two or three sentences naming where each variable's High-High and Low-Low clusters are.
+:::
+
+## Answer Key {#answer-key .answer-key}
+
+```{r key-values, include = FALSE}
+pm_w <- nb2listw(poly2nb(pm, queen = TRUE), style = "W", zero.policy = TRUE)
+sch_w <- nb2listw(knn2nb(knearneigh(schools, k = 6)), style = "W")
+set.seed(391); pm_m <- moran.mc(pm$meanpm_2016_2020, pm_w, nsim = 999, zero.policy = TRUE)
+set.seed(391); sch_m <- moran.mc(schools$avg_sat_score, sch_w, nsim = 999)
+classify <- function(l) ifelse(l[, "Pr(z != E(Ii)) Sim"] < 0.05, as.character(attr(l, "quadr")$mean), "Not significant")
+set.seed(391); pm_c <- classify(localmoran_perm(pm$meanpm_2016_2020, pm_w, nsim = 999, zero.policy = TRUE))
+set.seed(391); sch_c <- classify(localmoran_perm(schools$avg_sat_score, sch_w, nsim = 999))
+cnt <- function(cl, k) sum(cl == k)
+types <- c("High-High", "Low-Low", "High-Low", "Low-High", "Not significant")
+row_txt <- function(cl) paste(sapply(types, function(k) fmt(cnt(cl, k), 0)), collapse = " | ")
 ```
 
-Our Moran's I indicates strong clustering (.59) at a highly statistically significant level (very small p-value). Therefore, we now know that, at the global scale, this dataset is clustered.
+### Day 1
 
-### Global Autocorrelation in School Absence Rate
+| Variable | Neighbors | Moran's I | p-value |
+|---|---|---|---|
+| PM2.5 in tracts | Queen contiguity | `r fmt(pm_m$statistic)` | `r fmt(pm_m$p.value, 3)` |
+| SAT scores at schools | 6 nearest | `r fmt(sch_m$statistic)` | `r fmt(sch_m$p.value, 3)` |
 
-We can map chronic absence rate before Covid (which we've done before)
+A p-value of 0.001 is the smallest possible with 999 shuffles. PM2.5 is far more strongly autocorrelated: its scatterplot points hug a steep line, while the SAT scatterplot is a loose cloud with a gentle slope. PM2.5 comes from air that moves across tract borders and from regional sources, so neighboring tracts share it almost by definition. SAT scores depend on each school's students and programs, and neighboring schools can be very different, for example a magnet or early college next to a traditional high school.
 
-```{r}
-tm_shape(schools_sf) + tm_dots(fill = "pre_covid_pct", fill.scale = tm_scale_intervals(style = "fisher"), col_alpha = 0)
+### Day 2
+
+| Variable | High-High | Low-Low | High-Low | Low-High | Not significant |
+|---|---|---|---|---|---|
+| PM2.5 in tracts | `r row_txt(pm_c)` |
+| SAT scores at schools | `r row_txt(sch_c)` |
+
+Because these are permutation tests, counts can differ by a few with another seed or R version. About `r round(100 * mean(pm_c != "Not significant"))`% of tracts are in a significant cluster, compared with `r round(100 * mean(sch_c != "Not significant"))`% of schools, which matches the much larger global Moran's I for PM2.5. PM2.5 High-High tracts run through the Piedmont urban crescent from Charlotte through the Triad to the Triangle, and Low-Low tracts are in the mountains and along the coast. SAT High-High schools are around Chapel Hill, Cary and Raleigh and around Asheville, and Low-Low schools include parts of Charlotte, Winston-Salem and the rural northeast and southeast.
+
+```{r, eval = FALSE}
+#### Day 1, Partner A: PM2.5 ####
+pm <- st_read("https://drive.google.com/uc?export=download&id=1zf1xk-7pOoSnEwGvGsNVa6XejFoPFzdJ") |>
+  st_transform(2264)
+
+tm_shape(pm) +
+  tm_polygons(fill = "meanpm_2016_2020", col_alpha = 0,
+              fill.scale = tm_scale_intervals(style = "quantile", n = 5, values = "brewer.or_rd"),
+              fill.legend = tm_legend(title = "Mean PM2.5 (µg/m³)"))
+
+pm_nb <- poly2nb(pm, queen = TRUE)
+pm_w <- nb2listw(pm_nb, style = "W", zero.policy = TRUE)
+set.seed(391)
+moran.mc(pm$meanpm_2016_2020, pm_w, nsim = 999, zero.policy = TRUE)
+moran.plot(pm$meanpm_2016_2020, pm_w, zero.policy = TRUE)
+
+#### Day 1, Partner B: SAT scores ####
+schools <- st_read("https://drive.google.com/uc?export=download&id=1i-C2PF3ajbpHTlavh3m1QbWNObpobprZ")
+schools <- schools |> filter(!duplicated(st_coordinates(schools)))
+
+tm_shape(schools) +
+  tm_dots(fill = "avg_sat_score", size = 0.5,
+          fill.scale = tm_scale_intervals(style = "quantile", n = 5, values = "brewer.or_rd"),
+          fill.legend = tm_legend(title = "Average SAT score"))
+
+sch_nb <- knn2nb(knearneigh(schools, k = 6))
+sch_w <- nb2listw(sch_nb, style = "W")
+set.seed(391)
+moran.mc(schools$avg_sat_score, sch_w, nsim = 999)
+moran.plot(schools$avg_sat_score, sch_w)
+
+#### Day 2, Partner A: PM2.5 clusters ####
+set.seed(391)
+pm_lisa <- localmoran_perm(pm$meanpm_2016_2020, pm_w, nsim = 999, zero.policy = TRUE)
+pm <- pm |>
+  mutate(lisa_p = pm_lisa[, "Pr(z != E(Ii)) Sim"],
+         lisa_quad = as.character(attr(pm_lisa, "quadr")$mean),
+         lisa_cluster = ifelse(lisa_p < 0.05, lisa_quad, "Not significant"))
+table(pm$lisa_cluster)
+
+tm_shape(pm) +
+  tm_polygons(fill = "lisa_cluster", col_alpha = 0,
+              fill.scale = tm_scale_categorical(values = lisa_colors),
+              fill.legend = tm_legend(title = "LISA cluster"))
+
+#### Day 2, Partner B: SAT clusters ####
+set.seed(391)
+sch_lisa <- localmoran_perm(schools$avg_sat_score, sch_w, nsim = 999)
+schools <- schools |>
+  mutate(lisa_p = sch_lisa[, "Pr(z != E(Ii)) Sim"],
+         lisa_quad = as.character(attr(sch_lisa, "quadr")$mean),
+         lisa_cluster = ifelse(lisa_p < 0.05, lisa_quad, "Not significant"))
+table(schools$lisa_cluster)
+
+tm_shape(schools) +
+  tm_dots(fill = "lisa_cluster", size = 0.5,
+          fill.scale = tm_scale_categorical(values = lisa_colors),
+          fill.legend = tm_legend(title = "LISA cluster"))
 ```
-
-**Q2: Just by looking at the values on the map, do you see evidence of a spatial pattern?**
-
-We can then calculate Moran's I using a our 20-mile distance-based neighborhood definition
-
-```{r}
-#calculate neighborhoods
-nb_school <- dnearneigh(schools_sf, d1 = 0, d2 = 26400) 
-
-###if you wanted to do knearest neighbor
-knn <- knearneigh(schools_sf, k = 5) #number of neighbors
-nb_k5 <- knn2nb(knn) #put in nbw command below
-
-
-#set neighborhood weight matrix
-nbw_school <- nb2listw(nb_school, style = "W", zero.policy = T)
-
-#calculate Morans I
-gmoran_school <- moran.mc(schools_sf$pre_covid_pct, nbw_school, nsim = 99)
-gmoran_school
-```
-
-**Q3: What does our Moran I value tell us about the spatial structure of our data?**
-
-## Local Indicators of Spatial Autocorrelation (LISA)
-
-We know that both of our datasets are clustered because of our Moran's I values (with median household income strongly clustered and chronic absence rate weakly clustered). However, we don't know where, specifically, these high and low clusters are. Local Indicators of Spatial Autocorrelation quantify where statistically significant clusters exist in a dataset.
-
-For the median household income:
-
-```{r}
-locali<-localmoran_perm(tracts_sf$med_hh_inc, nbw) %>%
-  as_tibble() %>%
-  set_names(c("local_i", "exp_i", "var_i", "z_i", "p_i",
-              "p_i_sim", "pi_sim_folded", "skewness", "kurtosis"))
-
-#bind LISA results
-tracts_sf <- tracts_sf %>%
-  bind_cols(locali)
-
-#Divide into quadrants
-tracts_sf <- tracts_sf %>%
-  mutate(incz =  as.numeric(scale(med_hh_inc)),
-         evratezlag = lag.listw(nbw, incz),
-         lisa_cluster = case_when(
-           p_i >= 0.05 ~ "Not significant",
-           incz > 0 & local_i > 0 ~ "High-high",
-           incz > 0 & local_i < 0 ~ "High-low",
-           incz < 0 & local_i > 0 ~ "Low-low",
-           incz < 0 & local_i < 0 ~ "Low-high"
-         ))
-
-#Map
-tm_shape(tracts_sf) + tm_polygons("lisa_cluster", col_alpha = 0)
-```
-
-**Q2: What is the spatial pattern of clustering in the median household income variable?**
-
-For the school chronic absences:
-
-```{r}
-locali_school<-localmoran_perm(schools_sf$pre_covid_pct, nbw_school) %>%
-  as_tibble() %>%
-  set_names(c("local_i", "exp_i", "var_i", "z_i", "p_i",
-              "p_i_sim", "pi_sim_folded", "skewness", "kurtosis"))
-
-#bind LISA results
-schools_sf <- schools_sf %>%
-  bind_cols(locali_school)
-
-#Divide into quadrants
-schools_sf  <- schools_sf  %>%
-  mutate(absz =  as.numeric(scale(pre_covid_pct)),
-         evratezlag = lag.listw(nbw_school, absz),
-         lisa_cluster = case_when(
-           p_i >= 0.05 ~ "Not significant",
-           absz > 0 & local_i > 0 ~ "High-high",
-           absz > 0 & local_i < 0 ~ "High-low",
-           absz < 0 & local_i > 0 ~ "Low-low",
-           absz < 0 & local_i < 0 ~ "Low-high"
-         ))
-
-#Map
-tm_shape(schools_sf ) + tm_dots("lisa_cluster", col_alpha = 0)
-```
-
-**Q3: What is the spatial pattern of clustering in the school absence variable?**
-
-## Mini Challenge
-
--   Calculate global and local indicators of spatial autocorrelation for the average commuting time variable and interpret the results
-
--   Calculate global and local indicators of spatial autocorrelation for the chronic school absences after covid and interpret the results

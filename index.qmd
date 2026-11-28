@@ -23,39 +23,103 @@ Case studies
 
 ## Course Description and Goals
 
-[Description and goals, revised from the Spring 2026 syllabus to match the four units.]
+*Catalog description:* This course provides an introduction to the application of statistical methods to geographic problems and to statistical packages in their solution. Attention given to spatial data analysis and sampling methods.
+
+Geographers use quantitative methods to describe, estimate, and predict spatial patterns. The class covers the fundamentals of quantitative reasoning in geography, including data visualization and mapping, data description and summary, statistical inference and significance tests, and spatial patterns in events, values, and across continuous surfaces. Adopting a "spatial-first" perspective, the class emphasizes the distinctive characteristics of spatial data that both challenge and extend conventional statistics.
+
+By the end of the course, students will:
+
+- Explain how quantitative thinking developed within the discipline of geography and how quantitative methods shape the ways geographers ask and answer spatial questions
+- Analyze what makes spatial data distinctive, including spatial dependence, heterogeneity, and scale, and how these features complicate and extend traditional statistical methods
+- Formulate geographic research questions and hypotheses that can be investigated through quantitative methods
+- Apply statistical reasoning to calculate and interpret descriptive and inferential statistics using a variety of geographic datasets in R
+- Evaluate and interpret spatial patterns in point events, attribute values, relationships between variables, and continuous surfaces
+- Create maps, data visualizations, and written interpretations that communicate findings effectively
 
 ## Student Learning Outcomes
 
-[Outcomes for the four units: foundations and probability; classical inference; spatial patterns and relationships; new methods and surfaces.]
+### Unit 1: Foundations, Probability and Estimation
+
+**Concept 1: The Quantitative Revolution**
+
+- Describe the origins of the Quantitative Revolution in geography and how political and academic pressures pushed geography toward a "spatial science"
+- Analyze assumptions built into quantitative reasoning (measurability, objectivity, universality)
+- Critique the Quantitative Revolution using humanistic, radical, feminist, and critical GIS perspectives
+- Interpret early spatial models
+- Explain how spatial dependence, spatial heterogeneity, and distance decay influence the structure and interpretation of spatial data
+
+**Concept 2: Data and Descriptive Statistics**
+
+- Classify geographic data and variables (primary vs. secondary, individual vs. aggregated, level of measurement) and explain how these distinctions influence analysis
+- Explain the major sources and key dimensions of geographic data (coverage, resolution, scale, temporality, completeness, positional accuracy, and bias)
+- Describe basic geographic data structures (vector and raster)
+- Calculate and interpret descriptive statistics for attribute data (central tendency, dispersion, shape) and data visualizations
+
+**Concept 3: Spatial Description**
+
+- Compare map classification schemes and explain how each changes what a map shows
+- Compute and interpret spatial descriptive statistics (mean center, standard distance, standard deviational ellipse) and explain how they extend non-spatial descriptive measures
+- Explain how aggregation and the Modifiable Areal Unit Problem affect descriptive statistics for areal data
+
+**Concept 4: Probability**
+
+- Compute and interpret simple event (empirical) probabilities
+- Compute and interpret probabilities for discrete and continuous data using the binomial and normal distributions
+- Map probabilities across space
+
+**Concept 5: Sampling and Estimation**
+
+- Explain the Central Limit Theorem and why it allows us to generalize from samples to populations
+- Compare sampling designs and how each affects representativeness and uncertainty (simple, systematic, stratified, cluster, spatial)
+- Estimate and interpret population parameters (means and proportions) from samples, including point estimates and confidence intervals
+
+### Unit 2: Inference and Point Patterns
+
+**Concept 6: Hypothesis Testing**
+
+- Distinguish between the null (H₀) and alternative (H₁) hypotheses
+- Explain the two types of error in hypothesis testing (Type I and Type II)
+- Formulate testable hypotheses and select an appropriate test based on the characteristics of the data
+- Conduct and interpret one-sample and two-sample t-tests and Chi-square tests
+- Differentiate statistical significance from substantive importance, and association from causation
+
+**Concept 7: Patterns in Events**
+
+- Distinguish random, clustered, and regular event patterns
+- Compute and interpret nearest-neighbor and density-based methods to assess complete spatial randomness (CSR) and determine statistical significance
+- Create point maps and kernel density surfaces of event patterns
+- Evaluate the effects of scale and edge boundaries on event pattern analysis
+
+### Unit 3: Spatial Relationships
+
+**Concept 8: Patterns in Values**
+
+- Construct spatial neighborhoods for point and areal data using k-nearest neighbors, contiguity (queen's case), and distance-based measures
+- Compute and interpret global (Moran's I) and local (LISA) spatial autocorrelation, and map hot spots and cold spots
+- Evaluate how scale, zoning, and the MAUP influence patterns
+
+**Concept 9: Spatial Relationships**
+
+- Construct and interpret maps and scatterplots of bivariate relationships
+- Estimate and interpret linear regression models in a geographic context
+- Diagnose spatial dependence in regression residuals using spatial autocorrelation measures
+- Compare spatial lag and spatial error models with non-spatial regression and justify a model choice
+- Apply geographically weighted regression (GWR) to examine how relationships vary across space
+- Apply geodemographic clustering to group places with similar characteristics and interpret the resulting clusters
+
+### Unit 4: Continuous Surfaces
+
+**Concept 10: Spatially Continuous Surfaces**
+
+- Compute estimates at unsampled locations using Thiessen polygons and inverse distance weighting (IDW)
+- Interpret the semivariogram (nugget, sill, range) to describe spatial correlation and range of influence
+- Evaluate surfaces interpolated with IDW and kriging, including kriging's estimate of uncertainty
 
 ## Course Philosophy
 
 In a rapidly changing educational landscape, our time in class is becoming increasingly valuable. I strongly believe that in-class peer engagement, real-time critical thinking and real-world application of course concepts are the strongest facilitators of learning right now. This class is built around that belief, so in-class work makes up 65% of your grade.
 
 [Student agency and co-creation paragraph, carried over from the fall courses.]
-
-## Course Expectations
-
-::: expect
-::: {}
-### What You Can Expect from Me
-
-- I'll treat you with respect and as a collaborator
-- I'll be clear about expectations and deadlines
-- I'll listen to feedback and adjust
-- I won't assign anything that doesn't serve your learning
-:::
-
-::: {}
-### What I Expect from You
-
-- Come to class with a charged computer, paper and a pen
-- Be engaged and collaborate during class
-- Do the reading and its quiz before class
-- Respect the course policies
-:::
-:::
 
 ## Course AI Policy
 
