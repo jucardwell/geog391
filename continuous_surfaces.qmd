@@ -1,390 +1,378 @@
-# Continuous Surfaces
+---
+title: "Continuous Surfaces"
+css: styles/tutorial.css
+---
 
-Some phenomena are spatially continuous, meaning they are present at every location rather than confined to discrete points.
-
-In many cases, however, data about these continuous variables are only collected at discrete locations (i.e. weather monitoring stations, stream gauges, sample sites). Therefore, an important task is to predict these continuous values at unsampled locations. This is called spatial interpolation. In this tutorial we will explore several strategies for interpolating
-
-In this tutorial, we will explore several strategies for interpolating data. Ultimately, the choice of interpolation method depends on several factors, including the strength and scale of autocorrelation, the density of sampling locations, the need for estimates of uncertainty, and the computational complexity.
-
-We will use data from weather stations across North Carolina during a 2025 heat wave (July 30, 2025). The data is from the [North Carolina State Climate Office](https://products.climate.ncsu.edu/cardinal/user/)
-
-**To follow along with this tutorial, make a new .Rmd document. As you move through the tutorial add chunks, headers, and relevant text to your document.**
-
-## Reading in Data
-
-```{r, include = F}
-library(sf)
-library(tidyverse)
-library(gstat)
-library(sp)
-library(terra)
-library(tmap)
-library(INLA)
-
-options(scipen = 999)
-
-#heatwave data
-heatwave_temp <- st_read("https://drive.google.com/uc?export=download&id=1tZQU5NwZ3Z1lBtFbJTvM7clB1z0sXMI9") |> distinct()
-
-#nc boundaries
-nc_boundaries <- st_read("https://drive.google.com/uc?export=download&id=1SNy838Q7f7rvL6TFLmIZm-sKyRO7Htjw") 
-
+```{=html}
+<style>
+:root {
+  --t-ink: #14261D;
+  --t-title: #04764C;
+  --t-rule: #90CEAC;
+  --t-link: #016C46;
+  --t-plan-bg: #E0FBEB;
+  --t-plan-edge: #028758;
+  --t-why-bg: #FEF1E3;
+  --t-why-edge: #B87609;
+  --t-read-bg: #EFFAF3;
+  --t-read-edge: #70B691;
+  --t-a-bg: #D6F8E4;
+  --t-b-bg: #FEEBD7;
+  --t-deliver-bg: #FDE3C6;
+  --t-deliver-edge: #825100;
+  --t-code-bg: #F1F9F4;
+  --t-code-edge: #339C6D;
+  --t-key-edge: #9C630A;
+  --t-button: #056641;
+}
+</style>
 ```
 
-```{r, warning = F, eval = F}
-library(sf)
+```{r setup, include = FALSE}
 library(tidyverse)
+library(sf)
 library(gstat)
-library(sp)
 library(terra)
 library(tmap)
-library(INLA)
 
-options(scipen = 999)
+#course data (read once for the whole page)
+heat <- st_read("https://drive.google.com/uc?export=download&id=1tZQU5NwZ3Z1lBtFbJTvM7clB1z0sXMI9", quiet = TRUE) |>
+  distinct()
+nc_outline <- st_read("https://drive.google.com/uc?export=download&id=1SNy838Q7f7rvL6TFLmIZm-sKyRO7Htjw", quiet = TRUE)
+jan_temp <- st_read("https://drive.google.com/uc?export=download&id=1Mtc7SXpWAx-atL5u1aFUuZli0wTMVTcT", quiet = TRUE)
 
-#heatwave data
-heatwave_temp <- st_read("https://drive.google.com/uc?export=download&id=1tZQU5NwZ3Z1lBtFbJTvM7clB1z0sXMI9") |> distinct()
-
-#nc boundaries
-nc_boundaries <- st_read("https://drive.google.com/uc?export=download&id=1SNy838Q7f7rvL6TFLmIZm-sKyRO7Htjw") 
+#numbers quoted in the text below come from here, so they stay right if the data changes
+fmt <- function(x, d = 2) formatC(x, format = "f", digits = d, big.mark = ",")
+rmse <- function(cv) sqrt(mean(cv$residual^2))
+heat_df_key <- data.frame(x = st_coordinates(heat)[, 1], y = st_coordinates(heat)[, 2], value = heat$value)
 ```
 
-## Spatial Structure
+This tutorial runs over two class days. Day 1 covers inverse distance weighting (IDW) and Day 2 covers ordinary kriging. Each day has its own walkthrough, partner practice and index card.
 
-To predict continuous surfaces, we must assume that the underlying phenomenon has a predictable spatial structure. Methods for surface prediction rely on spatial autocorrelation. When a variable shows little or no spatial autocorrelation, it is not a good candidate for continuous surface prediction.
+## Day 1 Walkthrough: Inverse Distance Weighting {#walkthrough}
 
-Let's first look at our temperature values:
+Run each chunk in your own .Rmd. You will reuse this code in the Day 1 partner practice.
+
+### Step 1: Load and Map the Data
+
+::: {.why}
+We'll use air temperatures (°F) at `r nrow(heat)` weather stations across North Carolina during the July 30, 2025 heat wave, from the [North Carolina State Climate Office](https://products.climate.ncsu.edu/cardinal/user/). Temperature exists everywhere, but we only measured it at these points. Interpolation predicts it everywhere else. Both files are in NC State Plane, so distances are in feet.
+:::
+
+```{r, eval = FALSE}
+#load libraries
+library(tidyverse)
+library(sf)
+library(gstat)
+library(terra)
+library(tmap)
+
+#heat wave temperatures at weather stations
+heat <- st_read("https://drive.google.com/uc?export=download&id=1tZQU5NwZ3Z1lBtFbJTvM7clB1z0sXMI9") |>
+  distinct()
+
+#North Carolina outline
+nc_outline <- st_read("https://drive.google.com/uc?export=download&id=1SNy838Q7f7rvL6TFLmIZm-sKyRO7Htjw")
+```
+
+```{r, fig.alt = "Map of weather stations across North Carolina colored by temperature during the July 30, 2025 heat wave, in five quantile classes with a legend. The coolest stations are in the western mountains, and most stations in the Piedmont and coastal plain are in the low to high 90s."}
+tm_shape(nc_outline) + tm_borders() +
+  tm_shape(heat) +
+  tm_dots(fill = "value", size = 0.5,
+          fill.scale = tm_scale_intervals(style = "quantile", n = 5, values = "-brewer.rd_yl_bu"),
+          fill.legend = tm_legend(title = "Temperature (°F)"))
+```
+
+### Step 2: Set Up the Data and the Grid
+
+::: {.why}
+`gstat` works with a plain table of x, y and the value. The prediction grid is an empty raster over North Carolina. A cell size of 10,000 feet (about 2 miles) is fine enough for a statewide map.
+:::
 
 ```{r}
-tm_shape(heatwave_temp) + tm_dots("value", tm_scale_intervals(style = "quantile", values = "-brewer.rd_yl_gn")) + tm_shape(nc_boundaries) + tm_borders()
+#table of coordinates and values
+heat_df <- data.frame(x = st_coordinates(heat)[, 1],
+                      y = st_coordinates(heat)[, 2],
+                      value = heat$value)
+
+#empty raster covering North Carolina, 10,000 ft cells
+grid <- rast(vect(nc_outline), resolution = 10000)
 ```
 
-Just based on the pattern visible on the map, this variable clearly is autocorrelated. However, if we were unsure, we could calculate a Moran's I.
+### Step 3: Interpolate with IDW
 
-## Methods for Interpolation
+::: {.why}
+IDW predicts each cell as a weighted average of the stations, with closer stations weighted more. The power (`idp`) sets how fast the weight falls with distance. A low power gives a smooth surface, and a high power lets each station dominate its own area.
+:::
 
-### IDW
+```{r, fig.alt = "Map of the IDW temperature surface for North Carolina with power 2, with a legend. Temperatures are lowest in the western mountains and highest across the eastern Piedmont and coastal plain, with small bullseye spots around individual stations."}
+idw_model <- gstat(formula = value ~ 1, locations = ~x + y, data = heat_df,
+                   set = list(idp = 2))
 
-Inverse Distance Weighting (IDW) is a deterministic interpolation method that predicts values at unsampled locations as a weighted average of nearby observations. Points closer to the prediction location receive more weight than points farther away. IDW is a simple method that is often used to generate an exploratory surface.
+heat_idw <- interpolate(grid, idw_model, debug.level = 0)
+heat_idw <- mask(heat_idw, vect(nc_outline))
 
-IDW does not estimate an underlying statistical model of spatial dependence. Instead, it assumes that similarity decreases with distance and uses that assumption directly to compute predictions.
+tm_shape(heat_idw[["var1.pred"]]) +
+  tm_raster(col.scale = tm_scale_intervals(style = "quantile", n = 5, values = "-brewer.rd_yl_bu"),
+            col.legend = tm_legend(title = "Predicted temperature (°F)"))
+```
 
-The main parameter in IDW is the inverse distance power (IDP), which controls how rapidly influence declines as distance increases. Lower IDP (closer to 1) values allow more distant observations to contribute to predictions, while higher IDP (greater than 3) values emphasize local variation and weight nearby points more heavily.
+### Step 4: Choose the Power with Cross-Validation
 
-To select an appropriate IDP, we can compare several reasonable values using something called k-fold cross-validation. This approach iteratively divides the dataset into training and testing subsets and withholds part of the data. Predictions are generated using the remaining observations and value with the lowest prediction error (usually using RMSE) is selected.
+::: {.why}
+Leave-one-out cross-validation leaves out each station in turn, predicts it from the others, and records the error. The root mean square error (RMSE) summarizes the errors in °F. A lower RMSE is better.
+:::
 
-```{r, message=F, warning=F, results = F}
-#turn sf objects into sp objects for gstats
-heatwave_sp <- as(heatwave_temp, "Spatial")
-nc_sp <- as(nc_boundaries, "Spatial")
-
-#test values
-idp_vals <- c(1, 1.5, 2, 2.5, 3, 4)
-
-#store results
-idw_cv_results <- data.frame(
-  idp = idp_vals,
-  ME = NA,
-  MAE = NA,
-  RMSE = NA
-)
-
-#loop that calculates prediction error at all of the test vallues
-for (i in seq_along(idp_vals)) {
-  
-  idw_model <- gstat(
-    formula = value ~ 1, #idw formula
-    locations = heatwave_sp,
-    set = list(idp = idp_vals[i])
-  )
-  
-  cv <- gstat.cv(
-    object = idw_model,
-    nfold = 5   #5-fold cross-validation
-  )
-  
-  idw_cv_results$ME[i] <- mean(cv$residual, na.rm = TRUE)
-  idw_cv_results$MAE[i] <- mean(abs(cv$residual), na.rm = TRUE)
-  idw_cv_results$RMSE[i] <- sqrt(mean(cv$residual^2, na.rm = TRUE))
+```{r}
+#leave-one-out cross-validation for three powers
+for (p in c(1, 2, 3)) {
+  cv <- krige.cv(value ~ 1, locations = ~x + y, data = heat_df,
+                 set = list(idp = p), verbose = FALSE)
+  print(paste("idp", p, "RMSE", round(sqrt(mean(cv$residual^2)), 2)))
 }
 ```
 
-```{r}
-#view benchmarking results
-idw_cv_results
+```{r, include = FALSE}
+heat_rmse <- sapply(c(1, 2, 3), function(p) rmse(krige.cv(value ~ 1, locations = ~x + y, data = heat_df_key, set = list(idp = p), verbose = FALSE)))
 ```
 
-**Q1: Based on our benchmarking results, what IDP should we choose? (Note that the RMSE might vary slightly depending on the simulations)**
+The RMSE is `r fmt(heat_rmse[1])`°F for power 1, `r fmt(heat_rmse[2])`°F for power 2 and `r fmt(heat_rmse[3])`°F for power 3, so power 2 predicts the stations best.
 
-To actually create a prediction surface, we first need to create a prediction grid, which defines the locations where we want to estimate temperature values. The grid (raster) divides the study area into cells, and the interpolation method then will generate a predicted value for each cell. The size of each pixel determines the spatial resolution of the final surface. Smaller pixels produce a smoother, more detailed surface but require more computation, while larger pixels produce a coarser surface with less spatial detail. In this tutorial, we create a grid that covers the North Carolina boundary and will use this same grid for all interpolation methods so that the resulting prediction surfaces can be compared directly.
+## Day 1 Partner Practice {#partner-practice}
 
-```{r}
-# create a regular prediction grid. We say we want 2000 pixels
-grd <- as.data.frame(spsample(nc_sp, "regular", n = 2000))
+Both partners use the average daily high temperature in January (°F) at `r nrow(jan_temp)` weather stations across North Carolina, in NC State Plane (feet). Partner A interpolates with power 1 and Partner B with power 3. Each task tells you in parentheses which walkthrough step to reuse.
 
-#set grid coordinates
-names(grd) <- c("X", "Y")
-coordinates(grd) <- c("X", "Y")
-gridded(grd) <- TRUE
-fullgrid(grd) <- TRUE
-
-#assign CRS (which is 2264, you MUST use a projected coordinate system for interpolation)
-crs(grd) <- crs(heatwave_sp)
-
-# run IDW interpolation using the best IDP from cross-validation
-heatwave_idw <- idw(
-  formula = value ~ 1,
-  locations = heatwave_sp,
-  newdata = grd,
-  idp = 2
-)
-
-#rasterize interpolation output
-r <- rast(heatwave_idw)
-
-#mask to North Carolina boundaries
-r_m <- mask(r, nc_boundaries)
-
-#map interpolated temperatures
-tm_shape(r_m) +
-  tm_raster(
-    col = "var1.pred",
-    col.scale = tm_scale_intervals(
-      values = "-rd_yl_gn",
-      style = "quantile"
-    )
-  )
+```{r, eval = FALSE}
+#January average high temperature at weather stations (both partners)
+jan_temp <- st_read("https://drive.google.com/uc?export=download&id=1Mtc7SXpWAx-atL5u1aFUuZli0wTMVTcT")
 ```
 
-**Q2: Re-run the IDW using a different IDP and compare the results.**
+:::: {.partners}
+::: {.partner .partner-a}
+### Partner A: Power 1
 
-### Kriging
+1. Map the stations with a legend. *(Step 1)*
+2. Make the table of x, y and value, and the 10,000-foot grid. *(Step 2)*
+3. Interpolate with IDW using `idp = 1`, and map the surface. *(Step 3)*
+4. Find the leave-one-out RMSE for `idp = 1`. *(Step 4)*
 
-Kriging assumes that the observed data are realizations of an underlying spatial random field, meaning the values we measure at specific locations are part of a continuous stochastic process across space. Unlike IDW, which determines prediction weights solely based on distance, kriging uses a variogram model to describe how strongly observations are related to one another across space. This model characterizes how spatial similarity declines as the distance between locations increases, and kriging uses this relationship to determine the weights applied to nearby observations when predicting values at unsampled locations.
+When you finish, bring your map and RMSE to Day 1 Together.
+:::
 
-To understand the spatial structure of the data, we first calculate an empirical variogram on our data. The empirical variogram summarizes how differences between observed values change with distance by computing the average semivariance between pairs of observations at different separation distances.
+::: {.partner .partner-b}
+### Partner B: Power 3
 
-```{r}
-#compute empirical variogram
-v <- variogram(value ~ 1, data = heatwave_sp)
+1. Map the stations with a legend. *(Step 1)*
+2. Make the table of x, y and value, and the 10,000-foot grid. *(Step 2)*
+3. Interpolate with IDW using `idp = 3`, and map the surface. *(Step 3)*
+4. Find the leave-one-out RMSE for `idp = 3`. *(Step 4)*
 
-#plot empirical variogram
-plot(v)
+When you finish, bring your map and RMSE to Day 1 Together.
+:::
+::::
+
+## Day 1 Together {#together}
+
+1. Fill in the table.
+2. Put your maps side by side. Which surface is smoother, and which shows bullseyes around stations?
+3. There are only `r nrow(jan_temp)` stations. Where on the map are the predictions furthest from any station, and how much would you trust them?
+
+| Power | RMSE (°F) | Smoother or more local? |
+|---|---|---|
+| 1 (Partner A) | | |
+| 3 (Partner B) | | |
+
+::: {.deliver}
+Each pair turns in one index card before leaving. Write both of your names on it, copy the table, and add two or three sentences saying which power you would use and why, using both the maps and the RMSE.
+:::
+
+## Day 2 Walkthrough: Ordinary Kriging {#walkthrough-2}
+
+Use `heat_df`, `grid` and `nc_outline` from Day 1.
+
+### Step 1: Experimental Variogram
+
+::: {.why}
+The variogram shows how different two stations' values are, on average, as the distance between them grows. The nugget is the difference at almost no distance, the sill is where the curve levels off, and the range is the distance where it levels off. Beyond the range, stations are no longer related.
+:::
+
+```{r, fig.alt = "Experimental variogram of heat wave temperatures. Semivariance rises from about 11 to about 17 over the first 150,000 feet, then scatters between about 14 and 20 with no clear trend."}
+heat_vgm <- variogram(value ~ 1, locations = ~x + y, data = heat_df)
+plot(heat_vgm)
 ```
 
-We then match the overall shape of the empirical variogram to a theoretical variogram model, which provides a smooth mathematical function describing the spatial dependence structure of the data. The most commonly used models include the spherical, exponential, and Gaussian variogram models.
+### Step 2: Fit a Variogram Model Automatically
 
-```{r}
-show.vgms(par.strip.text = list(cex = 0.75))
+::: {.why}
+`fit.variogram()` fits a curve to the variogram. Given a list of model shapes, it fits each one and keeps the best. Here we let it choose among spherical (`"Sph"`), exponential (`"Exp"`) and Gaussian (`"Gau"`). A "No convergence" warning means one of the shapes could not be fit well. `fit.variogram()` still returns the best of the others.
+:::
 
+```{r, fig.alt = "Experimental variogram of heat wave temperatures with the fitted spherical model drawn as a line through the points, with a nugget of about 7, a sill near 17 and a range of about 137,000 feet."}
+heat_fit <- fit.variogram(heat_vgm, vgm(c("Sph", "Exp", "Gau")))
+heat_fit
+plot(heat_vgm, heat_fit)
 ```
 
-In our case, we will use a spherical variogram model.
+### Step 3: Krige and Map the Prediction and Variance
 
-Variogram models are typically described using three main parameters: the nugget, the sill, and the range. When fitting a variogram model, we provide initial estimates for these parameters so the fitting algorithm has a starting point. The goal is to roughly match the overall shape of the empirical variogram to one of the available theoretical models.
+::: {.why}
+Kriging uses the fitted variogram to weight the stations. It also gives a kriging variance for every cell, which is a measure of uncertainty: it is low near stations and high far from them.
+:::
 
-Once these starting values are specified, the fitting procedure refines the parameters to produce a variogram model that best represents the spatial structure observed in the data. This fitted model is then used by the kriging algorithm to determine the weights applied to nearby observations when generating predictions.
+```{r, fig.alt = c("Map of the kriging prediction of heat wave temperature for North Carolina, with a legend. Like the IDW surface, it is coolest in the western mountains and hottest in the east, but it is smoother, without bullseyes around stations.", "Map of kriging variance for North Carolina, with a legend. Variance is lowest at the stations and highest in the gaps between them, so the map looks like a field of dark spots on a lighter background.")}
+krige_model <- gstat(formula = value ~ 1, locations = ~x + y, data = heat_df,
+                     model = heat_fit)
 
-![](images/clipboard-2174812564.png){fig-alt="A diagram of a semivariogram curve with distance on the x axis and semivariance on the y axis. The curve starts above zero at the nugget, rises steeply, and levels off at the sill. The range is the distance where the curve reaches the sill, marked with a dashed line."}
+heat_krige <- interpolate(grid, krige_model, debug.level = 0)
+heat_krige <- mask(heat_krige, vect(nc_outline))
 
-In our case, we will define the nugget at 10, the sill at 17, and the range at 150000
+tm_shape(heat_krige[["var1.pred"]]) +
+  tm_raster(col.scale = tm_scale_intervals(style = "quantile", n = 5, values = "-brewer.rd_yl_bu"),
+            col.legend = tm_legend(title = "Predicted temperature (°F)"))
 
-```{r}
-#specify an initial variogram model
-vgm_initial <- vgm(
-  psill = 17,
-  model = "Sph",
-  range = 150000,
-  nugget = 10
-)
-
-#fit empirical to initial model
-vgm_fit <- fit.variogram(v, vgm_initial)
-
-#plot fitted variogram model 
-plot(v, vgm_fit)
-
-
-#fit kriging
-krig_pred <- krige(
-  formula = value ~ 1,
-  locations = heatwave_sp,
-  newdata = grd,
-  model = vgm_fit
-)
-
-#rasterize predictions
-krig_rast <- rast(krig_pred)
-
-#mask to North Carolina boundary
-krig_mask <- mask(krig_rast, nc_boundaries)
-
-#map kriging predictions
-tm_shape(krig_mask) +
-  tm_raster(
-    col = "var1.pred",
-    col.scale = tm_scale_intervals(
-      values = "-rd_yl_gn",
-      style = "quantile"
-    )
-  )
-
-# map kriging prediction variance
-tm_shape(krig_mask) +
-  tm_raster(
-    col = "var1.var",
-    col.scale = tm_scale_intervals(
-      values = "viridis",
-      style = "quantile"
-    )
-  )
+tm_shape(heat_krige[["var1.var"]]) +
+  tm_raster(col.scale = tm_scale_intervals(style = "quantile", n = 5, values = "brewer.purples"),
+            col.legend = tm_legend(title = "Kriging variance"))
 ```
 
-**Q3. Compare our kriging results to our IDW. What looks different?**
-
-**Q4. Look at the kriging variance. This represents the uncertainty of the prediction at that location. Taking the square of the variance is the standard error (i.e. if the variance is 17, that means the standard error would be about 4 degrees). What could cause differences in variance across the study region?**
-
-### Bayesian Approach
-
-Instead of estimating interpolation weights directly, a Bayesian approach it treats the underlying spatial pattern as a latent stochastic process that generates the observed data. In this framework, the temperature at each location is modeled as the sum of a global mean and a spatial random effect that varies smoothly across space. The spatial random effect represents the structured spatial dependence that we previously tried to capture with the variogram model in kriging.
-
-The model we will use is the Stochastic Partial Differential Equation (SPDE). This method approximates a continuous spatial field using a triangulated mesh that covers the study region. Each node in the mesh represents part of the spatial process, and the spatial effect is estimated as a weighted combination of these nodes.
-
-This structure is conceptually similar to kriging because both methods assume the data come from a spatial random field and both produce spatial predictions and uncertainty estimates. However, instead of fitting a variogram and solving kriging equations, the Bayesian model estimates the spatial field directly within a hierarchical probabilistic framework and produces posterior distributions for the predicted values.
-
-In our case, we will be using a simple SPDE model with no covariates. This means that the model only estimates an overall mean temperature and a spatial random effect that varies smoothly across space. In other words, the temperature at any location is modeled as the sum of a global intercept and the spatial field.
+### Step 4: Compare with IDW
 
 ```{r}
-# response and observed coordinates
-y <- heatwave_temp$value
-coo <- st_coordinates(heatwave_temp)
-
-#prediction coordinates from the existing grid
-coords_pred <- coordinates(grd)
-
-# build triangulated mesh over observed locations
-# the mesh approximates the continuous spatial field using a network of triangles
-
-mesh <- fmesher::fm_mesh_2d_inla(
-  loc = coo,
-
-  # max.edge controls the maximum triangle size in the mesh
-  # because our CRS (EPSG:2264) is in feet, these distances are also in feet
-  # c(50000, 100000) allows triangles up to ~9.5 miles inside the main data region
-  # and ~19 miles in the outer extension of the mesh
-  # this keeps the mesh detailed enough to capture statewide temperature patterns
-  # while avoiding excessive computation
-
-  max.edge = c(50000, 100000),
-
-  # cutoff prevents very small triangles when observation points are very close
-  # if stations are within 10,000 feet (~1.9 miles) of each other,
-  # they will not force the mesh to create extremely dense clusters of nodes
-  # this helps stabilize the mesh and reduce unnecessary complexity
-
-  cutoff = 10000
-)
-#plot the mesh
-plot(mesh)
-
-
-
+krige_cv <- krige.cv(value ~ 1, locations = ~x + y, data = heat_df,
+                     model = heat_fit, verbose = FALSE)
+sqrt(mean(krige_cv$residual^2))
 ```
 
-Now that we have our mesh, we can run our model
-```{r}
-#dfine the spatial random field using the SPDE formulation.
-#this specifies the Matérn covariance structure that describes spatial dependence. Alpha of 2 means controls the smoothness
-spde <- inla.spde2.matern(
-  mesh = mesh,
-  alpha = 2,
-  constr = TRUE
-)
-
-#index set for the spatial random effect. S is the name of the effect
-indexs <- inla.spde.make.index("s", spde$n.spde)
-
-#projection matrices map the mesh nodes onto the grids and the weather statin points
-#A_obs links observed station locations to the mesh
-#A_pred links prediction grid locations to the mesh
-A_obs <- inla.spde.make.A(mesh = mesh, loc = coo)
-A_pred <- inla.spde.make.A(mesh = mesh, loc = coords_pred)
-
-#inla uses a stack to organize the response variable, model covariates (we dont have these), spatial random effects, projection matrices
-
-#stack for observed data
-stk.e <- inla.stack(
-  tag = "est",
-  data = list(y = y),
-  A = list(1, A_obs),
-  effects = list(
-    data.frame(intercept = rep(1, nrow(A_obs))),
-    s = indexs
-  )
-)
-
-#stack for predicted locations
-stk.p <- inla.stack(
-  tag = "pred",
-  data = list(y = NA),
-  A = list(1, A_pred),
-  effects = list(
-    data.frame(intercept = rep(1, nrow(A_pred))),
-    s = indexs
-  )
-)
-stk.full <- inla.stack(stk.e, stk.p)
-
-# fit Bayesian spatial model. It is just our intercept (which is the global mean) and our spatial random effect
-formula <- y ~ 0 + intercept + f(s, model = spde)
-
-#gaussian for contirbous data
-res <- inla(
-  formula,
-  family = "gaussian",
-  data = inla.stack.data(stk.full),
-  control.predictor = list(
-    compute = TRUE,
-    A = inla.stack.A(stk.full)
-  ),
-  control.compute = list(
-    return.marginals.predictor = TRUE
-  )
-)
-
-#extract posterior summaries for prediction locations
-index_pred <- inla.stack.index(stk.full, tag = "pred")$data
-
-grd$mean <- res$summary.fitted.values[index_pred, "mean"]
-grd$ll <- res$summary.fitted.values[index_pred, "0.025quant"]
-grd$ul <- res$summary.fitted.values[index_pred, "0.975quant"]
-grd$ci_width <- grd$ul - grd$ll
-
-#rasterize and mask to North Carolina
-bayes_rast <- rast(grd)
-bayes_mask <- mask(bayes_rast, nc_boundaries)
-
-#posterior mean map
-tm_shape(bayes_mask) +
-  tm_raster(
-    col = "mean",
-    col.scale = tm_scale_intervals(
-      values = "-rd_yl_gn",
-      style = "quantile"
-    )
-  )
-
-#uncertainty map (credible interval width)
-tm_shape(bayes_mask) +
-  tm_raster(
-    col = "ci_width",
-    col.scale = tm_scale_intervals(
-      values = "viridis",
-      style = "quantile"
-    )
-  )
+```{r, include = FALSE}
+heat_fit_key <- fit.variogram(variogram(value ~ 1, locations = ~x + y, data = heat_df_key), vgm(c("Sph", "Exp", "Gau")))
+heat_krige_rmse <- rmse(krige.cv(value ~ 1, locations = ~x + y, data = heat_df_key, model = heat_fit_key, verbose = FALSE))
 ```
 
-### Picking a Model 
+Kriging's RMSE is `r fmt(heat_krige_rmse)`°F, compared with `r fmt(heat_rmse[2])`°F for IDW with power 2. With this many stations the two are close, and kriging adds a map of where its predictions are least certain.
 
-So, what model do we go with? In practice, the choice often depends on the purpose of the analysis. If the goal is rapid exploration, IDW may be sufficient. If the goal is statistically grounded interpolation with an explicit spatial covariance model, kriging is often a strong choice. If the goal is to model the spatial process directly and obtain full probabilistic uncertainty estimates, a Bayesian spatial model may be preferred. You can also compare interpolation methods using benchmarking, where predictions from each model are evaluated against observed data using techniques such as cross-validation.
+## Day 2 Partner Practice {#partner-practice-2}
+
+Both partners krige the January temperatures from Day 1. Partner A fits a spherical model and Partner B fits an exponential model. Each task tells you in parentheses which Day 2 step to reuse.
+
+:::: {.partners}
+::: {.partner .partner-a}
+### Partner A: Spherical Model
+
+1. Plot the experimental variogram. *(Step 1)*
+2. Fit a spherical model with `vgm("Sph")`, write down the nugget, sill and range, and plot the fit. *(Step 2)*
+3. Krige and map the prediction and the variance. *(Step 3)*
+4. Find the leave-one-out RMSE. *(Step 4)*
+
+When you finish, bring your nugget, sill, range, RMSE and both maps to Day 2 Together.
+:::
+
+::: {.partner .partner-b}
+### Partner B: Exponential Model
+
+1. Plot the experimental variogram. *(Step 1)*
+2. Fit an exponential model with `vgm("Exp")`, write down the nugget, sill and range, and plot the fit. *(Step 2)*
+3. Krige and map the prediction and the variance. *(Step 3)*
+4. Find the leave-one-out RMSE. *(Step 4)*
+
+When you finish, bring your nugget, sill, range, RMSE and both maps to Day 2 Together.
+:::
+::::
+
+## Day 2 Together {#together-2}
+
+1. Fill in the table, and add your best IDW RMSE from Day 1.
+2. Which variogram model predicts better? Which would `fit.variogram()` have chosen if you gave it both?
+3. Compare your variance maps with the station map. Where is each prediction least certain?
+
+| Method | Nugget | Sill | Range (feet) | RMSE (°F) |
+|---|---|---|---|---|
+| Kriging, spherical (Partner A) | | | | |
+| Kriging, exponential (Partner B) | | | | |
+| Best IDW from Day 1 | | | | |
+
+::: {.deliver}
+Each pair turns in one index card before leaving. Write both of your names on it, copy the table, and add two or three sentences recommending one surface for January temperature and naming the part of the state where it is least certain.
+:::
+
+## Answer Key {#answer-key .answer-key}
+
+```{r key-values, include = FALSE}
+jan_df <- data.frame(x = st_coordinates(jan_temp)[, 1], y = st_coordinates(jan_temp)[, 2], value = jan_temp$value)
+jan_idw <- sapply(c(1, 3), function(p) rmse(krige.cv(value ~ 1, locations = ~x + y, data = jan_df, set = list(idp = p), verbose = FALSE)))
+jan_vgm <- variogram(value ~ 1, locations = ~x + y, data = jan_df)
+fit_sph <- fit.variogram(jan_vgm, vgm("Sph"))
+fit_exp <- fit.variogram(jan_vgm, vgm("Exp"))
+sph_rmse <- rmse(krige.cv(value ~ 1, locations = ~x + y, data = jan_df, model = fit_sph, verbose = FALSE))
+exp_rmse <- rmse(krige.cv(value ~ 1, locations = ~x + y, data = jan_df, model = fit_exp, verbose = FALSE))
+fit_auto <- fit.variogram(jan_vgm, vgm(c("Sph", "Exp")))
+par_txt <- function(f) c(fmt(f$psill[1]), fmt(sum(f$psill)), fmt(f$range[2], 0))
+```
+
+### Day 1
+
+| Power | RMSE (°F) | Smoother or more local? |
+|---|---|---|
+| 1 | `r fmt(jan_idw[1])` | Smoother, with values pulled toward the statewide average |
+| 3 | `r fmt(jan_idw[2])` | More local, with bullseyes around stations |
+
+Power 3 has the lower RMSE, so it predicts the stations better, even though its map looks patchier. The predictions are least trustworthy far from any station, such as the Outer Banks, the far northeast and parts of the mountains, where a single distant station decides the value.
+
+### Day 2
+
+| Method | Nugget | Sill | Range (feet) | RMSE (°F) |
+|---|---|---|---|---|
+| Kriging, spherical | `r par_txt(fit_sph)[1]` | `r par_txt(fit_sph)[2]` | `r par_txt(fit_sph)[3]` | `r fmt(sph_rmse)` |
+| Kriging, exponential | `r par_txt(fit_exp)[1]` | `r par_txt(fit_exp)[2]` | `r par_txt(fit_exp)[3]` | `r fmt(exp_rmse)` |
+| IDW, power 3 | | | | `r fmt(jan_idw[2])` |
+
+Your fitted values can differ a little if `fit.variogram()` starts from different values. Given both shapes, `fit.variogram()` picks the `r c(Sph = "spherical", Exp = "exponential")[as.character(fit_auto$model[2])]` model. The exponential model and IDW with power 3 are nearly tied, and both beat the spherical model. Kriging adds the variance map, which is highest in the gaps between stations and near the edges of the state, farthest from any station. A good card recommends the exponential kriging surface (or IDW with power 3 if they prefer its simplicity) and names one of those areas as least certain.
+
+```{r, eval = FALSE}
+jan_temp <- st_read("https://drive.google.com/uc?export=download&id=1Mtc7SXpWAx-atL5u1aFUuZli0wTMVTcT")
+
+#### Day 1, both partners ####
+tm_shape(nc_outline) + tm_borders() +
+  tm_shape(jan_temp) +
+  tm_dots(fill = "value", size = 0.5,
+          fill.scale = tm_scale_intervals(style = "quantile", n = 5, values = "-brewer.rd_yl_bu"),
+          fill.legend = tm_legend(title = "January average high (°F)"))
+
+jan_df <- data.frame(x = st_coordinates(jan_temp)[, 1],
+                     y = st_coordinates(jan_temp)[, 2],
+                     value = jan_temp$value)
+grid <- rast(vect(nc_outline), resolution = 10000)
+
+#Partner A uses idp = 1, Partner B uses idp = 3
+jan_idw <- interpolate(grid, gstat(formula = value ~ 1, locations = ~x + y, data = jan_df,
+                                   set = list(idp = 1)), debug.level = 0)
+jan_idw <- mask(jan_idw, vect(nc_outline))
+tm_shape(jan_idw[["var1.pred"]]) +
+  tm_raster(col.scale = tm_scale_intervals(style = "quantile", n = 5, values = "-brewer.rd_yl_bu"),
+            col.legend = tm_legend(title = "Predicted January high (°F)"))
+
+cv <- krige.cv(value ~ 1, locations = ~x + y, data = jan_df, set = list(idp = 1), verbose = FALSE)
+sqrt(mean(cv$residual^2))
+
+#### Day 2, both partners ####
+jan_vgm <- variogram(value ~ 1, locations = ~x + y, data = jan_df)
+plot(jan_vgm)
+
+#Partner A uses "Sph", Partner B uses "Exp"
+jan_fit <- fit.variogram(jan_vgm, vgm("Sph"))
+jan_fit
+plot(jan_vgm, jan_fit)
+
+jan_krige <- interpolate(grid, gstat(formula = value ~ 1, locations = ~x + y, data = jan_df,
+                                     model = jan_fit), debug.level = 0)
+jan_krige <- mask(jan_krige, vect(nc_outline))
+
+tm_shape(jan_krige[["var1.pred"]]) +
+  tm_raster(col.scale = tm_scale_intervals(style = "quantile", n = 5, values = "-brewer.rd_yl_bu"),
+            col.legend = tm_legend(title = "Predicted January high (°F)"))
+tm_shape(jan_krige[["var1.var"]]) +
+  tm_raster(col.scale = tm_scale_intervals(style = "quantile", n = 5, values = "brewer.purples"),
+            col.legend = tm_legend(title = "Kriging variance"))
+
+cv <- krige.cv(value ~ 1, locations = ~x + y, data = jan_df, model = jan_fit, verbose = FALSE)
+sqrt(mean(cv$residual^2))
+```

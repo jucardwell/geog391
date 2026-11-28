@@ -100,8 +100,12 @@ h3, h2.h3 { font-size: 1.3rem; }
   li + li { border-top: 1px solid $ink; }
   .nav-link { display: block; color: $ink; padding: 7px 10px; border-left: 0; line-height: 1.3; margin: 0; }
   .nav-link:hover { background: $tint; }
-  .nav-link.active, .nav-link.active:hover { background: $ink; color: #FFFFFF !important; font-weight: 700; }
+  // Same weight as the other items so the list never rewraps or jumps as the highlight moves.
+  .nav-link.active, .nav-link.active:hover { background: $ink; color: #FFFFFF !important; font-weight: 400; }
 }
+// Quarto pins the sidebar at the very top with a full-height box, which made the list
+// slide up off the screen near the end of long pages. Keep it short and inset instead.
+#quarto-sidebar.sidebar { top: 16px !important; height: auto !important; max-height: calc(100vh - 32px) !important; align-self: start; }
 .side-block { font-size: 15px; line-height: 1.45; margin-bottom: 22px; display: flex; flex-direction: column; gap: 4px; }
 .side-block .side-title { font-weight: 700; }
 
@@ -245,9 +249,8 @@ table.plain-list {
 .case-main h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 0.5rem; }
 .case-main h3 { font-size: 1.25rem; font-weight: 700; margin: 1.5rem 0 0.5rem; }
 .legend-box {
-  border: 1px solid $ink; padding: 12px 14px; display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 6px 8px;
+  border: 1px solid $ink; padding: 12px 14px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px;
   .legend-title { grid-column: 1 / -1; font-weight: 700; text-align: center; border-bottom: 1px solid $ink; padding-bottom: 6px; margin-bottom: 2px; }
-  .sym.prep, .sym.case { color: $red; }
 }
 .case-side p { margin: 0; }
 .case-downloads { display: flex; flex-direction: column; gap: 3px; }

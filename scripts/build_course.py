@@ -22,8 +22,6 @@ ROOT = Path(__file__).resolve().parent.parent
 COURSE = ROOT / "course"
 GEN = ROOT / "_generated"
 
-SYM = {"concept": "■", "workshop": "▲", "new": "●", "prep": "○",
-       "case": "★", "off": "—", "final": "◆"}
 
 
 def read_csv(name):
@@ -232,9 +230,9 @@ def main():
     # ---- Case study legend boxes -----------------------------------------
     for c in cases:
         box = (f'<div class="legend-box"><div class="legend-title">Case Study {c["n"]}</div>'
-               f'<span class="sym prep">○</span><span>Prep day, {esc(c["prep"])}</span>'
-               f'<span class="sym case">★</span><span>Case study, {esc(c["label"])}</span>'
-               f'<span class="sym muted">—</span><span class="muted">In class, closed book.{" Guest proctor." if c["note"] else ""}</span></div>'
+               f'<span>Prep day, {esc(c["prep"])}</span>'
+               f'<span>Case study, {esc(c["label"])}</span>'
+               f'<span class="muted">In class, closed book.{" Guest proctor." if c["note"] else ""}</span></div>'
                f'<p>Covers {esc(c["covers"])}.</p>')
         (GEN / f"case_{c['n']}.md").write_text(raw(box), encoding="utf-8")
 

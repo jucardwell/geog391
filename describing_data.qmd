@@ -55,7 +55,7 @@ Run each chunk in your own .Rmd. You will reuse this code in Part 2.
 ### Step 1: Load the Data
 
 ::: {.why}
-We'll use rurality codes (RUCA) for `r fmt(n_tracts, 0)` North Carolina census tracts from the [USDA Economic Research Service](https://www.ers.usda.gov/data-products/rural-urban-commuting-area-codes), and 1991 to 2020 summer temperature normals at `r fmt(n_normals, 0)` locations across the U.S. from [NOAA](https://www.ncei.noaa.gov/cdo-web/). Both are already summaries: the normals are 30-year averages, so anything we calculate from them describes data that has already been averaged once.
+We'll use rurality codes (RUCA) for `r fmt(n_tracts, 0)` North Carolina census tracts from the [USDA Economic Research Service](https://www.ers.usda.gov/data-products/rural-urban-commuting-area-codes), and 1991 to 2020 summer temperature normals at `r fmt(n_normals, 0)` grid points, about 7 km apart, across the contiguous U.S. from [NOAA](https://www.ncei.noaa.gov/cdo-web/). Both are already summaries: the normals are 30-year averages, so anything we calculate from them describes data that has already been averaged once.
 :::
 
 ```{r, eval = FALSE}
@@ -127,7 +127,7 @@ climate_normals |>
   ) |>
   pivot_longer(everything(), names_to = "Statistic", values_to = "Value") |>
   gt() |>
-  fmt_number(columns = Value, decimals = 2)
+  fmt_number(columns = Value, decimals = 2, drop_trailing_zeros = TRUE)
 ```
 
 ### Step 5: Plot the Distribution
@@ -178,9 +178,9 @@ When you finish, bring the mean, median, standard deviation and maximum to Part 
 1. Make a descriptive statistics table for `pct_no_veh`. Count the missing values. *(Step 4)*
 2. Plot a histogram and a boxplot. *(Step 5)*
 3. Map `pct_no_veh` by tract. *(Step 3)*
-4. Find the tract with the highest value. Its `GEOID` starts with the state and county codes, so you can tell which county it is in.
+4. Find the tract or tracts with the highest value. A `GEOID` starts with the state and county codes, so you can tell which county it is in.
 
-When you finish, bring the mean, median, standard deviation and maximum to Part 3, along with the tract that has the maximum.
+When you finish, bring the mean, median, standard deviation and maximum to Part 3, along with the tract or tracts that have the maximum.
 :::
 ::::
 
@@ -224,7 +224,7 @@ b_top <- tract_acs |> st_drop_geometry() |> slice_max(pct_no_veh, n = 1)
 | Standard deviation | `r fmt(a$sd)` | `r fmt(b$sd)` |
 | Minimum to maximum | `r fmt(a$min)` to `r fmt(a$max)` | `r fmt(b$min)` to `r fmt(b$max)` |
 | Skewness | `r fmt(a$skewness, 2)` | `r fmt(b$skewness, 2)` |
-| Highest | `r a_top$county_name` | tract `r b_top$GEOID[1]` |
+| Highest | `r a_top$county_name` | `r ifelse(nrow(b_top) > 1, paste0("a tie between tracts ", paste(b_top$GEOID, collapse = " and ")), paste("tract", b_top$GEOID))` |
 
 A good card says something like this. The means are almost the same, but the tracts are far more spread out, with a standard deviation of `r fmt(b$sd)` against `r fmt(a$sd)` for counties. Each county averages together tracts with very different shares, so the high and low tracts cancel out. The tract distribution is also strongly right-skewed (skewness `r fmt(b$skewness, 2)`), which is why its mean sits well above its median. A tract that reports `r fmt(b$max, 0)`% is worth checking before you trust it, because estimates for small areas can be extreme. The transit agency should use tracts, because a bus route serves neighborhoods, and county averages hide the pockets it is looking for.
 
@@ -247,7 +247,7 @@ county_acs |>
   ) |>
   pivot_longer(everything(), names_to = "Statistic", values_to = "Value") |>
   gt() |>
-  fmt_number(columns = Value, decimals = 2)
+  fmt_number(columns = Value, decimals = 2, drop_trailing_zeros = TRUE)
 
 #A2: histogram and boxplot (Step 5)
 ggplot(county_acs, aes(x = pct_no_veh)) +
@@ -286,7 +286,7 @@ tract_acs |>
   ) |>
   pivot_longer(everything(), names_to = "Statistic", values_to = "Value") |>
   gt() |>
-  fmt_number(columns = Value, decimals = 2)
+  fmt_number(columns = Value, decimals = 2, drop_trailing_zeros = TRUE)
 
 #B2: histogram and boxplot (Step 5)
 ggplot(tract_acs, aes(x = pct_no_veh)) +

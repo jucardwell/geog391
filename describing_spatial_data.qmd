@@ -50,7 +50,7 @@ Run each chunk in your own .Rmd. You will reuse this code in Part 2.
 ### Step 1: Load the Data
 
 ::: {.why}
-We'll use the touchdown points of `r fmt(nrow(torn))` U.S. tornadoes from 1954 to 2022, from [NOAA's Storm Prediction Center](https://www.spc.noaa.gov/gis/svrgis/). Useful columns are `yr` (year), `mag` (Enhanced Fujita rating), `inj` (injuries) and `fat` (fatalities). The data are already projected, so distances are in meters.
+We'll use the touchdown points of `r fmt(nrow(torn))` U.S. tornadoes from 1954 to 2022, from [NOAA's Storm Prediction Center](https://www.spc.noaa.gov/gis/svrgis/). Useful columns are `yr` (year), `mag` (Fujita or, since 2007, Enhanced Fujita rating), `inj` (injuries) and `fat` (fatalities). The data are already projected, so distances are in meters.
 :::
 
 ```{r, eval = FALSE}
