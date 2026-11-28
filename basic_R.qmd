@@ -1,4 +1,4 @@
-# Working in R and R Studio
+# Working in R and RStudio
 
 This is NOT a coding class, but we will be using R for our data analysis. Because of this, while I don't expect you to be able to generate code independently, I do expect you to develop a competency in navigating the RStudio environment and modifying code that I give you to complete specific tasks. This chapter will introduce you to R and RStudio.
 
@@ -12,14 +12,14 @@ To use R and RStudio, you will need to download and install both programs on you
 
 -   [Download RStudio](https://posit.co/download/rstudio-desktop/)
 
-Once you have downloaded and installed RStudio, open up the application. We need to change one global setting before we start. **You only need to do this once!** Navigate **Tools** \> **Global Options**, unclick “Restore .RData into Workspace at Startup” and choosing **Never** on the “Save workspace to .RData on exit”.
+Once you have downloaded and installed RStudio, open up the application. We need to change one global setting before we start. **You only need to do this once!** Navigate **Tools** \> **Global Options**, uncheck “Restore .RData into workspace at startup” and choose **Never** for “Save workspace to .RData on exit”.
 
 ## The RStudio Environment
 
 The RStudio environment consists of four panels.
 
 1.  **Source**: This is where you can edit R files (either .R or .Rmd) and run R code.
-2.  **Console:** The console is an interactive R environment, where you can easily run R commands. Commands written in the console are not saved into any file. It can be good to use the console for quickly testing R code
+2.  **Console:** The console is an interactive R environment, where you can easily run R commands. Commands written in the console are not saved into any file. It can be good to use the console for quickly testing R code.
 3.  **Environment:** This is where R objects made during each session will appear.
 4.  **Output:** This is where charts and graphs will appear.
 
@@ -29,7 +29,7 @@ The RStudio environment consists of four panels.
 
 In this class, we will primarily be working with .Rmd files. An R Markdown or .Rmd is a document format that is designed to easily integrate text and code. This means that you can easily type answers to questions, descriptions of code outputs, and other assignment tasks within the same document as your code.
 
-To make a new .Rmd file, navigate to File \> New Script \> R Markdown
+To make a new .Rmd file, navigate to File \> New File \> R Markdown
 
 **I will sometimes provide you a .Rmd template for in-class exercises. You should save these files into a GEOG391 folder on your computer (not in the downloads folder please!)**
 
@@ -46,11 +46,11 @@ R packages extend the functionality of Base R and must be downloaded. We will us
 -   terra: This package allows us to read and manipulate rasters
 -   spdep: We use this package to create neighborhood definitions for spatial data
 -   sfdep: Allows the spdep package to interact with sf package
--   car: Includes basic statistical functions
--   e1071:Includes basic statistical functions
--   spatstat:Includes spatial statistical functions
+-   car: Includes statistical tests, such as Levene's test
+-   e1071: Includes basic statistical functions, such as skewness
+-   spatstat: Includes point pattern analysis functions
 -   gstat: Geostatistical modeling
--   stars: Spatial statistical modeling
+-   stars: Reads and manipulates rasters and other gridded data
 -   spatialreg: We will use this package to run spatial regressions
 -   tigris: This package helps us get geographic boundaries
 -   deldir: Calculates Voronoi tessellation
@@ -88,7 +88,7 @@ Welcome to your first .Rmd! Each .Rmd starts with a header, where you can change
 
 A .Rmd is made up of two main components: code chunks (this is where you write code) and text (any words that are outside of a code chunk). Any time you are writing code, it needs to be in a code chunk. Chunks can then be **run** to execute the code within the chunk. The idea of *chunking* is to group code that accomplishes a single, related task into one code chunk. When you begin a new step or process in your workflow, you start a new chunk.
 
-Your .Rmd template already has a header (where you can change the name and date) and two code chunks. The first code chunk is the **SET UP CHUNK.** The second code chunk is the **LIBRARY AND DATA CHUNK.** To load the libraries and data, you should **RUN CODE CHUNK**.
+Your .Rmd template already has a header (where you can change the name and date) and two code chunks. The first code chunk is the **SET UP CHUNK.** The second code chunk is the **LIBRARY AND DATA CHUNK.** To load the libraries and data, **run the code chunk**.
 
 ![](images/run_codechunk.png){fig-alt="An .Rmd open in RStudio. Labels point to the Add Code Chunk button in the toolbar, the set up chunk, the green Run Code Chunk arrow at the right edge of the library and data chunk, and the parks object (16 obs. of 18 variables) that appears in the Environment pane after the chunk runs."}
 
@@ -119,8 +119,8 @@ When your knitted document opens, it should look something like this
 
 ## Adding Text and Formatting a .Rmd
 
-The great thing about working in .Rmds is that you can create nicely formatted documents that merge code and text. At the bottom of the .Rmd is some tips for formatting nice-looking documents. Play around with adding some heading and text to your document.
+The great thing about working in .Rmds is that you can create nicely formatted documents that merge code and text. At the bottom of the .Rmd are some tips for formatting nice-looking documents. Play around with adding some headings and text to your document.
 
-Sometimes we want to modify what code and output actually appears in our knitted document. The commands at the bottom of the document explain which chunk modifiers to. **See if you can figure out how to change the map chunk to not include the code in the knitted document.**
+Sometimes we want to modify what code and output actually appears in our knitted document. The commands at the bottom of the document explain which chunk options to use. **See if you can figure out how to change the map chunk to not include the code in the knitted document.**
 
 After you are done working in your .Rmd, make sure to save it!

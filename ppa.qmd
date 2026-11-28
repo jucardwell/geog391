@@ -100,7 +100,7 @@ plot(station_pp, add = TRUE, pch = 16, cex = 0.5)
 ### Step 3: Quadrat Test
 
 ::: {.why}
-Split the window into quadrats and count the points in each. Under complete spatial randomness (CSR), every quadrat of the same size expects about the same count, and the variance-to-mean ratio (VMR) is about 1. A VMR well above 1 means uneven intensity. The Monte Carlo test compares the counts with 999 random patterns.
+Split the window into quadrats and count the points in each. Under complete spatial randomness (CSR), each quadrat expects a count in proportion to its area, and for equal-sized quadrats the variance-to-mean ratio (VMR) is about 1. A VMR well above 1 means uneven intensity. The Monte Carlo test compares the counts with 999 random patterns.
 :::
 
 ```{r, fig.alt = "The three-county window split into six quadrats, with the number of fire stations printed in each. The counts range widely, with the most stations in the quadrats that hold Greensboro and Winston-Salem."}

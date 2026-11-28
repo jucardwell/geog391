@@ -115,7 +115,7 @@ pm_test$estimate
 diff(pm_test$estimate)
 ```
 
-The p-value says the difference is unlikely to be chance. The effect size says how big it is: rural tracts average `r fmt(abs(diff(pm_key$estimate)))` µg/m³ less PM2.5 than non-rural tracts (`r fmt(pm_key$estimate[2])` vs. `r fmt(pm_key$estimate[1])`).
+The p-value says a difference this large would be very unlikely if H0 were true. The effect size says how big the difference is: rural tracts average `r fmt(abs(diff(pm_key$estimate)))` µg/m³ less PM2.5 than non-rural tracts (`r fmt(pm_key$estimate[2])` vs. `r fmt(pm_key$estimate[1])`).
 
 ### Step 5: Paired T-Test
 
@@ -206,7 +206,7 @@ acs <- st_read("https://drive.google.com/uc?export=download&id=1ffMbuX4ZQ8vuZK9u
 ### Step 2: Contingency Table and Row Percentages
 
 ::: {.why}
-H0: rural status and low-income status are independent. The row percentages are the effect size: they show how much more common low-income tracts are in one group than the other.
+H0: rural status and low-income status are independent. The row percentages show the effect size: how much more common low-income tracts are in one group than in the other.
 :::
 
 ```{r}
@@ -305,7 +305,7 @@ Both results are significant and of similar size, about 8 to 9 percentage points
 | Rural and commute | rural `r fmt(100 * pa["rural", "high commute"], 1)`%, non-rural `r fmt(100 * pa["non-rural", "high commute"], 1)`% | `r fmt(ca$statistic)` | `r pv(ca$p.value)` | No |
 | Income and commute | low income `r fmt(100 * pb["low income", "high commute"], 1)`%, not low income `r fmt(100 * pb["not low income", "high commute"], 1)`% | `r fmt(cb$statistic)` | `r pv(cb$p.value)` | Yes |
 
-Every expected count is well above 5. Rural and non-rural tracts have almost the same share of high-commute tracts, so the two variables look independent. Low-income tracts are less likely to have high commutes, a difference of about `r round(100 * abs(pb["low income", "high commute"] - pb["not low income", "high commute"]))` percentage points. That is significant with this many tracts, but it is a modest difference.
+Every expected count is well above 5. Rural and non-rural tracts have almost the same share of high-commute tracts, so Partner A fails to reject H0: these data show no relationship between rural status and commute. Low-income tracts are less likely to have high commutes, a difference of about `r round(100 * abs(pb["low income", "high commute"] - pb["not low income", "high commute"]))` percentage points. That is significant with this many tracts, but it is a modest difference.
 
 ```{r, eval = FALSE}
 mobility <- st_read("https://drive.google.com/uc?export=download&id=1YbCNVR5K8jDF5HOKHcoJ25gz7VkRvDHa") |>

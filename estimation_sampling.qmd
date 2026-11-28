@@ -97,7 +97,7 @@ The mean commute is `r fmt(mean(commuters_key$travel_time_work))` minutes, and t
 ### Step 4: Confidence Interval for a Proportion
 
 ::: {.why}
-For a proportion the interval is $\hat{p} \pm z^* \sqrt{\frac{\hat{p}(1-\hat{p})}{n}}$. `prop.test()` uses a slightly different formula (the Wilson interval), so its answer differs a little from the hand calculation.
+For a proportion the interval is $\hat{p} \pm z^* \sqrt{\frac{\hat{p}(1-\hat{p})}{n}}$. `prop.test()` uses a slightly different formula (the Wilson interval with a continuity correction), so its answer differs a little from the hand calculation.
 :::
 
 ```{r}

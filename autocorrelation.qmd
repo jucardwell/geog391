@@ -201,7 +201,7 @@ head(county_lisa)
 ### Step 2: Classify the Clusters
 
 ::: {.why}
-A county is High-High if it is high and its neighbors are high, and Low-Low if both are low. High-Low and Low-High are outliers. Counties with a p-value of 0.05 or more are labeled not significant.
+A county is High-High if it is high and its neighbors are high, and Low-Low if both are low. High-Low and Low-High are outliers. Counties with a p-value of 0.05 or more are labeled not significant. Because we run one test per county, a few counties will be significant by chance alone.
 :::
 
 ```{r}

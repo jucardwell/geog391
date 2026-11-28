@@ -228,7 +228,7 @@ AIC(ols_model, lag_model, error_model)
 moran.test(residuals(lag_model), county_w, zero.policy = TRUE)
 ```
 
-Both simple tests are significant, and only the robust lag test is, so the tests point to a lag model. The lag model also has the lowest AIC (`r fmt(AIC(lag_key), 1)`, compared with `r fmt(AIC(err_key), 1)` for the error model and `r fmt(AIC(ols_key), 1)` for OLS). With rho at `r fmt(lag_key$rho)`, the `pct_bachelors` coefficient falls from `r fmt(coef(ols_key)[2])` to `r fmt(coef(lag_key)["pct_bachelors"])`, because part of what OLS credited to education was really the pull of neighboring counties.
+Both simple tests are significant, and only the robust lag test is, so the tests point to a lag model. The lag model also has the lowest AIC (`r fmt(AIC(lag_key), 1)`, compared with `r fmt(AIC(err_key), 1)` for the error model and `r fmt(AIC(ols_key), 1)` for OLS). Rho is `r fmt(lag_key$rho)`, so a county's drop in workplace visits moves with its neighbors' drops. In a lag model the `pct_bachelors` coefficient (`r fmt(coef(lag_key)["pct_bachelors"])`) is not directly comparable with the OLS slope (`r fmt(coef(ols_key)[2])`), because a change in one county also spills over to its neighbors. `impacts(lag_model, listw = county_w)` adds those spillovers and gives a total effect of `r fmt(impacts(lag_key, listw = cov_w_key)$total)`.
 
 ## Day 2 Partner Practice {#partner-practice-2}
 

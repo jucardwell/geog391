@@ -55,7 +55,7 @@ Run each chunk in your own .Rmd. You will reuse this code in Part 2.
 ### Step 1: Load the Data
 
 ::: {.why}
-We'll use rurality codes (RUCA) for `r fmt(n_tracts, 0)` North Carolina census tracts from the [USDA Economic Research Service](https://www.ers.usda.gov/data-products/rural-urban-commuting-area-codes), and 1991 to 2020 summer temperature normals at `r fmt(n_normals, 0)` locations across the U.S. from [NOAA](https://www.ncei.noaa.gov/cdo-web/). Both are already summaries: the normals are 30-year averages, so anything we calculate from them describes data that has already been averaged once.
+We'll use rurality codes (RUCA) for `r fmt(n_tracts, 0)` North Carolina census tracts from the [USDA Economic Research Service](https://www.ers.usda.gov/data-products/rural-urban-commuting-area-codes), and 1991 to 2020 summer temperature normals at `r fmt(n_normals, 0)` grid points, about 7 km apart, across the contiguous U.S. from [NOAA](https://www.ncei.noaa.gov/cdo-web/). Both are already summaries: the normals are 30-year averages, so anything we calculate from them describes data that has already been averaged once.
 :::
 
 ```{r, eval = FALSE}
@@ -127,7 +127,7 @@ climate_normals |>
   ) |>
   pivot_longer(everything(), names_to = "Statistic", values_to = "Value") |>
   gt() |>
-  fmt_number(columns = Value, decimals = 2)
+  fmt_number(columns = Value, decimals = 2, drop_trailing_zeros = TRUE)
 ```
 
 ### Step 5: Plot the Distribution
@@ -247,7 +247,7 @@ county_acs |>
   ) |>
   pivot_longer(everything(), names_to = "Statistic", values_to = "Value") |>
   gt() |>
-  fmt_number(columns = Value, decimals = 2)
+  fmt_number(columns = Value, decimals = 2, drop_trailing_zeros = TRUE)
 
 #A2: histogram and boxplot (Step 5)
 ggplot(county_acs, aes(x = pct_no_veh)) +
@@ -286,7 +286,7 @@ tract_acs |>
   ) |>
   pivot_longer(everything(), names_to = "Statistic", values_to = "Value") |>
   gt() |>
-  fmt_number(columns = Value, decimals = 2)
+  fmt_number(columns = Value, decimals = 2, drop_trailing_zeros = TRUE)
 
 #B2: histogram and boxplot (Step 5)
 ggplot(tract_acs, aes(x = pct_no_veh)) +
