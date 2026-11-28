@@ -4,7 +4,7 @@
 
 - In class on Wednesday, February 10. A guest proctor will run the session.
 - Closed book and handwritten. You will not write any code.
-- Eight questions (sub-components), each worth 2 points.
+- Eight questions, each worth 2 points.
 - Most questions give you R output, graphs or maps from a North Carolina dataset you have not seen before and ask you to interpret them.
 
 ### You Should Be Able To

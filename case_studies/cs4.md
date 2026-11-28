@@ -4,7 +4,7 @@
 
 - In class on Monday, April 26.
 - Closed book and handwritten. You will not write any code.
-- Eight questions (sub-components), each worth 2 points.
+- Eight questions, each worth 2 points.
 - The questions give you maps, plots and R output from datasets you have not seen before and ask you to interpret them.
 
 ### You Should Be Able To

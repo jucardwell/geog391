@@ -4,7 +4,7 @@
 
 - In class on Friday, April 9. A guest proctor will run the session.
 - Closed book and handwritten. You will not write any code.
-- Eight questions (sub-components), each worth 2 points.
+- Eight questions, each worth 2 points.
 - Most questions give you R output and maps from a dataset you have not seen before and ask you to interpret them.
 
 ### You Should Be Able To
