@@ -54,6 +54,8 @@ R packages extend the functionality of Base R and must be downloaded. We will us
 -   spatialreg: We will use this package to run spatial regressions
 -   tigris: This package helps us get geographic boundaries
 -   deldir: Calculates Voronoi tessellation
+-   GWmodel: We use this package for geographically weighted regression
+-   cols4all: Helps us browse and choose color palettes
 
 You should copy and paste each of these commands into the **Console** one by one to download the packages.
 
@@ -76,6 +78,8 @@ install.packages("stars")
 install.packages("spatialreg")
 install.packages("tigris")
 install.packages("deldir")
+install.packages("GWmodel")
+install.packages("cols4all")
 ```
 
 Once you have downloaded the packages, you will need to load them every time you want to use them. **I will always tell you what packages to load!**

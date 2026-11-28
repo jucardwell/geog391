@@ -52,7 +52,7 @@ Run each chunk in your own .Rmd. You will reuse this code in Part 2.
 ### Step 1: Load the Data and Make a Point Pattern
 
 ::: {.why}
-We'll use fire station locations in Forsyth, Guilford and Alamance counties (Winston-Salem, Greensboro and Burlington). `spatstat` needs a point pattern (`ppp`): the points plus a window, which is the area where points could have been. Here the window is the three counties. The data are in NC State Plane (feet), so `rescale()` turns the units into miles.
+We'll use fire station locations in Forsyth, Guilford and Alamance counties (Winston-Salem, Greensboro and Burlington). `spatstat` needs a point pattern (`ppp`): the points plus a window, which is the area where points could have been. Here the window is the three counties. The data are in NC State Plane (feet), so `rescale.ppp()` turns the units into miles.
 :::
 
 ```{r, eval = FALSE}
@@ -81,7 +81,7 @@ stations <- st_filter(stations, triad)
 
 #make the point pattern, convert feet to miles, and drop exact duplicates
 station_pp <- as.ppp(st_geometry(stations), W = as.owin(st_union(triad)))
-station_pp <- rescale(station_pp, 5280, "mile")
+station_pp <- rescale.ppp(station_pp, 5280, "mile")
 station_pp <- unique(station_pp)
 station_pp
 ```
@@ -127,7 +127,7 @@ set.seed(391)
 
 #observed and expected mean nearest-neighbor distance (miles)
 ann_obs <- mean(nndist(station_pp))
-ann_exp <- 0.5 / sqrt(npoints(station_pp) / area(Window(station_pp)))
+ann_exp <- 0.5 / sqrt(npoints(station_pp) / area.owin(Window(station_pp)))
 ann_obs / ann_exp
 
 clarkevans.test(station_pp, correction = "none", alternative = "two.sided",
@@ -203,7 +203,7 @@ Each pair turns in one index card before leaving. Write both of your names on it
 
 ```{r key-values, include = FALSE}
 nc_outline <- st_union(nc_counties)
-make_pp <- function(pts) unique(rescale(as.ppp(st_geometry(pts), W = as.owin(nc_outline)), 5280, "mile"))
+make_pp <- function(pts) unique(rescale.ppp(as.ppp(st_geometry(pts), W = as.owin(nc_outline)), 5280, "mile"))
 run_all <- function(pp) {
   set.seed(391); q <- quadratcount(pp, nx = 6, ny = 2)
   qt <- quadrat.test(pp, nx = 6, ny = 2, method = "MonteCarlo", nsim = 999)
@@ -231,7 +231,7 @@ nc_hosp <- st_read("https://drive.google.com/uc?export=download&id=1K7lH1U6oQQ6s
   st_transform(2264)
 
 hosp_pp <- as.ppp(st_geometry(nc_hosp), W = as.owin(nc_outline))
-hosp_pp <- rescale(hosp_pp, 5280, "mile")
+hosp_pp <- rescale.ppp(hosp_pp, 5280, "mile")
 hosp_pp <- unique(hosp_pp)
 
 plot(density(hosp_pp), main = "Hospitals per square mile")
@@ -243,7 +243,7 @@ var(as.vector(hosp_q)) / mean(as.vector(hosp_q))
 quadrat.test(hosp_pp, nx = 6, ny = 2, method = "MonteCarlo", nsim = 999)
 
 set.seed(391)
-mean(nndist(hosp_pp)) / (0.5 / sqrt(npoints(hosp_pp) / area(Window(hosp_pp))))
+mean(nndist(hosp_pp)) / (0.5 / sqrt(npoints(hosp_pp) / area.owin(Window(hosp_pp))))
 clarkevans.test(hosp_pp, correction = "none", alternative = "two.sided",
                 method = "MonteCarlo", nsim = 999)
 
@@ -251,7 +251,7 @@ clarkevans.test(hosp_pp, correction = "none", alternative = "two.sided",
 schools <- st_read("https://drive.google.com/uc?export=download&id=1i-C2PF3ajbpHTlavh3m1QbWNObpobprZ")
 
 school_pp <- as.ppp(st_geometry(schools), W = as.owin(nc_outline))
-school_pp <- rescale(school_pp, 5280, "mile")
+school_pp <- rescale.ppp(school_pp, 5280, "mile")
 school_pp <- unique(school_pp)
 
 plot(density(school_pp), main = "High schools per square mile")
@@ -263,7 +263,7 @@ var(as.vector(school_q)) / mean(as.vector(school_q))
 quadrat.test(school_pp, nx = 6, ny = 2, method = "MonteCarlo", nsim = 999)
 
 set.seed(391)
-mean(nndist(school_pp)) / (0.5 / sqrt(npoints(school_pp) / area(Window(school_pp))))
+mean(nndist(school_pp)) / (0.5 / sqrt(npoints(school_pp) / area.owin(Window(school_pp))))
 clarkevans.test(school_pp, correction = "none", alternative = "two.sided",
                 method = "MonteCarlo", nsim = 999)
 ```
