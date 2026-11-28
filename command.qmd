@@ -485,7 +485,7 @@ tm_shape(DATABASE_OBJECT) + tm_polygons(fill = tm_vars(c("VARIABLE1", "VARIABLE2
                 scale2 = tm_scale_intervals(n = 4, style = "quantile")))
 
 #add a basemap
-MAPCOMMANDS + tm_basemap("CartoDB.PositronNoLabels")
+MAPCOMMANDS + tm_basemap("Esri.WorldGrayCanvas")
 
 #add a legend entry by hand (e.g. for a point you added)
 MAPCOMMANDS + tm_add_legend(type = "symbols", labels = "LABEL", fill = "COLOR")
