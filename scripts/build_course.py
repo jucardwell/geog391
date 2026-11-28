@@ -154,7 +154,7 @@ def main():
 
     # ---- Schedule table -------------------------------------------------
     out = ['<div class="schedule-scroll"><table class="schedule">',
-           '<thead><tr><th>Date</th><th></th><th>Topic</th><th>In Class</th>'
+           '<thead><tr><th>Date</th><th><span class="visually-hidden">Concept</span></th><th>Topic</th><th>In Class</th>'
            '<th>Read Before Class</th><th>Due</th></tr></thead><tbody>']
     cur_unit = None
     for r in rows:
@@ -241,7 +241,7 @@ def main():
     # ---- This week section shell (filled in by site.js) -------------------
     svg = (ROOT / "assets" / "contours.svg").read_text(encoding="utf-8")
     week = (f'<section id="this-week" class="this-week">{svg}'
-            '<div class="week-head"><h2>This Week</h2><span class="week-label"></span>'
+            '<div class="week-head"><h1>This Week</h1><span class="week-label"></span>'
             '</div><div class="week-days">'
             '</div></section>')
     (GEN / "week.md").write_text(raw(week), encoding="utf-8")

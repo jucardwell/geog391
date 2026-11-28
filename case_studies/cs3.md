@@ -1,13 +1,13 @@
-### Study guide
+## Study Guide
 
-#### Format
+### Format
 
 [To be written.]
 
-#### You should be able to
+### You Should Be Able To
 
 1. [Skill, with the tutorial it comes from]
 
-#### Practice questions
+### Practice Questions
 
 1. [Practice question]

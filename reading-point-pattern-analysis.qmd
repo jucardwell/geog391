@@ -5,7 +5,7 @@ date: "March 2026"
 reading: point-pattern-analysis
 ---
 
-### Overview
+## Overview
 
 A spatial point pattern consists of the locations of discrete events occurring within a defined study region. Events are treated as realizations of an underlying spatial process. Examples include species locations, lightning strikes, crime incidents, and cases of diseases. Point pattern analysis asks whether the observed arrangement of events is consistent with randomness or whether it exhibits structure like clustering or regularity.
 
@@ -21,7 +21,7 @@ The three possible spatial patterns are:
 
 Across all types of spatial data, spatial patterns/structure can exist at two levels---first-order structure and second-order structure. First-order structure describes the spatial pattern resulting from the varying intensity of a process across space. It reflects the "global" external drivers (such as the environment, social policy, or infrastructure) that makes some areas inherently different from the others. Second-order structure describes the spatial pattern resulting from interaction between observations themselves.
 
-### The Poisson Distribution and Complete Spatial Randomness (CSR)
+## The Poisson Distribution and Complete Spatial Randomness (CSR)
 
 For analyzing point pattern structure, CSR serves as the baseline null model, representing the absence of spatial interaction or variance in intensity. Random does not mean evenly spaced; apparent clusters or gaps can still arise by chance. CSR is represented mathematically by the homogeneous Poisson point process. CSR is defined by two assumptions:
 
@@ -93,13 +93,13 @@ We can then simulate realizations of our process!
 
 ![](readings/media/point-pattern-analysis/media/image5.png){fig-alt="A screenshot of a computer game"}
 
-### A Minimal Workflow for Diagnosing Structure in Point Pattern Data
+## A Minimal Workflow for Diagnosing Structure in Point Pattern Data
 
 This course emphasizes diagnosing spatial structure rather than formally modeling point processes because model-based inference requires strong assumptions about the underlying data-generating mechanism. Since these mechanisms are typically unknown at the outset, exploratory diagnostic methods are used first to determine whether departures from complete spatial randomness exist and to characterize their spatial scale
 
 Most point pattern analytical tests (which the exception of quadrat density tests) do not have a formal hypothesis testing framework because many spatial point-pattern statistics do not have tractable variance formulas under CSR, which prevents classical hypothesis testing. As a result, inference in point-pattern analysis is commonly performed using simulation-based methods. In this course, Monte Carlo simulation is used to generate realizations of homogeneous and inhomogeneous Poisson point patterns under CSR, allowing comparison between observed statistics and those expected under spatial randomness.
 
-#### Diagnosing First-Order Spatial Structure
+### Diagnosing First-Order Spatial Structure
 
 **Step 1: Global Randomness Test**
 
@@ -117,7 +117,7 @@ KDE is a method for estimating the spatial intensity of a point pattern by using
 
 There is no formal hypothesis testing in KDE. Instead, KDE is often used as an exploratory step to identify trends or hotspots that might suggest covariates that are leading to spatial order at the first-level. Additionally, KDE outputs are often incorporated as inputs in subsequent analyses, such as inhomogeneous point process models, to examine second-order spatial effects while accounting for spatially varying intensity.
 
-#### Diagnosing Second-Order Spatial Structure
+### Diagnosing Second-Order Spatial Structure
 
 **Average Nearest Neighbor (ANN)**
 

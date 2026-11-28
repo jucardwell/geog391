@@ -23,7 +23,7 @@ The RStudio environment consists of four panels.
 3.  **Environment:** This is where R objects made during each session will appear.
 4.  **Output:** This is where charts and graphs will appear.
 
-![RStudio Panes](images/rstudio-panes-labeled.jpeg)
+![RStudio Panes](images/rstudio-panes-labeled.jpeg){fig-alt="The RStudio window divided into four labeled panes: Source at top left with an R script open, Console at bottom left showing the same commands after they ran, Environment at top right listing the object mpg_plot, and Output at bottom right showing a scatter plot."}
 
 ## Creating and Saving Files
 
@@ -90,27 +90,32 @@ A .Rmd is made up of two main components: code chunks (this is where you write c
 
 Your .Rmd template already has a header (where you can change the name and date) and two code chunks. The first code chunk is the **SET UP CHUNK.** The second code chunk is the **LIBRARY AND DATA CHUNK.** To load the libraries and data, you should **RUN CODE CHUNK**.
 
-![](images/run_codechunk.png)
+![](images/run_codechunk.png){fig-alt="An .Rmd open in RStudio. Labels point to the Add Code Chunk button in the toolbar, the set up chunk, the green Run Code Chunk arrow at the right edge of the library and data chunk, and the parks object (16 obs. of 18 variables) that appears in the Environment pane after the chunk runs."}
 
 If everything is working, 'parks' should appear in your environment. The 'parks' dataset is now an "object".
 
 We can view objects by double clicking the object in the environment. A data table should appear with all the information about the parks.
 
-![](images/view_object.png)
+![](images/view_object.png){fig-alt="The parks data opened as a table in RStudio, with 16 rows and columns OBJECTID, Park_Name, Address, Zipcode, Park_Hours and Rental_Opportunities. The first row is Homestead Park, 100 Northern Park Dr, Chapel Hill NC, 27516, Dawn to 10pm, Yes."}
 
 Add a new code chunk and add the code below to create your first map. Every command that you create should have a **comment (#)** above that explains what that command is doing. If you **run** that chunk, a map should appear below.
 
-![](images/clipboard-2379786468.png)
+```r
+# create a map of parks in Chapel Hill
+tm_shape(parks) + tm_dots("Park_Hours")
+```
+
+![](images/clipboard-2379786468.png){fig-alt="RStudio after running the chunks. Each comment line (load libraries, load data, create a map of parks in Chapel Hill) is boxed and labeled Comments. Below the last chunk is a map of park points in Chapel Hill colored by Park_Hours, with a legend listing 6-10pm, Dawn to 10pm, Dawn to 11pm, Dawn to Dusk, Public Space: 24hrs and Unknown."}
 
 ## Knitting a .Rmd
 
 Knitting a .Rmd means that you create a rendered .html including your code, output, and text. To knit your document, click the knit button. It will create a .html in whatever folder you have the .Rmd saved in (hopefully your GEOG391 folder!)
 
-![](images/knit.png)
+![](images/knit.png){fig-alt="The RStudio toolbar for r_practice.Rmd with the Knit button, a ball of yarn icon next to the word Knit, outlined in red."}
 
 When your knitted document opens, it should look something like this
 
-![](images/knitted_final.png)
+![](images/knitted_final.png){fig-alt="The knitted HTML page titled R Practice and dated 2025-11-07, showing the map code and the map of Chapel Hill parks colored by Park_Hours. The setup and library chunks do not appear."}
 
 ## Adding Text and Formatting a .Rmd
 

@@ -17,7 +17,7 @@ Spatial interpolation is how we can estimate these unsampled values and is the m
 
 This reading will introduce you to two common approaches to spatial interpolation: Inverse Distance Weighting and Kriging.
 
-### Deterministic Method: Inverse Distance Weighting (IDW)
+## Deterministic Method: Inverse Distance Weighting (IDW)
 
 Inverse Distance Weighting is a deterministic method that predicts unsampled locations as a weighted average of nearby observations. Because it is deterministic, that means that IDW does not model uncertainty or randomness---the predicted values are determined entirely by the known sample points and the weighting scheme. There are two important parameters in an IDW. The first is the size of the prediction pixel. Since we are moving from point data to raster data, we must define the size of the pixel. This should be based on the scale of the phenomenon being modeled and the density of the input data. A fine resolution is more appropriate when data points are dense and there is a lot of spatial variation, whereas coarse resolution is often more appropriate when data are sparse or the phenomenon changes more gradually.
 
@@ -43,17 +43,17 @@ Where:
 
 P = 1 P= 4
 
-### Moving from Deterministic to Probabilistic
+## Moving from Deterministic to Probabilistic
 
 As we have already learned, most geographic processes are complex and only partially observed, which means that they are best modeled as stochastic processes. More advanced interpolation methods take this approach by modeling the unknown spatial surface as a realization of a probabilistic process. The key advantage of probabilistic approaches is that they try to model the data generation process. IDW does not include an explicit model of the underlying spatial process and does not estimate uncertainty. Probabilistic methods such as kriging assume that the data arise from a spatial process, explicitly model how similarity changes with distance (through a variogram), and use that model to derive optimal weights. This allows them to produce both predictions and associated measures of uncertainty.
 
-### Gaussian Random Fields
+## Gaussian Random Fields
 
 A common assumption in probabilistic approaches to interpolation is that the spatial process follows a Gaussian Random Field (GRF). The key idea in a GRF is that there is a true, continuous surfaces that exists everywhere but that we do not observe it directly. Instead, we observe one realization of a random process at certain discrete locations along the continuous surface. In a GRF, each location is associated with a normally distributed random variable, and any set of locations is assumed to follow a joint normal distribution. The strength of the correlation between sets of locations depends on the distance, which is described using a semivariogram.
 
 A GRF framework combines three components: an assumption about the distribution of values (Gaussian), a model of how similarity changes with distance (spatial correlation), and an acknowledgment that the data are imperfect observations of an underlying process. This allows methods like kriging to produce statistically optimal predictions along with uncertainty estimates.s
 
-### Kriging
+## Kriging
 
 Similar to IDW, Kriging calculates a weighted average of nearby points to estimate values at an unsampled location. However, unlike IDW, which determines prediction weights solely based on distance, kriging uses a semivariogram model to describe spatial autocorrelation by characterizing how spatial similarity declines as the distance between locations increases.
 
@@ -81,7 +81,7 @@ Where:
 
 Kriging also provides an estimate of uncertainty, called the kriging variance, which is derived from the same variogram model used to calculate the weights. It reflects how well nearby observations can predict the value at a location based on their distance, spatial arrangement, and degree of correlation. Areas with dense, strongly correlated nearby points have lower uncertainty, while areas with sparse or distant observations have higher uncertainty.
 
-### Covariates
+## Covariates
 
 In the two approaches explored in this reading, estimates at unsampled locations are based entirely on spatial autocorrelation (i.e. we can guess these values based on the values that are nearby since we know that they are related). However, we often have additional information, such as environmental variables or underlying gradients, that can improve our predictions. For example, factors like elevation, temperature, land cover, or soil type may influence the values we are trying to predict. These factors can be included as covariates in more advanced kriging methods. By including covariates, we can move beyond relying only on spatial proximity and instead model both spatial structure and explanatory relationships. Methods such as regression kriging or universal kriging combine a regression component (which captures the relationship between the response and covariates) with a kriging component (which models the spatial correlation in the residuals). This allows us to first explain large-scale trends using covariates and then account for remaining spatial dependence, resulting in more accurate and informative predictions than using spatial autocorrelation alone.
 

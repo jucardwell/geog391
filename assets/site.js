@@ -117,7 +117,7 @@
 
     var box = el('div', { 'class': 'week-list' });
     groups.forEach(function (g) {
-      box.appendChild(el('section', { 'class': 'wl-group' }, '<h3>' + g[0] + '</h3><ul>' + g[1].join('') + '</ul>'));
+      box.appendChild(el('section', { 'class': 'wl-group' }, '<h2>' + g[0] + '</h2><ul>' + g[1].join('') + '</ul>'));
     });
     return box;
   }
@@ -261,9 +261,9 @@
     if (!quiz) { box.remove(); return; }
     box.innerHTML = '';
     quiz.questions.forEach(function (q, qi) {
-      var wrap = el('div', { 'class': 'quiz-q' });
-      wrap.appendChild(el('p', {}, (qi + 1) + '. ' + esc(q.q)));
-      var why = el('p', { 'class': 'quiz-why', hidden: '' });
+      var wrap = el('fieldset', { 'class': 'quiz-q' });
+      wrap.appendChild(el('legend', {}, (qi + 1) + '. ' + esc(q.q)));
+      var why = el('p', { 'class': 'quiz-why', 'aria-live': 'polite' });
       q.options.forEach(function (opt, oi) {
         var lab = el('label', { 'class': 'quiz-opt' });
         var input = el('input', { type: 'radio', name: 'q' + qi + '-' + box.getAttribute('data-quiz') });
@@ -273,7 +273,6 @@
           lab.classList.add(right ? 'right' : 'wrong');
           why.className = 'quiz-why ' + (right ? 'right' : 'wrong');
           why.textContent = (right ? 'Right. ' : 'Not quite. ') + q.why;
-          why.hidden = false;
         });
         lab.appendChild(input);
         lab.appendChild(el('span', {}, esc(opt)));

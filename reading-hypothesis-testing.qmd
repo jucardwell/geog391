@@ -71,7 +71,7 @@ A p-value of 0.03 means that, if there truly were no difference in the populatio
 
 Because hypothesis tests are based on samples, we can make the wrong decision even when we follow all of the steps correctly. There are two types of error:
 
-|  | H₀ is true | H₀ is false |
+| Decision | H₀ is true | H₀ is false |
 | --- | --- | --- |
 | **Reject H₀** | Type I error (false positive) | Correct decision |
 | **Fail to reject H₀** | Correct decision | Type II error (false negative) |

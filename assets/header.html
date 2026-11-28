@@ -8,4 +8,6 @@
   <a href="homework.html">Homework</a>
   <a href="case_studies.html">Case Studies</a>
 </nav>
-<script>(function(s){var n=s.previousElementSibling;document.body.insertBefore(n,document.body.firstChild);})(document.currentScript);</script>
+<script>(function(s){var n=s.previousElementSibling;document.body.insertBefore(n,document.body.firstChild);
+var k=document.createElement('a');k.className='skip-link';k.href='#quarto-document-content';k.textContent='Skip to main content';document.body.insertBefore(k,n);
+var here=location.pathname.split('/').pop()||'index.html';n.querySelectorAll('a').forEach(function(a){if(a.getAttribute('href')===here)a.setAttribute('aria-current','page');});})(document.currentScript);</script>

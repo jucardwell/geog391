@@ -185,7 +185,7 @@ Variogram models are typically described using three main parameters: the nugget
 
 Once these starting values are specified, the fitting procedure refines the parameters to produce a variogram model that best represents the spatial structure observed in the data. This fitted model is then used by the kriging algorithm to determine the weights applied to nearby observations when generating predictions.
 
-![](images/clipboard-2174812564.png)
+![](images/clipboard-2174812564.png){fig-alt="A diagram of a semivariogram curve with distance on the x axis and semivariance on the y axis. The curve starts above zero at the nugget, rises steeply, and levels off at the sill. The range is the distance where the curve reaches the sill, marked with a dashed line."}
 
 In our case, we will define the nugget at 10, the sill at 17, and the range at 150000
 

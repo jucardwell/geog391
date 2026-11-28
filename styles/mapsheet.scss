@@ -46,6 +46,17 @@ body {
 
 a { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
 
+// Keyboard focus is always visible.
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible,
+summary:focus-visible, [tabindex]:focus-visible, .nav-link:focus-visible {
+  outline: 3px solid $ink; outline-offset: 2px; box-shadow: 0 0 0 2px #FFFFFF;
+}
+.skip-link {
+  position: absolute; left: 16px; top: -60px; z-index: 2000; background: #FFFFFF; color: $ink;
+  border: 2px solid $ink; padding: 8px 14px; font-weight: 700;
+  &:focus { top: 16px; }
+}
+
 .muted { color: $muted; }
 
 // Course nav row
@@ -54,6 +65,7 @@ a { text-decoration: underline; text-decoration-thickness: 1px; text-underline-o
   padding: 4px 32px; border-bottom: 1px solid $ink;
   a { font-weight: 700; font-size: 15px; color: $ink; text-decoration: none; padding: 10px 0; }
   a:hover { color: $brown; }
+  a[aria-current="page"] { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
 }
 
 .course-foot {
@@ -72,7 +84,7 @@ a { text-decoration: underline; text-decoration-thickness: 1px; text-underline-o
 h1.title { font-size: 2.6rem; line-height: 1.05; }
 .quarto-title-meta-heading { display: none; }
 h2 { font-size: 1.6rem; margin-top: 2rem; border-bottom: 0; }
-h3 { font-size: 1.3rem; }
+h3, h2.h3 { font-size: 1.3rem; }
 
 // Left sidebar (table of contents and the boxes site.js adds above and below it)
 #TOC, .sidebar nav[role="doc-toc"] {
@@ -127,7 +139,7 @@ code { font-family: $font-family-monospace; }
   .contours { position: absolute; inset: 0; width: 100%; height: 100%; }
   .week-head { position: relative; flex: 1 1 220px; max-width: 280px; display: flex; flex-direction: column; gap: 8px; }
   .week-head { align-items: flex-start; }
-  .week-head h2 { font-size: 2rem; margin: 0; background: #FFFFFF; border: 1px solid $ink; padding: 4px 14px; }
+  .week-head h1, .week-head h2 { font-size: 2rem; margin: 0; background: #FFFFFF; border: 1px solid $ink; padding: 4px 14px; }
   .week-label { background: #FFFFFF; border: 1px solid $ink; padding: 3px 12px; font-weight: 700; }
   .week-days {
     position: relative; flex: 999 1 540px; min-width: 0; background: #FFFFFF;
@@ -146,7 +158,7 @@ code { font-family: $font-family-monospace; }
     position: relative; flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start;
   }
   .wl-group { flex: 1 1 300px; padding: 16px 18px; background: #FFFFFF; border: 1px solid $ink; }
-  .wl-group h3 { font-size: 1.1rem; margin: 0 0 10px; }
+  .wl-group h2, .wl-group h3 { font-size: 1.1rem; margin: 0 0 10px; }
   .wl-group ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
   .wl-group li { display: grid; grid-template-columns: 110px 1fr; gap: 10px; margin: 0; font-size: 15px; line-height: 1.4; }
   .wl-when { color: $muted; }
@@ -201,8 +213,8 @@ table.plain-list {
 
 // ---- Reading quizzes ----------------------------------------------------
 .reading-quiz { border: 1px solid $ink; padding: 18px 20px; display: flex; flex-direction: column; gap: 22px; }
-.quiz-q { display: flex; flex-direction: column; gap: 8px; }
-.quiz-q > p { font-weight: 700; margin: 0; }
+.quiz-q { display: flex; flex-direction: column; gap: 8px; border: 0; padding: 0; margin: 0; min-width: 0; }
+.quiz-q > legend { float: none; width: auto; font-size: inherit; line-height: inherit; font-weight: 700; padding: 0; margin: 0 0 8px; }
 .quiz-opt {
   display: flex; gap: 10px; align-items: flex-start; padding: 8px 10px; border: 1px solid $rule; cursor: pointer;
   input { margin-top: 6px; }
@@ -210,6 +222,7 @@ table.plain-list {
   &.wrong { border-color: $red; background: #FBEDEA; }
 }
 .quiz-why { margin: 0; font-size: 15px; }
+.quiz-why:empty { display: none; }
 .quiz-why.right { color: #2F5E22; }
 .quiz-why.wrong { color: #8E2A22; }
 
@@ -226,7 +239,8 @@ table.plain-list {
 .case-body { display: flex; flex-wrap: wrap; }
 .case-side { flex: 1 1 240px; max-width: 300px; border-right: 1px solid $ink; padding: 22px; font-size: 15px; line-height: 1.45; display: flex; flex-direction: column; gap: 14px; }
 .case-main { flex: 999 1 520px; min-width: 0; padding: 22px 28px; }
-.case-main h3 { margin-top: 0; }
+.case-main h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 0.5rem; }
+.case-main h3 { font-size: 1.25rem; font-weight: 700; margin: 1.5rem 0 0.5rem; }
 .legend-box {
   border: 1px solid $ink; padding: 12px 14px; display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 6px 8px;
   .legend-title { grid-column: 1 / -1; font-weight: 700; text-align: center; border-bottom: 1px solid $ink; padding-bottom: 6px; margin-bottom: 2px; }
