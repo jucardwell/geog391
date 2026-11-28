@@ -73,7 +73,7 @@ triangle <- acs_tract_nc |> filter(COUNTYFP %in% c("135", "183", "063"))
 Color (`fill`) works for rates and averages. Size works for counts, like the number of people in a tract.
 :::
 
-```{r}
+```{r, fig.alt = c("Map of median age for census tracts in Orange, Durham and Wake counties, shaded from dark to light blue with a legend. Tracts near the universities and downtown Raleigh and Durham are the youngest, and rural tracts at the edges are older.", "Map of the same census tracts with a circle in each tract sized by total population, with a size legend. Larger circles mark the most populous tracts, most of them in Wake County.")}
 #color
 tm_shape(triangle) +
   tm_polygons(fill = "median_age")
@@ -90,7 +90,7 @@ tm_shape(triangle) +
 Every choropleth map sorts its values into classes. The right classification depends on the shape of the distribution, so plot a histogram first.
 :::
 
-```{r}
+```{r, fig.alt = "Histogram of median age across the Triangle census tracts. Most tracts have a median age between 30 and 45 years, with a peak near 36, a few very young tracts near 20 and a short tail of older tracts up to about 62."}
 ggplot(triangle, aes(x = median_age)) +
   geom_histogram(binwidth = 2, fill = "lightgrey", color = "black") +
   labs(x = "Median age", y = "Number of tracts")
@@ -102,7 +102,7 @@ ggplot(triangle, aes(x = median_age)) +
 `style = "equal"` splits the range into classes of the same width, while `style = "quantile"` puts the same number of tracts in each class. Run `cols4all::c4a_gui()` to browse palettes.
 :::
 
-```{r}
+```{r, fig.alt = c("Map of median age by census tract in five equal interval classes from light to dark purple, with a legend. Most tracts fall in the two middle classes and only a few rural tracts reach the top class.", "Map of median age by census tract in five quantile classes, with a legend. Each class holds about the same number of tracts, so the young tracts near the universities and the older tracts at the edges both stand out.")}
 #equal interval
 tm_shape(triangle) +
   tm_polygons(fill = "median_age",
@@ -122,7 +122,7 @@ Other useful styles are `"pretty"` and `"fisher"` (natural breaks).
 `tmap_mode("view")` makes any map interactive, and `tmap_mode("plot")` switches back. A title, some transparency and a basemap make a static map readable on its own. Static basemaps need the `maptiles` package.
 :::
 
-```{r}
+```{r, fig.alt = "Finished map titled Median age by census tract, using five quantile classes with semi-transparent purple fill over a grey basemap and a legend titled Median age. The youngest tracts are near the universities and downtowns, and the oldest are in the rural edges of the three counties."}
 tmap_mode("plot")
 
 tm_shape(triangle) +

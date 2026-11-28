@@ -79,7 +79,7 @@ climate_normals <- st_read("https://raw.githubusercontent.com/jucardwell/geog391
 `ruca_code` is nominal, so the only descriptive statistics that make sense are counts and the mode. A bar chart shows the counts.
 :::
 
-```{r}
+```{r, fig.alt = "Bar chart of the number of North Carolina census tracts in each RUCA category. Metropolitan core is by far the largest category, with about 1,450 tracts, followed by metropolitan high commuting at about 400. Every small town category has only a handful of tracts."}
 #count tracts in each RUCA category
 ruca_counts <- rurality |>
   st_drop_geometry() |>
@@ -99,7 +99,7 @@ The mode is **`r ruca_mode$ruca_code`**, with `r fmt(ruca_mode$n, 0)` tracts.
 
 ### Step 3: Map It
 
-```{r}
+```{r, fig.alt = "Map of North Carolina census tracts colored by RUCA category, with a legend. Metropolitan tracts cluster around Charlotte, the Triangle and the Triad, while rural and small town tracts cover most of the east and the mountains."}
 #map the raw tract data, not the counts
 tm_shape(rurality) +
   tm_polygons(fill = "ruca_code", fill.scale = tm_scale_categorical(values = "paired"))
@@ -136,7 +136,7 @@ climate_normals |>
 A histogram shows the shape of the distribution. A boxplot shows the median, the quartiles and any outliers.
 :::
 
-```{r}
+```{r, fig.alt = c("Histogram of 1991 to 2020 summer temperature normals at locations across the U.S. Most values fall between 60 and 85 degrees F, with two peaks near 68 and 80 degrees, a long tail of cool values down to about 30 degrees and a small bump of hot values in the 90s.", "Boxplot of summer temperature normals. The median is about 71 degrees F and the middle half of the values runs from about 66 to 78 degrees, with outliers below about 50 degrees and above about 95 degrees.")}
 #histogram
 ggplot(climate_normals, aes(x = summer_temp)) +
   geom_histogram(binwidth = 1, fill = "lightgrey", color = "black") +
