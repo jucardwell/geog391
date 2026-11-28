@@ -25,14 +25,30 @@ DATA <- st_read("FILE_PATH_OR_URL")
 #read a csv file
 DATA <- read_csv("FILE_PATH_OR_URL")
 
+#read a raster file (.tif) (requires terra package)
+RASTER <- rast("FILE_PATH_OR_URL")
+
 #load objects saved in an .RData file
 load("FILE_NAME.RData")
+```
 
+### Looking at Data
+
+```{r, eval=F}
 #look at the columns and their types
 glimpse(DATA)
 
 #open the data in a spreadsheet view
 View(DATA)
+
+#see the first 6 rows
+head(DATA)
+
+#number of rows
+nrow(DATA)
+
+#count how many rows have each value of a column
+table(DATA$VARIABLE)
 ```
 
 ## Basic Data Manipulation
@@ -44,7 +60,7 @@ Creating an object allows you to store the output of a command in the environmen
 ```{r, eval=F}
 
 ## When this command runs, it will show up in the environment
-chart <- ggplot(DATASET_OBJECT, aes(y = VARIABLE OF INTEREST)) +
+chart <- ggplot(DATASET_OBJECT, aes(y = VARIABLE_OF_INTEREST)) +
   geom_boxplot(fill = "lightgrey")
 
 ##now I can "call" the object
@@ -60,19 +76,19 @@ To create our analytical dataset we often need to subset a larger dataset. Filte
 #to select certain columns
 columns <- DATASET |> select(COLUMN1, COLUMN2, COLUMN3)
 
-### IF VALUES ARE STRING (NON-NUMERIC) THEY MUST BE IN "" 
+### IF VALUES ARE STRING (NON-NUMERIC) THEY MUST BE IN ""
 
 #to filter by values in a certain column
 values <- DATASET |> filter(COLUMN == VALUE)
 
-# to filter by multiple conditions. 
+# to filter by multiple conditions.
 #and
 values <- DATASET |> filter(COLUMN == VALUE & COLUMN2 == VALUE2)
 
-#or 
+#or
 values <- DATASET |> filter(COLUMN == VALUE | COLUMN2 == VALUE2)
 
-#in 
+#in
 values <- DATASET |> filter(COLUMN %in% c(VALUE1, VALUE2, VALUE3))
 
 #numeric operator
@@ -86,6 +102,14 @@ values <- DATASET |> filter(COLUMN < 2000)
 #creating new columns
 dataset <- DATASET |> mutate(NEWCOLUMN = COMMAND, NEWCOLUMN2 = COMMAND)
 
+#a column that is 1 when a condition is true and 0 when it is false
+dataset <- DATASET |> mutate(NEWCOLUMN = ifelse(VARIABLE > VALUE, 1, 0))
+
+#recode 1 and 0 into labels
+dataset <- DATASET |> mutate(NEWCOLUMN = ifelse(VARIABLE == 1, "LABEL_IF_1", "LABEL_IF_0"))
+
+#the difference between two columns
+dataset <- DATASET |> mutate(diff = VARIABLE2 - VARIABLE1)
 ```
 
 ### Renaming Columns
@@ -99,12 +123,28 @@ clean_data <- DATASET |> rename(
 
 ```
 
+### Removing Missing Values and Duplicates
+
+```{r, eval=F}
+#drop rows with a missing value in any of the listed columns
+complete <- DATA |> drop_na(VARIABLE1, VARIABLE2)
+
+#how many rows were dropped
+nrow(DATA) - nrow(complete)
+
+#drop rows that are exact copies of another row
+DATA <- DATA |> distinct()
+
+#drop points that share exact coordinates with an earlier point
+DATA <- DATA |> filter(!duplicated(st_coordinates(DATA)))
+```
+
 ### Grouping and Summarizing Data
 
 ```{r, eval=F}
 
-summary_data <- DATASET |> 
-  group_by(CATEGORY_COLUMN) |> 
+summary_data <- DATASET |>
+  group_by(CATEGORY_COLUMN) |>
   summarize(
     mean_value = mean(NUMERIC_COLUMN, na.rm = TRUE),
     count = n()
@@ -133,17 +173,49 @@ unique_rows <- DATA |> distinct(VARIABLE)
 DATA |> summarize(n_unique = n_distinct(VARIABLE))
 ```
 
+### Counts and Proportions
+
+```{r, eval=F}
+#number of rows where a condition is true
+sum(DATA$VARIABLE > VALUE)
+
+#share of rows where a condition is true
+mean(DATA$VARIABLE > VALUE)
+
+#two-way table of counts
+counts <- table(DATA$VARIABLE1, DATA$VARIABLE2)
+
+#turn the counts into proportions within each row
+prop.table(counts, margin = 1)
+```
+
+### Making Random Results Repeatable
+
+```{r, eval=F}
+#run this right before any command that uses random numbers (sample, simulations, permutation tests)
+set.seed(391)
+```
+
 ### Creating a Spatial Object
 
 ```{r, eval = F}
-#assumes a nonspatial object with a longitude and latitude field
-grouped_pm_sf <- YOUR_NEWOBJECT |> st_as_sf(coords = c("lon", "lat"), crs = 4326)
+#assumes a nonspatial object with a longitude and latitude field (longitude goes first)
+DATA_sf <- DATA |> st_as_sf(coords = c("lon", "lat"), crs = 4326)
+
+#drop the geometry to get a regular table
+DATA_table <- DATA_sf |> st_drop_geometry()
+
+#make a table of the x and y coordinates and one variable
+DATA_df <- data.frame(x = st_coordinates(DATA_sf)[, 1],
+                      y = st_coordinates(DATA_sf)[, 2],
+                      value = DATA_sf$VARIABLE)
 ```
 
 ### Projecting and Other Spatial Operations
 
 ```{r, eval=F}
-#reproject to a new coordinate reference system (e.g. 32119 = NC State Plane in meters)
+#reproject to a new coordinate reference system
+#2264 = NC State Plane in feet, 32119 = NC State Plane in meters
 DATA_projected <- st_transform(DATA, crs = EPSG_CODE)
 
 #find the center point of each polygon
@@ -152,11 +224,17 @@ centroids <- st_centroid(DATA)
 #draw a buffer around features (distance is in the units of the CRS)
 buffered <- st_buffer(DATA, dist = DISTANCE)
 
-#distance between every feature in two datasets
+#distance between every feature in two datasets (in the units of the CRS)
 distances <- st_distance(DATA1, DATA2)
 
 #keep only the features of DATA1 that fall inside DATA2
 inside <- DATA1 |> st_filter(DATA2)
+
+#merge many polygons (for example counties) into one outline
+outline <- st_union(DATA)
+
+#just the geometry, without the attribute columns
+st_geometry(DATA)
 ```
 
 ## Descriptive Statistics
@@ -167,12 +245,12 @@ inside <- DATA1 |> st_filter(DATA2)
 #requires e1071 package
 #requires gt package
 ## descriptive statistics for quantitative data
-  DATASET_OBJECT |> #whatever the object is named
+DATASET_OBJECT |> #whatever the object is named
   st_drop_geometry() |> #gets rid of geometry column
   select(VARIABLE_OF_INTEREST) |> #field name of variable of interest
   summarise(                  #summarizes variable of interest. You can add/remove
     n = n(),
-    num_na = sum(is.na(VARIABLE_OF_INTEREST)), 
+    num_na = sum(is.na(VARIABLE_OF_INTEREST)),
     mean = mean(VARIABLE_OF_INTEREST, na.rm = TRUE),
     median = median(VARIABLE_OF_INTEREST, na.rm = TRUE),
     sd = sd(VARIABLE_OF_INTEREST, na.rm = TRUE),
@@ -181,25 +259,24 @@ inside <- DATA1 |> st_filter(DATA2)
     cv = sd / mean,
     min = min(VARIABLE_OF_INTEREST, na.rm = TRUE),
     max = max(VARIABLE_OF_INTEREST, na.rm = TRUE),
-    skewness = skewness(VARIABLE_OF_INTEREST, na.rm = TRUE), 
-    kurtosis = kurtosis(VARIABLE_OF_INTEREST, na.rm = TRUE)
-                               
-  ) |> 
-    #this starts the table formatting.
+    skewness = skewness(VARIABLE_OF_INTEREST, na.rm = TRUE),
+    kurtosis = kurtosis(VARIABLE_OF_INTEREST, na.rm = TRUE) #excess kurtosis, so a normal distribution is 0
+  ) |>
+  #this starts the table formatting.
   pivot_longer(everything(), names_to = "Statistic", values_to = "Value") |>
   gt() |>
   tab_header(
-    title = "TITLE", ##Add your title here
-  ) %>%
+    title = "TITLE" ##Add your title here
+  ) |>
   fmt_number(
-    columns = everything(),
+    columns = Value,
     decimals = 2 ##You can change number of decimals
   )
 
 ## Descriptive statistics table for categorical data
 DATASET_OBJECT |> #whatever the object is named
   st_drop_geometry() |> #gets rid of geometry column
-  group_by(ruca_code) |> #variable that you want to summarize
+  group_by(CATEGORICAL_VARIABLE) |> #variable that you want to summarize
   summarise(n = n())  |> #calculates the count
   gt() #formats into a table
 
@@ -209,15 +286,15 @@ DATASET_OBJECT |> #whatever the object is named
 
 ```{r, eval=F}
 #requires ggplot2 package
-## Create a basic histogram. 
+## Create a basic histogram.
 ## You will likely need to modify the binwidth command
-ggplot(DATASET_OBJECT, aes(x = VARIABLE OF INTEREST)) +
+ggplot(DATASET_OBJECT, aes(x = VARIABLE_OF_INTEREST)) +
   geom_histogram(binwidth = 1, fill = "lightgrey", color = "black", alpha = 0.7) +
   labs(
     title = "TITLE",
     x = "X-AXIS LABEL",
     y = "Y-AXIS LABEL"
-  ) 
+  )
 
 ```
 
@@ -226,7 +303,7 @@ ggplot(DATASET_OBJECT, aes(x = VARIABLE OF INTEREST)) +
 ```{r, eval = F}
 #requires ggplot2 package
 # create basic boxplot
-ggplot(DATASET_OBJECT, aes(y = VARIABLE OF INTEREST)) +
+ggplot(DATASET_OBJECT, aes(y = VARIABLE_OF_INTEREST)) +
   geom_boxplot(fill = "lightgrey") +
   labs(
     title = "TITLE",
@@ -256,17 +333,28 @@ ggplot(DATASET_OBJECT, aes(x = 1, y = VARIABLE_OF_INTEREST)) +
 ```{r, eval = F}
 #requires ggplot2 package
 ##YOU NEED TO FIRST GROUP THE DATA
-grouped_data <- DATASET_OBJECT |> st_drop_geometry() |> 
+grouped_data <- DATASET_OBJECT |> st_drop_geometry() |>
   group_by(VARIABLE_OF_INTEREST) |>
-  summarise(Count = n()) 
+  summarise(Count = n())
 
-#this plots the bar plot (note that the coord_flip swtiches the axis which is optional
-ggplot(grouped_data, aes(x=VARIABLE_OF_INTEREST, y=Count)) + 
-  geom_bar(stat = "identity") + coord_flip()  + labs(
+#this plots the bar plot (note that the coord_flip switches the axis which is optional)
+ggplot(grouped_data, aes(x = VARIABLE_OF_INTEREST, y = Count)) +
+  geom_col() + coord_flip() + labs(
     x = "X_AXIS_LABEL",
-    y = "Y_AXIS_LABEL",
+    y = "Y_AXIS_LABEL"
   )
 
+```
+
+### Scatterplot
+
+```{r, eval=F}
+#requires ggplot2 package
+#points with a straight best-fit line
+ggplot(DATASET_OBJECT, aes(x = X_VARIABLE, y = Y_VARIABLE)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  labs(x = "X_AXIS_LABEL", y = "Y_AXIS_LABEL")
 ```
 
 ### Density Plot
@@ -299,8 +387,8 @@ ggplot(DATASET_OBJECT, aes(x = VARIABLE_OF_INTEREST)) +
 #add a vertical line to any ggplot (for example at the mean)
 PLOTCOMMANDS + geom_vline(xintercept = VALUE, linetype = "dashed")
 
-#add a column chart when you already have the heights
-ggplot(DATASET_OBJECT, aes(x = CATEGORY, y = VALUE)) + geom_col()
+#label every whole number on the x axis
+PLOTCOMMANDS + scale_x_continuous(breaks = 0:MAX_VALUE)
 ```
 
 ## Maps
@@ -313,32 +401,65 @@ ggplot(DATASET_OBJECT, aes(x = CATEGORY, y = VALUE)) + geom_col()
 ## "pretty"
 ## "quantile"
 
-#command to see color palettes
+#command to see color palettes (requires cols4all package)
 cols4all::c4a_gui()
 
 ##make a basic point map
-tm_shape(DATABASE_OBJECT) + tm_dots(fill = "VARIABLE_OF_INTEREST",
-                fill.scale = tm_scale_intervals(values = "brewer.COLORPALETTE", style = "CLASSIFICATION", n= NUMBEROFCLASSES)) 
+tm_shape(DATABASE_OBJECT) + tm_dots(fill = "VARIABLE_OF_INTEREST", size = 0.5,
+                fill.scale = tm_scale_intervals(values = "brewer.COLOR_PALETTE", style = "CLASSIFICATION", n = NUMBEROFCLASSES))
 
 ##make a basic polygon map
 tm_shape(DATABASE_OBJECT) + tm_polygons(fill = "VARIABLE_OF_INTEREST",
-                fill.scale = tm_scale_intervals(values = "brewer.COLOR_PALETTE", style = "CLASSIFICATION", n= NUMBEROFCLASSES)) 
+                fill.scale = tm_scale_intervals(values = "brewer.COLOR_PALETTE", style = "CLASSIFICATION", n = NUMBEROFCLASSES))
 
 
 ## make an interactive map
 tmap_mode(mode = "view")
 
-##go back to static map 
+##go back to static map
 tmap_mode(mode = "plot")
 
 
-## add title 
+## add title
 MAPCOMMANDS + tm_title("TITLE")
 
 
 ## Add transparency
-tm_shape(DATABASE_OBJECT) + tm_polygons(fill = "VARIABLE_OF_INTEREST",fill_alpha = VALUE) 
+tm_shape(DATABASE_OBJECT) + tm_polygons(fill = "VARIABLE_OF_INTEREST", fill_alpha = VALUE)
 
+```
+
+### Legends, Colors and Borders
+
+```{r, eval=F}
+#give the legend a title
+tm_shape(DATABASE_OBJECT) + tm_polygons(fill = "VARIABLE_OF_INTEREST",
+                fill.legend = tm_legend(title = "LEGEND_TITLE"))
+
+#reverse a palette by putting a minus sign in front of its name
+fill.scale = tm_scale_intervals(values = "-brewer.rd_yl_bu", style = "quantile", n = 5)
+
+#center a diverging palette on zero (for example for residuals)
+fill.scale = tm_scale_intervals(values = "brewer.rd_bu", style = "pretty", midpoint = 0)
+
+#hide polygon borders (useful for small polygons like tracts)
+tm_shape(DATABASE_OBJECT) + tm_polygons(fill = "VARIABLE_OF_INTEREST", col_alpha = 0)
+
+#choose a color for each category yourself
+category_colors <- c("CATEGORY1" = "#B2182B", "CATEGORY2" = "#2166AC")
+tm_shape(DATABASE_OBJECT) + tm_polygons(fill = "CATEGORICAL_VARIABLE",
+                fill.scale = tm_scale_categorical(values = category_colors))
+```
+
+### Checking Class Breaks
+
+```{r, eval=F}
+#requires classInt package (installed with tmap)
+#the class breaks a classification style makes
+breaks <- classInt::classIntervals(na.omit(DATA$VARIABLE), n = 5, style = "quantile")$brks
+
+#how many features fall in each class
+table(cut(DATA$VARIABLE, breaks, include.lowest = TRUE))
 ```
 
 ### More Map Types
@@ -364,10 +485,15 @@ tm_shape(DATABASE_OBJECT) + tm_polygons(fill = tm_vars(c("VARIABLE1", "VARIABLE2
                 scale2 = tm_scale_intervals(n = 4, style = "quantile")))
 
 #add a basemap
-MAPCOMMANDS + tm_basemap("OpenStreetMap")
+MAPCOMMANDS + tm_basemap("CartoDB.PositronNoLabels")
 
 #add a legend entry by hand (e.g. for a point you added)
 MAPCOMMANDS + tm_add_legend(type = "symbols", labels = "LABEL", fill = "COLOR")
+
+#put two maps side by side
+map1 <- tm_shape(DATA1) + tm_polygons(fill = "VARIABLE")
+map2 <- tm_shape(DATA2) + tm_polygons(fill = "VARIABLE")
+tmap_arrange(map1, map2, ncol = 2)
 ```
 
 ## Descriptive Spatial Statistics
@@ -381,39 +507,57 @@ MAPCOMMANDS + tm_add_legend(type = "symbols", labels = "LABEL", fill = "COLOR")
 DATASET_mean_center <- center_mean(DATASET)
 
 #calculate weighted mean center
-DATASET_mean_center <- center_mean(DATASET, weight = DATASET$VARIABLE)
+DATASET_weighted_center <- center_mean(DATASET, weights = DATASET$VARIABLE)
 
-
+#distance between two centers (in the units of the CRS; divide feet by 5280 for miles)
+st_distance(DATASET_mean_center, DATASET_weighted_center)
 ```
 
 ### Standard Deviational Ellipse
 
 ```{r, eval = F}
 #requires sfdep package
+#std_dev_ellipse() has no weights, so filter to the features you want first
 #calculate standard ellipse values
 std_ellip_DATASET <- std_dev_ellipse(DATASET)
 
 #create an ellipse of those values
-std_ellip_DATASET <- sfdep::st_ellipse(geometry =std_ellip_DATASET,
-                                   sx = std_ellip_DATASET$sx,
-                                   sy = std_ellip_DATASET$sy,
-                                   rotation = -std_ellip_DATASET$theta)
+std_ellip_DATASET <- st_ellipse(geometry = std_ellip_DATASET,
+                                sx = std_ellip_DATASET$sx,
+                                sy = std_ellip_DATASET$sy,
+                                rotation = -std_ellip_DATASET$theta)
 ```
 
 ## Probability
 
+### Empirical Probability
+
+```{r, eval = F}
+#share of days (rows) where the event happened
+p <- mean(DATASET$VARIABLE > VALUE)
+
+#the same thing with a 1/0 column
+p <- sum(DATASET$EVENT_COLUMN) / nrow(DATASET)
+```
+
 ### Binomial Distribution
 
 ```{r, eval = F}
-#per trial probability, x = number of trials, p = probability per trial
-probability_per_trial <- tibble(
-  num_trials = 0:X,
-  #here is the main probability function
-  probability = dbinom(x = 0:X, size = X, prob = p)
+#N = number of trials, p = probability of success on each trial
+probability_per_outcome <- tibble(
+  num_successes = 0:N,
+  #here is the main probability function: the probability of exactly x successes
+  probability = dbinom(x = 0:N, size = N, prob = p)
 )
 
-#cumulative probability
-cum_prob <- pbinom(VALUELESSTHAN, TOTALTRIALS, p = p)
+#most likely number of successes
+probability_per_outcome |> slice_max(probability)
+
+#cumulative probability of VALUE or fewer successes
+cum_prob <- pbinom(VALUE, size = N, prob = p)
+
+#probability of more than VALUE successes
+1 - pbinom(VALUE, size = N, prob = p)
 
 ```
 
@@ -444,6 +588,13 @@ qqline(DATASET$VARIABLE)
 ```{r, eval = F}
 #t test command (assumes two-tail)
 t.test(DATASET$VARIABLE, conf.level = 0.95)
+
+#the same interval by hand
+x_bar <- mean(DATASET$VARIABLE)
+s <- sd(DATASET$VARIABLE)
+n <- nrow(DATASET)
+margin <- qt(0.975, df = n - 1) * s / sqrt(n)
+c(x_bar - margin, x_bar + margin)
 ```
 
 ### Point Estimate and CI for Proportion
@@ -451,6 +602,10 @@ t.test(DATASET$VARIABLE, conf.level = 0.95)
 ```{r, eval = F}
 prop.test(TOTALSUCCESSES, n, conf.level = 0.95)
 
+#by hand (prop.test adds a small correction, so its interval is slightly different)
+p_hat <- TOTALSUCCESSES / n
+p_margin <- qnorm(0.975) * sqrt(p_hat * (1 - p_hat) / n)
+c(p_hat - p_margin, p_hat + p_margin)
 ```
 
 ### Critical Values
@@ -471,6 +626,10 @@ one_sample <- sample(DATASET$VARIABLE, size = N, replace = TRUE)
 
 #repeat that many times and keep each sample mean
 sample_means <- replicate(NUM_SAMPLES, mean(sample(DATASET$VARIABLE, size = N, replace = TRUE)))
+
+#turn a raster into a table of its cell values (requires terra package)
+RASTER_df <- as.data.frame(RASTER)
+names(RASTER_df) <- "VARIABLE"
 ```
 
 ## Hypothesis Testing
@@ -485,11 +644,18 @@ t.test(DATASET$VARIABLE, mu = TRUEMEAN, alternative = "less", conf.level = 0.95)
 ### Two-Sample T-Test
 
 ```{r, eval=F}
-#test for equality of variance
+#test for equality of variance (requires car package)
 leveneTest(VARIABLE ~ CATEGORY, data = DATASET)
 
 #change var.equal if Levene's test indicates unequal variance
-t.test(VARIABLE ~ CATEGORY, data = DATASET, var.equal = TRUE)
+test <- t.test(VARIABLE ~ CATEGORY, data = DATASET, var.equal = TRUE)
+test
+
+#the mean of each group
+test$estimate
+
+#effect size: the difference between the group means, in the variable's units
+diff(test$estimate)
 ```
 
 ### Paired T-Test
@@ -502,32 +668,57 @@ t.test(DATASET$VARIABLE1, DATASET$VARIABLE2, paired = TRUE, alternative = "great
 ### Chi Square Test of Independence
 
 ```{r, eval=F}
-chisq.test(table(DATASET$VARIABLE1, DATASET$VARIABLE2))
+counts <- table(DATASET$VARIABLE1, DATASET$VARIABLE2)
+chi_test <- chisq.test(counts)
+chi_test
+
+#the counts you would expect if the two variables were independent
+chi_test$expected
 ```
 
 ## Point Pattern Analysis
 
+### Making a Point Pattern
+
+```{r, eval=F}
+#boundary must be owin object (st_union merges polygons like counties into one outline)
+boundary_owin <- as.owin(st_union(BOUNDARYOBJECT))
+
+#turn point data into a ppp
+data.ppp <- as.ppp(st_geometry(DATA), W = boundary_owin)
+
+#change the units from feet to miles (use 1000, "km" for meters to kilometers)
+data.ppp <- rescale(data.ppp, 5280, "mile")
+
+#points at the exact same location break nearest neighbor analysis, so either keep unique locations
+data.ppp <- unique(data.ppp)
+
+#or move each point a tiny random distance
+data.ppp <- rjitter(data.ppp, radius = SMALL_DISTANCE)
+```
+
 ### Quadrat Analysis
 
 ```{r, eval=F}
-#boundary must be owin object
-boundary_owin <- BOUNDARYOBJECT |> as.owin()
-
-#turn point data into into a ppp
-data.ppp <- as.ppp(st_coordinates(DATA), W = boundary_owin)
-
 #create a quadrat count with 9 quadrats (modify the number of quadrats to fit your case)
 q_count <- quadratcount(data.ppp, nx = 3, ny = 3)
 
+#plot the counts on top of the points
+plot(data.ppp, pch = 16, cex = 0.5)
+plot(q_count, add = TRUE, col = "black")
+
+#variance-to-mean ratio (above 1 suggests clustering, below 1 suggests dispersion)
+var(as.vector(q_count)) / mean(as.vector(q_count))
+
 #run quadrat test with monte carlo sims
-q_test <- quadrat.test(data.ppp, nx = 3, ny = 3, method= "MonteCarlo", nsim=9)
+q_test <- quadrat.test(data.ppp, nx = 3, ny = 3, method = "MonteCarlo", nsim = 999)
 ```
 
 ### Intensity
 
 ```{r, eval=F}
-#points per unit area
-intensity <- data.ppp$n / area.owin(data.ppp$window)
+#points per unit area (use area.owin, because terra also has an area command)
+intensity <- npoints(data.ppp) / area.owin(Window(data.ppp))
 ```
 
 ### Kernel Density
@@ -535,20 +726,36 @@ intensity <- data.ppp$n / area.owin(data.ppp$window)
 ```{r, eval=F}
 #estimate KDE
 kernel_density <- density(data.ppp)
+
+#map it with the points on top
+plot(kernel_density, main = "TITLE")
+plot(data.ppp, add = TRUE, pch = 16, cex = 0.5)
 ```
 
 ### ANN Analysis
 
 ```{r, eval=F}
-#compute observed ANN
+#observed and expected (under CSR) average nearest neighbor distance
 ANN_obs <- mean(nndist(data.ppp))
+ANN_exp <- 0.5 / sqrt(npoints(data.ppp) / area.owin(Window(data.ppp)))
 
+#ANN ratio (below 1 suggests clustering, above 1 suggests dispersion)
+ANN_obs / ANN_exp
+
+#Clark-Evans test of the ratio against CSR with monte carlo sims
+clarkevans.test(data.ppp, correction = "none", alternative = "two.sided",
+                method = "MonteCarlo", nsim = 999)
+```
+
+### ANN Against an Inhomogeneous Process
+
+```{r, eval=F}
 nsim <- 999
 ANN_sim <- numeric(nsim)
 
 #MC simulations
 for(i in 1:nsim){
-  sim <- rpoispp(kernel_density) #simulate inhomogeneous Poisson using KDE if necessary
+  sim <- rpoispp(kernel_density) #simulate inhomogeneous Poisson using the KDE
   ANN_sim[i] <- mean(nndist(sim))
 }
 
@@ -562,14 +769,27 @@ p_value
 ### L-function
 
 ```{r, eval=F}
-#first point pattern demonstrated global structure, therefore we use an inhomogenous Poisson as comparison. Correction corrects for edge effects. 
-l_funct_pattern1 <- envelope(
+#compare against CSR (homogeneous Poisson). Correction corrects for edge effects.
+l_funct_csr <- envelope(
   data.ppp,
-  fun = Linhom, #inhomogenous, use Lest for homogenous
+  fun = Lest,
   nsim = 99,
-  funargs = list(correction = "border"),
-  transform = expression(. - r)   
+  correction = "border",
+  transform = expression(. - r)
 )
+plot(l_funct_csr)
+
+#if the first-order pattern is not uniform, compare against an inhomogeneous Poisson
+#simulate from the KDE and give Linhom the same KDE
+l_funct_inhom <- envelope(
+  data.ppp,
+  fun = Linhom,
+  nsim = 99,
+  simulate = expression(rpoispp(kernel_density)),
+  funargs = list(lambda = kernel_density, correction = "border"),
+  transform = expression(. - r)
+)
+plot(l_funct_inhom)
 ```
 
 ## Spatial Autocorrelation and Spatial Modeling
@@ -580,20 +800,27 @@ l_funct_pattern1 <- envelope(
 ## QUEENS CASE NEIGHBORS ###
 #calculate neighbors
 nb_queen <- poly2nb(DATASET, queen = TRUE) # queen shares point or border
-#set neighborhood weight matrix
-nbw_queen <- nb2listw(nb_queen, style = "W")
+#set neighborhood weight matrix (zero.policy = TRUE allows features with no neighbors, like islands)
+nbw_queen <- nb2listw(nb_queen, style = "W", zero.policy = TRUE)
+
+#see how many neighbors each feature has
+summary(nb_queen)
+
+#draw the neighbor links
+plot(st_geometry(DATASET), border = "grey")
+plot(nb_queen, st_coordinates(st_centroid(st_geometry(DATASET))), add = TRUE)
 
 
 ## DISTANCE BASED NEIGHBORS ##
-#calculate neighborhoods, threshold is units in CRS
-nb_dist <- dnearneigh(schools_sf, d1 = 0, d2 = THRESHOLD) 
+#needs points (use st_centroid() first for polygons), threshold is units in CRS
+nb_dist <- dnearneigh(DATASET, d1 = 0, d2 = THRESHOLD)
 #set neighborhood weight matrix
-nbw_dist <- nb2listw(nb_dist, style = "W", zero.policy = T)
+nbw_dist <- nb2listw(nb_dist, style = "W", zero.policy = TRUE)
 
 
 ## K NEAREST NEIGHBORS ####
-#calculate nearest neighbors k= number of neighbors
-knn<- knearneigh(DATASET, k = NUMNEIGHBORS)
+#needs points (use st_centroid() first for polygons), k = number of neighbors
+knn <- knearneigh(DATASET, k = NUMNEIGHBORS)
 #calculate neighborhoods
 nb_knn  <- knn2nb(knn)
 #set neighborhood weight matrix
@@ -611,33 +838,38 @@ gmoran <- moran.test(DATASET$VARIABLE, NBWMATRIX)
 
 ```{r, eval=F}
 #Monte Carlo test of global Moran's I
-gmoran <- moran.mc(DATA$VARIABLE, nbw, nsim = 99)
+set.seed(391)
+gmoran <- moran.mc(DATA$VARIABLE, NBWMATRIX, nsim = 999)
 gmoran
+
+#Moran scatterplot of each value against its neighbors' average
+moran.plot(DATA$VARIABLE, NBWMATRIX, xlab = "X_AXIS_LABEL", ylab = "Y_AXIS_LABEL")
 ```
 
 ### LISA
 
 ```{r, eval=F}
-locali<-localmoran_perm(DATASET$VARIABLE, NBWMATRIX) %>%
-  as_tibble() %>%
-  set_names(c("local_i", "exp_i", "var_i", "z_i", "p_i",
-              "p_i_sim", "pi_sim_folded", "skewness", "kurtosis"))
+#local Moran's I with a permutation test for each feature
+set.seed(391)
+locali <- localmoran_perm(DATASET$VARIABLE, NBWMATRIX, nsim = 999)
+head(locali)
 
-#bind LISA results to dataset
-DATASET <- DATASET %>%
-  bind_cols(locali)
+#add the p-value and the quadrant, and label features that are not significant
+DATASET <- DATASET |>
+  mutate(lisa_p = locali[, "Pr(z != E(Ii)) Sim"],
+         lisa_quad = as.character(attr(locali, "quadr")$mean),
+         lisa_cluster = ifelse(lisa_p < 0.05, lisa_quad, "Not significant"))
 
-#Divide into quadrants
-DATASET <- DATASET %>%
-  mutate(variablez =  as.numeric(scale(VARIABLE)),
-         evratezlag = lag.listw(NBWMATRIX, variablez),
-         lisa_cluster = case_when(
-           p_i >= 0.05 ~ "Not significant",
-           variablez > 0 & local_i > 0 ~ "High-high",
-           variablez > 0 & local_i < 0 ~ "High-low",
-           variablez < 0 & local_i > 0 ~ "Low-low",
-           variablez < 0 & local_i < 0 ~ "Low-high"
-         ))
+#how many features are in each cluster type
+table(DATASET$lisa_cluster)
+
+#map the clusters
+lisa_colors <- c("High-High" = "#B2182B", "Low-Low" = "#2166AC", "High-Low" = "#F4A582",
+                 "Low-High" = "#92C5DE", "Not significant" = "#E5E5E5")
+tm_shape(DATASET) +
+  tm_polygons(fill = "lisa_cluster",
+              fill.scale = tm_scale_categorical(values = lisa_colors),
+              fill.legend = tm_legend(title = "LISA cluster"))
 ```
 
 ### Ordinary Least Squares (OLS) Regression
@@ -650,62 +882,141 @@ fit.ols <- lm(DEPENDENT ~ INDEPENDENT + INDEPENDENT, data = DATA)
 summary(fit.ols)
 
 #save the residuals to map them or test them for autocorrelation
-DATA$residuals <- resid(fit.ols)
+DATA <- DATA |> mutate(residuals = resid(fit.ols))
 ```
 
-### Traditional Spatial Models 
+### Testing Residuals for Spatial Autocorrelation
+
 ```{r, eval=F}
+#Moran's I of the OLS residuals
+lm.morantest(fit.ols, nbw)
+
+#Lagrange multiplier tests to choose between a lag and an error model (requires spdep 1.3-1 or newer)
+lm.RStests(fit.ols, nbw, test = c("RSerr", "RSlag", "adjRSerr", "adjRSlag"))
+```
+
+### Traditional Spatial Models
+
+```{r, eval=F}
+#requires spatialreg package
 #lag model
-fit.lag<-lagsarlm(DEPENDENT ~ INDEPENDENT + INDEPENDENT,  
-                  data = DATA, 
-                  listw = nbw) 
+fit.lag <- lagsarlm(DEPENDENT ~ INDEPENDENT + INDEPENDENT,
+                  data = DATA,
+                  listw = nbw)
 #see results
 summary(fit.lag)
 
 #error model
-fit.error<-errorsarlm(DEPENDENT ~ INDEPENDENT + INDEPENDENT,  
-                  data = DATA, 
-                  listw = nbw)  
+fit.error <- errorsarlm(DEPENDENT ~ INDEPENDENT + INDEPENDENT,
+                  data = DATA,
+                  listw = nbw)
 #see results
 summary(fit.error)
+
+#compare models (lower AIC is better)
+AIC(fit.ols, fit.lag, fit.error)
+
+#check whether the spatial model removed the autocorrelation in the residuals
+moran.test(residuals(fit.error), nbw)
+```
+
+### Geographically Weighted Regression (GWR)
+
+```{r, eval=F}
+#requires GWmodel package
+#data must be projected and have no missing values in the model variables
+#choose the bandwidth (adaptive = TRUE means the bandwidth is a number of neighbors)
+bw <- bw.gwr(DEPENDENT ~ INDEPENDENT + INDEPENDENT, data = DATA,
+             approach = "AICc", kernel = "bisquare", adaptive = TRUE)
+
+#fit the GWR
+fit.gwr <- gwr.basic(DEPENDENT ~ INDEPENDENT + INDEPENDENT, data = DATA,
+                     bw = bw, kernel = "bisquare", adaptive = TRUE)
+
+#see results (global and local coefficients)
+fit.gwr
+
+#the local results as an sf object you can map with tmap
+gwr_results <- st_as_sf(fit.gwr$SDF)
+
+#each predictor's local coefficient is a column with the predictor's name, local R2 is Local_R2
+tm_shape(gwr_results) + tm_polygons(fill = "INDEPENDENT")
+tm_shape(gwr_results) + tm_polygons(fill = "Local_R2")
+```
+
+### K-Means Clustering
+
+```{r, eval=F}
+#keep the variables to cluster on and standardize them (mean 0, sd 1)
+cluster_vars <- DATA |>
+  st_drop_geometry() |>
+  select(VARIABLE1, VARIABLE2, VARIABLE3, VARIABLE4) |>
+  scale()
+
+#elbow plot: total within-cluster sum of squares for 1 to 10 clusters
+set.seed(391)
+wss <- sapply(1:10, function(k) kmeans(cluster_vars, centers = k, nstart = 25)$tot.withinss)
+ggplot(data.frame(k = 1:10, wss = wss), aes(x = k, y = wss)) +
+  geom_line() + geom_point() +
+  labs(x = "Number of clusters", y = "Total within-cluster sum of squares")
+
+#run k-means with the number of clusters you chose
+set.seed(391)
+km <- kmeans(cluster_vars, centers = NUM_CLUSTERS, nstart = 25)
+
+#add the cluster to the data (as a category, so it maps with categorical colors)
+DATA <- DATA |> mutate(cluster = as.character(km$cluster))
+
+#average of each variable in each cluster, to name the clusters
+DATA |>
+  st_drop_geometry() |>
+  group_by(cluster) |>
+  summarise(across(c(VARIABLE1, VARIABLE2, VARIABLE3, VARIABLE4), mean), n = n())
 ```
 
 ## Continuous Surfaces
 
-### IDW
+### Setting Up for Interpolation
+
 ```{r, eval=F}
-# create a regular prediction grid. We say we want 2000 pixels
-grd <- as.data.frame(spsample(DATA, "regular", n = 2000))
+#requires gstat and terra packages
+#points must be projected. Make a table of coordinates and values
+DATA_df <- data.frame(x = st_coordinates(DATA)[, 1],
+                      y = st_coordinates(DATA)[, 2],
+                      value = DATA$VARIABLE)
 
-#set grid coordinates
-names(grd) <- c("X", "Y")
-coordinates(grd) <- c("X", "Y")
-gridded(grd) <- TRUE
-fullgrid(grd) <- TRUE
+#empty raster covering the boundary (resolution is the cell size in the units of the CRS)
+grid <- rast(vect(BOUNDARY), resolution = CELL_SIZE)
+```
 
-#assign CRS
-crs(grd) <- crs(heatwave_sp)
+### IDW
 
-# run IDW interpolation using the best IDP from cross-validation
-idw <- idw(
-  formula = value ~ 1,
-  locations = DATA,
-  newdata = grd,
-  idp = 2
-)
+```{r, eval=F}
+#set up the IDW model (idp is the power)
+idw_model <- gstat(formula = value ~ 1, locations = ~x + y, data = DATA_df,
+                   set = list(idp = 2))
 
-#rasterize interpolation output
-r <- rast(idw)
+#predict a value for every raster cell
+idw_surface <- interpolate(grid, idw_model, debug.level = 0)
 
 #mask to boundaries
-r_m <- mask(r, BOUNDARY)
+idw_surface <- mask(idw_surface, vect(BOUNDARY))
+
+#map the predictions
+tm_shape(idw_surface[["var1.pred"]]) +
+  tm_raster(col.scale = tm_scale_intervals(style = "quantile", n = 5, values = "-brewer.rd_yl_bu"))
 ```
 
 ### Cross-Validation
 
 ```{r, eval=F}
-#5-fold cross-validation of an interpolation model
-cv <- gstat.cv(object = MODEL, nfold = 5)
+#leave-one-out cross-validation of IDW
+cv <- krige.cv(value ~ 1, locations = ~x + y, data = DATA_df,
+               set = list(idp = 2), verbose = FALSE)
+
+#leave-one-out cross-validation of kriging
+cv <- krige.cv(value ~ 1, locations = ~x + y, data = DATA_df,
+               model = vgm_fit, verbose = FALSE)
 
 #root mean squared error
 sqrt(mean(cv$residual^2))
@@ -715,7 +1026,7 @@ sqrt(mean(cv$residual^2))
 
 ```{r, eval=F}
 #compute empirical variogram
-v <- variogram(value ~ 1, data = DATA)
+v <- variogram(value ~ 1, locations = ~x + y, data = DATA_df)
 
 #plot empirical variogram
 plot(v)
@@ -723,33 +1034,37 @@ plot(v)
 #see the shapes of the available variogram models
 show.vgms()
 
-#specify an initial variogram model
-vgm_initial <- vgm(
-  psill = FILL,
-  model = "FILL",
-  range = FILL,
-  nugget = FILL
-)
+#fit a variogram model ("Sph", "Exp" or "Gau"); give several and R picks the best fit
+vgm_fit <- fit.variogram(v, vgm("Sph"))
+vgm_fit
 
-#fit empirical to initial model
-vgm_fit <- fit.variogram(v, vgm_initial)
+#or give starting values yourself
+vgm_fit <- fit.variogram(v, vgm(psill = FILL, model = "FILL", range = FILL, nugget = FILL))
 
-#plot fitted variogram model 
+#plot fitted variogram model
 plot(v, vgm_fit)
 
-
 #fit kriging
-krig_pred <- krige(
-  formula = value ~ 1,
-  locations = DATA,
-  newdata = grd,
-  model = vgm_fit
-)
-
-#rasterize predictions
-krig_rast <- rast(krig_pred)
+krige_model <- gstat(formula = value ~ 1, locations = ~x + y, data = DATA_df,
+                     model = vgm_fit)
+krige_surface <- interpolate(grid, krige_model, debug.level = 0)
 
 #mask to boundary
-krig_mask <- mask(krig_rast, BOUNDARY)
+krige_surface <- mask(krige_surface, vect(BOUNDARY))
 
+#predictions are in var1.pred and the kriging variance is in var1.var
+tm_shape(krige_surface[["var1.pred"]]) + tm_raster()
+tm_shape(krige_surface[["var1.var"]]) + tm_raster()
+
+```
+
+### Summarizing a Surface by Polygon
+
+```{r, eval=F}
+#average predicted value in each polygon (for example each county)
+#the polygons must be in the same CRS as the raster
+polygon_means <- terra::extract(SURFACE[["var1.pred"]], vect(POLYGONS), fun = mean, na.rm = TRUE)
+
+#add the averages to the polygons (rows come back in the same order)
+POLYGONS <- POLYGONS |> mutate(mean_pred = polygon_means$var1.pred)
 ```

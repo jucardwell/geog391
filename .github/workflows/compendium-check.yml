@@ -1,0 +1,50 @@
+name: Check Command Compendium examples
+
+on:
+  push:
+    branches: [claude/project-thread-xa9r2p]
+    paths:
+      - scripts/compendium_check/**
+      - .github/workflows/compendium-check.yml
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - name: Install system libraries for spatial R packages
+        run: sudo apt-get update && sudo apt-get install -y libudunits2-dev libgdal-dev libgeos-dev libproj-dev libglpk-dev
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          packages: |
+            any::tidyverse
+            any::sf
+            any::tmap
+            any::spdep
+            any::spatialreg
+            any::sfdep
+            any::terra
+            any::sp
+            any::gstat
+            any::spatstat
+            any::gt
+            any::e1071
+            any::maptiles
+            any::car
+            any::GWmodel
+            any::classInt
+            any::cols4all
+
+      - name: Run every compendium example
+        run: Rscript scripts/compendium_check/check.R 2>&1 | tee compendium_check.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: compendium-check
+          path: compendium_check.txt
