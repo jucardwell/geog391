@@ -1,5 +1,6 @@
 # Answer-key codewords, one per tutorial page (file name without .html).
 # Change a word here and the next site build uses it. Capital letters don't matter.
+basic_R: oxbow
 describing_data: dune
 tmap: isthmus
 describing_spatial_data: butte

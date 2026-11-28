@@ -1,130 +1,186 @@
-# Working in R and RStudio
+---
+title: "Working in R and RStudio"
+css: styles/tutorial.css
+---
 
-This is NOT a coding class, but we will be using R for our data analysis. Because of this, while I don't expect you to be able to generate code independently, I do expect you to develop a competency in navigating the RStudio environment and modifying code that I give you to complete specific tasks. This chapter will introduce you to R and RStudio.
+```{=html}
+<style>
+:root {
+  --t-ink: #182230;
+  --t-title: #0961BB;
+  --t-rule: #9BC1F1;
+  --t-link: #0859AC;
+  --t-plan-bg: #EDF4FE;
+  --t-plan-edge: #2171CC;
+  --t-why-bg: #FFF1DF;
+  --t-why-edge: #B2790C;
+  --t-read-bg: #F2F7FE;
+  --t-read-edge: #7EA7DC;
+  --t-a-bg: #E5F0FD;
+  --t-b-bg: #FEECD3;
+  --t-deliver-bg: #FEE3BF;
+  --t-deliver-edge: #7E5403;
+  --t-code-bg: #F2F7FE;
+  --t-code-edge: #5188CD;
+  --t-key-edge: #986600;
+  --t-button: #0053A4;
+}
+</style>
+```
 
-RStudio is an Integrated Development Environment (IDE) for R. RStudio provides a user-friendly interface for working with R code. R is an open-source programming language that has excellent capabilities for analyzing and visualizing spatial data.
+```{r setup, include = FALSE}
+library(tidyverse)
+library(sf)
 
-## Downloading and Installing R and RStudio
+#course data (read once for the whole page)
+parks <- st_read("https://drive.google.com/uc?export=download&id=1JNbcHQvKfm4menXhUjP71sYF207Y8ozm", quiet = TRUE)
+```
 
-To use R and RStudio, you will need to download and install both programs on your computer.
+## Part 1: Walkthrough {#walkthrough}
 
--   [Download R](https://cran.rstudio.com/) (make sure to download the correct version for your operating system)
+This is not a coding class, but we will use R for our data analysis. You don't need to write code from scratch. You do need to find your way around RStudio and change code that I give you. R is a free programming language that is very good at analyzing and mapping spatial data, and RStudio is the program we use to work in R.
 
--   [Download RStudio](https://posit.co/download/rstudio-desktop/)
+### Step 1: Install R and RStudio
 
-Once you have downloaded and installed RStudio, open up the application. We need to change one global setting before we start. **You only need to do this once!** Navigate **Tools** \> **Global Options**, uncheck “Restore .RData into workspace at startup” and choose **Never** for “Save workspace to .RData on exit”.
+::: {.why}
+Install both programs: [download R](https://cran.rstudio.com/) (pick the version for your operating system) and [download RStudio](https://posit.co/download/rstudio-desktop/). Then open RStudio and change one setting. You only need to do this once.
+:::
 
-## The RStudio Environment
+Go to **Tools** \> **Global Options**, uncheck "Restore .RData into workspace at startup", and choose **Never** for "Save workspace to .RData on exit".
 
-The RStudio environment consists of four panels.
+### Step 2: Find the Four Panes
 
-1.  **Source**: This is where you can edit R files (either .R or .Rmd) and run R code.
-2.  **Console:** The console is an interactive R environment, where you can easily run R commands. Commands written in the console are not saved into any file. It can be good to use the console for quickly testing R code.
-3.  **Environment:** This is where R objects made during each session will appear.
-4.  **Output:** This is where charts and graphs will appear.
+::: {.why}
+RStudio has four panes. You write and run code in **Source**. **Console** runs one command at a time and saves nothing, so it is good for quick tests. **Environment** lists the objects you have made, and **Output** shows plots, maps and files.
+:::
 
 ![RStudio Panes](images/rstudio-panes-labeled.jpeg){fig-alt="The RStudio window divided into four labeled panes: Source at top left with an R script open, Console at bottom left showing the same commands after they ran, Environment at top right listing the object mpg_plot, and Output at bottom right showing a scatter plot."}
 
-## Creating and Saving Files
+### Step 3: Install the Packages
 
-In this class, we will primarily be working with .Rmd files. An R Markdown or .Rmd is a document format that is designed to easily integrate text and code. This means that you can easily type answers to questions, descriptions of code outputs, and other assignment tasks within the same document as your code.
+::: {.why}
+Packages add tools to R. Install them once, by pasting these lines into the **Console** one at a time. After that, you only load them with `library()`, and I will always tell you which ones to load.
+:::
 
-To make a new .Rmd file, navigate to File \> New File \> R Markdown
-
-**I will sometimes provide you a .Rmd template for in-class exercises. You should save these files into a GEOG391 folder on your computer (not in the downloads folder please!)**
-
-## Downloading Packages
-
-R packages extend the functionality of Base R and must be downloaded. We will use a small set of libraries in this class.
-
--   tmap: This is the main mapping package we will use
--   maptiles: This package helps us add basemaps to our maps
--   gt: We will use this package to create nice tables
--   tidyverse: This is the package we will use to create "tidy" analysis workflows. Tidyverse also includes ggplot2 which will be our main package to create graphics
--   sf: This package allows us to read and manipulate spatial datasets
--   sp: Another package for manipulating spatial data
--   terra: This package allows us to read and manipulate rasters
--   spdep: We use this package to create neighborhood definitions for spatial data
--   sfdep: Allows the spdep package to interact with sf package
--   car: Includes statistical tests, such as Levene's test
--   e1071: Includes basic statistical functions, such as skewness
--   spatstat: Includes point pattern analysis functions
--   gstat: Geostatistical modeling
--   stars: Reads and manipulates rasters and other gridded data
--   spatialreg: We will use this package to run spatial regressions
--   tigris: This package helps us get geographic boundaries
--   deldir: Calculates Voronoi tessellation
--   GWmodel: We use this package for geographically weighted regression
--   cols4all: Helps us browse and choose color palettes
-
-You should copy and paste each of these commands into the **Console** one by one to download the packages.
-
-```{r, eval=F}
-
-install.packages("tmap")
-install.packages("maptiles")
-install.packages("tidyverse")
-install.packages("gt")
-install.packages("sf")
-install.packages("sp")
-install.packages("spdep")
-install.packages("sfdep")
-install.packages("terra")
-install.packages("e1071")
-install.packages("car")
-install.packages("spatstat")
-install.packages("gstat")
-install.packages("stars")
-install.packages("spatialreg")
-install.packages("tigris")
-install.packages("deldir")
-install.packages("GWmodel")
-install.packages("cols4all")
+```{r, eval = FALSE}
+install.packages("tidyverse")  #data analysis and ggplot2 graphics
+install.packages("sf")         #spatial data
+install.packages("tmap")       #maps
+install.packages("maptiles")   #basemaps
+install.packages("gt")         #tables
+install.packages("e1071")      #skewness and other statistics
+install.packages("car")        #statistical tests such as Levene's test
+install.packages("terra")      #rasters
+install.packages("stars")      #rasters and other gridded data
+install.packages("sp")         #older spatial data tools
+install.packages("sfdep")      #centrography and spdep tools for sf data
+install.packages("spdep")      #neighbors and spatial autocorrelation
+install.packages("spatialreg") #spatial regression
+install.packages("spatstat")   #point pattern analysis
+install.packages("gstat")      #interpolation and kriging
+install.packages("GWmodel")    #geographically weighted regression
+install.packages("tigris")     #census boundaries
+install.packages("deldir")     #Voronoi polygons
+install.packages("cols4all")   #color palettes
 ```
 
-Once you have downloaded the packages, you will need to load them every time you want to use them. **I will always tell you what packages to load!**
+### Step 4: Open the Template and Run It
 
-[Download your first .Rmd template](https://drive.google.com/uc?export=download&id=1t6PT4vNp1e1e10PDcEfOrQp9c9m8bVIu) for this class **(very exciting)! Save this file into your GEOG391 folder.**
+::: {.why}
+An R Markdown file (.Rmd) holds text and code together. Code goes in **chunks**, and each chunk should do one task. [Download the class template (.Rmd)](https://drive.google.com/uc?export=download&id=1t6PT4vNp1e1e10PDcEfOrQp9c9m8bVIu) and save it in a GEOG391 folder, not in Downloads. To start your own later, use **File** \> **New File** \> **R Markdown**.
+:::
 
-## Basic .Rmd Functionality
-
-Welcome to your first .Rmd! Each .Rmd starts with a header, where you can change the name and the date. **Change the header to your name and the current date**
-
-A .Rmd is made up of two main components: code chunks (this is where you write code) and text (any words that are outside of a code chunk). Any time you are writing code, it needs to be in a code chunk. Chunks can then be **run** to execute the code within the chunk. The idea of *chunking* is to group code that accomplishes a single, related task into one code chunk. When you begin a new step or process in your workflow, you start a new chunk.
-
-Your .Rmd template already has a header (where you can change the name and date) and two code chunks. The first code chunk is the **SET UP CHUNK.** The second code chunk is the **LIBRARY AND DATA CHUNK.** To load the libraries and data, **run the code chunk**.
+Open the template, change the header to your name and today's date, and click the green arrow on the second chunk to run it. It loads the packages and the data on the 16 parks in Chapel Hill. `parks` then appears in the Environment pane, and double-clicking it opens it as a table.
 
 ![](images/run_codechunk.png){fig-alt="An .Rmd open in RStudio. Labels point to the Add Code Chunk button in the toolbar, the set up chunk, the green Run Code Chunk arrow at the right edge of the library and data chunk, and the parks object (16 obs. of 18 variables) that appears in the Environment pane after the chunk runs."}
 
-If everything is working, 'parks' should appear in your environment. The 'parks' dataset is now an "object".
-
-We can view objects by double clicking the object in the environment. A data table should appear with all the information about the parks.
-
 ![](images/view_object.png){fig-alt="The parks data opened as a table in RStudio, with 16 rows and columns OBJECTID, Park_Name, Address, Zipcode, Park_Hours and Rental_Opportunities. The first row is Homestead Park, 100 Northern Park Dr, Chapel Hill NC, 27516, Dawn to 10pm, Yes."}
 
-Add a new code chunk and add the code below to create your first map. Every command that you create should have a **comment (#)** above that explains what that command is doing. If you **run** that chunk, a map should appear below.
+### Step 5: Make a Map and Knit
 
-```r
-# create a map of parks in Chapel Hill
-tm_shape(parks) + tm_dots("Park_Hours")
+::: {.why}
+Add a new chunk with the **+C** button and put the code below in it. Start every command with a comment (`#`) that says what it does. Then click **Knit** to turn the .Rmd into an .html file with your text, code and output. The .html is saved in the same folder as the .Rmd.
+:::
+
+```{r, eval = FALSE}
+#map the parks in Chapel Hill, colored by their hours
+tm_shape(parks) + tm_dots("Park_Hours", size = 0.8)
 ```
 
 ![](images/clipboard-2379786468.png){fig-alt="RStudio after running the chunks. Each comment line (load libraries, load data, create a map of parks in Chapel Hill) is boxed and labeled Comments. Below the last chunk is a map of park points in Chapel Hill colored by Park_Hours, with a legend listing 6-10pm, Dawn to 10pm, Dawn to 11pm, Dawn to Dusk, Public Space: 24hrs and Unknown."}
 
-## Knitting a .Rmd
-
-Knitting a .Rmd means that you create a rendered .html including your code, output, and text. To knit your document, click the knit button. It will create a .html in whatever folder you have the .Rmd saved in (hopefully your GEOG391 folder!)
-
 ![](images/knit.png){fig-alt="The RStudio toolbar for r_practice.Rmd with the Knit button, a ball of yarn icon next to the word Knit, outlined in red."}
 
-When your knitted document opens, it should look something like this
+The bottom of the template shows how to make headings, **bold** and *italic* text, and the chunk options that hide code (`echo = FALSE`) or hide everything (`include = FALSE`).
 
-![](images/knitted_final.png){fig-alt="The knitted HTML page titled R Practice and dated 2025-11-07, showing the map code and the map of Chapel Hill parks colored by Park_Hours. The setup and library chunks do not appear."}
+## Part 2: Partner Practice {#partner-practice}
 
-## Adding Text and Formatting a .Rmd
+Both partners work in their own copy of the template. Partner A maps which parks have playground equipment (`Playground_Equipment`), and Partner B maps which parks have trails (`Trails`). Each task tells you in parentheses which walkthrough step to reuse.
 
-The great thing about working in .Rmds is that you can create nicely formatted documents that merge code and text. At the bottom of the .Rmd are some tips for formatting nice-looking documents. Play around with adding some headings and text to your document.
+:::: {.partners}
+::: {.partner .partner-a}
+### Partner A: Playgrounds
 
-Sometimes we want to modify what code and output actually appears in our knitted document. The commands at the bottom of the document explain which chunk options to use. **See if you can figure out how to change the map chunk to not include the code in the knitted document.**
+1. Run the template's data chunk, and open `parks` as a table. *(Step 4)*
+2. In a new chunk with a comment, map the parks colored by `Playground_Equipment`. *(Step 5)*
+3. In another chunk, count the parks with and without playground equipment with `table(parks$Playground_Equipment)`.
+4. Add a second-level heading and one sentence about your map, hide the code of your map chunk with `echo = FALSE`, and knit. *(Step 5)*
 
-After you are done working in your .Rmd, make sure to save it!
+When you finish, bring your knitted .html and the names of the parks with playground equipment to Part 3.
+:::
+
+::: {.partner .partner-b}
+### Partner B: Trails
+
+1. Run the template's data chunk, and open `parks` as a table. *(Step 4)*
+2. In a new chunk with a comment, map the parks colored by `Trails`. *(Step 5)*
+3. In another chunk, count the parks with and without trails with `table(parks$Trails)`.
+4. Add a second-level heading and one sentence about your map, hide the code of your map chunk with `echo = FALSE`, and knit. *(Step 5)*
+
+When you finish, bring your knitted .html and the names of the parks with trails to Part 3.
+:::
+::::
+
+## Part 3: Together {#together}
+
+1. Open both knitted files side by side. Check that each one hides the map code but still shows the map.
+2. Which parks have both playground equipment and trails?
+3. Where in town are those parks?
+
+::: {.deliver}
+Each pair turns in one index card before leaving. Write both of your names on it, the number of parks with playground equipment and the number with trails, and the names of the parks that have both.
+:::
+
+## Answer Key {#answer-key .answer-key}
+
+```{r key-values, include = FALSE}
+n_play <- sum(parks$Playground_Equipment == "Yes")
+n_trail <- sum(parks$Trails == "Yes")
+both <- parks$Park_Name[parks$Playground_Equipment == "Yes" & parks$Trails == "Yes"]
+```
+
+`r n_play` of the `r nrow(parks)` parks have playground equipment and `r n_trail` have trails. The parks with both are `r knitr::combine_words(both)`. They are spread across town: Cedar Falls Park in the north off Weaver Dairy Road, the Chapel Hill Community Center on Estes Drive near the middle, and Southern Community Park in the south.
+
+A good knitted file has the map but not the map code, a second-level heading above it, and a sentence describing the map.
+
+```{r, eval = FALSE}
+#### Partner A ####
+#map the parks, colored by whether they have playground equipment
+tm_shape(parks) + tm_dots("Playground_Equipment", size = 0.8)
+
+#count the parks with and without playground equipment
+table(parks$Playground_Equipment)
+
+#### Partner B ####
+#map the parks, colored by whether they have trails
+tm_shape(parks) + tm_dots("Trails", size = 0.8)
+
+#count the parks with and without trails
+table(parks$Trails)
+
+#### Together ####
+#parks with both
+parks |> filter(Playground_Equipment == "Yes", Trails == "Yes") |> pull(Park_Name)
+```
+
+A map chunk with its code hidden starts with `{r, echo = FALSE}` instead of `{r}`.
