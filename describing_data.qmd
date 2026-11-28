@@ -224,7 +224,7 @@ b_top <- tract_acs |> st_drop_geometry() |> slice_max(pct_no_veh, n = 1)
 | Standard deviation | `r fmt(a$sd)` | `r fmt(b$sd)` |
 | Minimum to maximum | `r fmt(a$min)` to `r fmt(a$max)` | `r fmt(b$min)` to `r fmt(b$max)` |
 | Skewness | `r fmt(a$skewness, 2)` | `r fmt(b$skewness, 2)` |
-| Highest | `r a_top$county_name` | tract `r b_top$GEOID[1]` |
+| Highest | `r a_top$county_name` | `r ifelse(nrow(b_top) > 1, paste0("a tie between tracts ", paste(b_top$GEOID, collapse = " and ")), paste("tract", b_top$GEOID))` |
 
 A good card says something like this. The means are almost the same, but the tracts are far more spread out, with a standard deviation of `r fmt(b$sd)` against `r fmt(a$sd)` for counties. Each county averages together tracts with very different shares, so the high and low tracts cancel out. The tract distribution is also strongly right-skewed (skewness `r fmt(b$skewness, 2)`), which is why its mean sits well above its median. A tract that reports `r fmt(b$max, 0)`% is worth checking before you trust it, because estimates for small areas can be extreme. The transit agency should use tracts, because a bus route serves neighborhoods, and county averages hide the pockets it is looking for.
 

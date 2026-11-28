@@ -204,7 +204,7 @@ plot(heat_vgm)
 ### Step 2: Fit a Variogram Model Automatically
 
 ::: {.why}
-`fit.variogram()` fits a curve to the variogram. Given a list of model shapes, it fits each one and keeps the best. Here we let it choose among spherical (`"Sph"`), exponential (`"Exp"`) and Gaussian (`"Gau"`).
+`fit.variogram()` fits a curve to the variogram. Given a list of model shapes, it fits each one and keeps the best. Here we let it choose among spherical (`"Sph"`), exponential (`"Exp"`) and Gaussian (`"Gau"`). A "No convergence" warning means one of the shapes could not be fit well. `fit.variogram()` still returns the best of the others.
 :::
 
 ```{r, fig.alt = "Experimental variogram of heat wave temperatures with the fitted spherical model drawn as a line through the points, with a nugget of about 7, a sill near 17 and a range of about 137,000 feet."}
