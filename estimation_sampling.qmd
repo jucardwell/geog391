@@ -1,139 +1,209 @@
-# Estimation in Sampling
+---
+title: "Estimation in Sampling"
+css: styles/tutorial.css
+---
 
-Because we know from the CLT that repeated sampling of a population will result in a normal distribution of means, we can use the properties of the normal distribution to estimate population parameters from a sample.
+```{=html}
+<style>
+:root {
+  --t-ink: #0E2627;
+  --t-title: #057176;
+  --t-rule: #7CCED2;
+  --t-link: #08686C;
+  --t-plan-bg: #D9FBFD;
+  --t-plan-edge: #088187;
+  --t-why-bg: #FEF0EC;
+  --t-why-edge: #D45B3D;
+  --t-read-bg: #ECFAFB;
+  --t-read-edge: #56B6BB;
+  --t-a-bg: #CCF8FA;
+  --t-b-bg: #FDEAE5;
+  --t-deliver-bg: #FFE0D8;
+  --t-deliver-edge: #9D381F;
+  --t-code-bg: #F0F9F9;
+  --t-code-edge: #0A999F;
+  --t-key-edge: #BC4527;
+  --t-button: #026266;
+}
+</style>
+```
 
-There are two types of sample estimations:
-
-1.  **Point Estimation:** With probability sampling, the "best" point estimate for the population mean is the sample mean.
-2.  **Interval Estimation:** Because probability sampling involves some uncertainty, it is unlikely that a point estimation will exactly equal the true population parameter. However, because of the characteristics of the normal distribution, we can calculate the likelihood that a sample statistic is within a certain interval of the population parameter. A confidence interval represents the level of precision associated with the population estimate.
-
-We will use the following dataset:
-
--   PUMS data for the Chapel Hill Data from the [US Census Bureau](https://www.census.gov/programs-surveys/acs/microdata/access.html)
-
-PUMS data are individual-level, anonymized records from the American Community Survey. They represent a sample of the population and serve as the raw data used to produce ACS summary statistics at aggregated geographic levels, such as block groups and tracts.
-
-For the purposes of calculating confidence intervals, we will treat the PUMS sample as if it were a simple random sample. In reality, PUMS is a complex survey sample with weights and clustering, so the independence assumption of the CLT is not strictly met.
-
-The variables in this dataset are:
-
--   SERIALNO- unique identifier for each individual
--   hrs_wrked_per_week- average number of hours worked per week (over the last 12 weeks)
--   travel_time_to_work- average time commuting to work (one-way)
--   income- yearly income
--   public_health_ins- binary indicator for public health insurance (1= public health insurance, 0= no public health insurance)
-
-**To follow along with this tutorial, make a new .Rmd document. As you move through the tutorial add chunks, headers, and relevant text to your document.**
-
-## Reading in Data
-
-```{r, include=F}
+```{r setup, include = FALSE}
 library(tidyverse)
-library(tmap)
 
-#read in pums data
+#course data (read once for the whole page)
+ch_pums <- read_csv("https://drive.google.com/uc?export=download&id=1ifsUSH8veyhn8x8gUMo0MGu4VxYWpI9p", show_col_types = FALSE)
+brfss <- read_csv("https://drive.google.com/uc?export=download&id=11rKXmplEk0dcvi7lzEQ0OUrXDrnvK4MR", show_col_types = FALSE)
+
+#numbers quoted in the text below come from here, so they stay right if the data changes
+fmt <- function(x, d = 2) formatC(x, format = "f", digits = d, big.mark = ",")
+commuters_key <- ch_pums |> filter(travel_time_work > 0)
+```
+
+## Part 1: Walkthrough {#walkthrough}
+
+Run each chunk in your own .Rmd. You will reuse this code in Part 2.
+
+### Step 1: Load the Data
+
+::: {.why}
+We'll use `r fmt(nrow(ch_pums), 0)` American Community Survey records for people in the Chapel Hill area, from the Census Bureau's [Public Use Microdata Sample (PUMS)](https://www.census.gov/programs-surveys/acs/microdata/access.html). Each row is one person. `travel_time_work` is the one-way commute in minutes (0 for people who don't commute) and `public_health_ins` is 1 for people with public health insurance and 0 for everyone else. PUMS is really a weighted survey sample, but here we treat it as a simple random sample.
+:::
+
+```{r, eval = FALSE}
+#load libraries
+library(tidyverse)
+
+#Chapel Hill PUMS records
 ch_pums <- read_csv("https://drive.google.com/uc?export=download&id=1ifsUSH8veyhn8x8gUMo0MGu4VxYWpI9p")
 ```
 
-```{r, eval = F}
-library(tidyverse)
-library(tmap)
+```{r, fig.alt = "Histogram of one-way commute times for Chapel Hill commuters. Most commutes are between 5 and 30 minutes, with a long right tail of commutes over an hour."}
+#keep only the people who commute
+commuters <- ch_pums |> filter(travel_time_work > 0)
 
-#read in pums data
-ch_pums <- read_csv("https://drive.google.com/uc?export=download&id=1ifsUSH8veyhn8x8gUMo0MGu4VxYWpI9p")
-
+ggplot(commuters, aes(x = travel_time_work)) +
+  geom_histogram(binwidth = 5, fill = "lightgrey", color = "black") +
+  labs(x = "One-way commute (minutes)", y = "Number of people")
 ```
 
-## Calculating Point Estimate and Confidence Interval for Means
+### Step 2: Confidence Interval for a Mean by Hand
 
-To calculate a confidence interval for a mean, we use this formula
-
-$$
-\bar{x} \pm t^* \frac{s}{\sqrt{n}}
-$$
-
-Where $\bar{x}$ is equal to the sample mean (or the point estimate), $t^*$ is the critical t-value, ${s}$ is equal to the sample standard deviation, and ${n}$ is the sample size. We use t distribution for means because we must estimate the population standard deviation and that extra uncertainty makes the sampling distribution wider than the normal curve.
-
-We can "manually" calculate the confidence interval in R.
-
-The script below shows the calculation of the 95% confidence interval (because we're running a two-tail interval which means we want the low end and the high end, the critical value is .975 for each side) for the average commute to work for the Chapel Hill population.
+::: {.why}
+The sample mean is the point estimate. The 95% confidence interval is $\bar{x} \pm t^* \frac{s}{\sqrt{n}}$. We use the t distribution for a mean because we estimate the population standard deviation from the sample.
+:::
 
 ```{r}
-#calculate mean
-sample_mean <- mean(ch_pums$travel_time_work)
+x_bar <- mean(commuters$travel_time_work)
+s <- sd(commuters$travel_time_work)
+n <- nrow(commuters)
 
-#calculate sample variance
-sample_variance <- sd(ch_pums$travel_time_work)**2
+#critical value: 0.975 leaves 2.5% in each tail
+t_star <- qt(0.975, df = n - 1)
 
-#sample size
-sample_size <- nrow(ch_pums)
-
-#command to get critical value
-t_val <- qt(0.975, df = sample_size - 1)
-
-#calculate lower bound
-confidence_l <- sample_mean - t_val * (sqrt(sample_variance/sample_size))
-#calculate higher bound
-confidence_h <- sample_mean + t_val * (sqrt(sample_variance/sample_size))
+#margin of error, then the interval
+margin <- t_star * s / sqrt(n)
+c(x_bar - margin, x_bar + margin)
 ```
 
-From running this script, we learn that the point estimate of the population mean (which is equal to the sample mean) is 11.845. Applying the confidence interval calculation, we know that there is a 95% chance that the true population mean is between 11.42 and 12.27 (or 11.845 +/- .425).
-
-There is also an easy command to calculate point estimates and confidence intervals for means
+### Step 3: Confidence Interval for a Mean with `t.test()`
 
 ```{r}
-#t test command (assumes two-tail)
-t.test(ch_pums$travel_time_work, conf.level = 0.95)
-
+t.test(commuters$travel_time_work, conf.level = 0.95)
 ```
 
-**Q1. We have a large sample size (6502). What would happen to the confidence interval if we had a smaller sample? You can try it out by artificially changing the sample size in the manual code above (not the t.test command)**
+The mean commute is `r fmt(mean(commuters_key$travel_time_work))` minutes, and the 95% confidence interval runs from `r fmt(t.test(commuters_key$travel_time_work)$conf.int[1])` to `r fmt(t.test(commuters_key$travel_time_work)$conf.int[2])` minutes. Change `conf.level` to 0.90 or 0.99 to see the interval get narrower or wider.
 
-**Q2. Rerun the script above using a difference confidence level. How do the results change?**
+### Step 4: Confidence Interval for a Proportion
 
-## Calculating Point Estimate and Confidence Interval for Proportions
-
-We use the following formula to calculate a confidence interval for a proportion.
-
-$$
-\hat{p} \pm z^* \sqrt{\frac{\hat{p}(1-\hat{p})}{n}} 
-$$
-
-Where $\hat{p}$ is the sample proportion (point estimate), $z^*$ is the critical z-value, and $n$ is the sample size. For proportions, the variability is already built into the binomial model, so we do not need to estimate the standard deviation, which is why we can use the z distribution
-
-We can "manually" calculate the confidence interval in R.
-
-The script below shows the calculation of the 95% confidence interval (because we're running a two-tail interval, the critical value is .975 for each side) for the proportion of people who have public health insurance
+::: {.why}
+For a proportion the interval is $\hat{p} \pm z^* \sqrt{\frac{\hat{p}(1-\hat{p})}{n}}$. `prop.test()` uses a slightly different formula (the Wilson interval), so its answer differs a little from the hand calculation.
+:::
 
 ```{r}
-#people with public health insurance (we can take the sum since it is represented as 1/0 binary)
-total_pop_pub_health <- sum(ch_pums$public_health_ins)
-total_sample_pop <- nrow(ch_pums)
+#by hand
+p_hat <- mean(ch_pums$public_health_ins)
+n_all <- nrow(ch_pums)
+z_star <- qnorm(0.975)
+p_margin <- z_star * sqrt(p_hat * (1 - p_hat) / n_all)
+c(p_hat - p_margin, p_hat + p_margin)
 
-prop_pub_health <- total_pop_pub_health/ total_sample_pop
-
-#get z critical value for two tail confidence 95%
-z_val <- qnorm(0.975)
-
-#lower bound of confidence interval
-confidence_lower <- prop_pub_health - z_val * (sqrt(prop_pub_health * (1 -prop_pub_health)/ total_sample_pop))
-
-#higher bound of confidence interval
-confidence_higher <- prop_pub_health + z_val * (sqrt(prop_pub_health * (1 -prop_pub_health)/ total_sample_pop))
+#with prop.test (number of 1s, number of people)
+prop.test(sum(ch_pums$public_health_ins), n_all, conf.level = 0.95)
 ```
 
-From the code above, we can say that the best point estimate for the proportion of people with public health insurance in Chapel Hill is .172 and that we are 95% confident that the true proportion falls between .163 and .182.
+## Part 2: Partner Practice {#partner-practice}
 
-There is also an easy command to calculate point estimates and confidence intervals for proportions
+Both partners use answers from `r fmt(nrow(brfss), 0)` U.S. adults in the CDC's [Behavioral Risk Factor Surveillance System (BRFSS)](https://www.cdc.gov/brfss/). `menthlth` is the number of days in the past 30 that the person's mental health was not good, `exerany2` is 1 if they exercised in the past 30 days and 0 if not, and `x.state` is the state's FIPS code (North Carolina is 37). Partner A estimates for North Carolina only and Partner B estimates for the whole sample. Each task tells you in parentheses which walkthrough step to reuse.
 
-```{r}
-# calculate CI using Wilson method
-prop.test(total_pop_pub_health, total_sample_pop, conf.level = 0.95)
-
+```{r, eval = FALSE}
+#BRFSS survey answers (both partners)
+brfss <- read_csv("https://drive.google.com/uc?export=download&id=11rKXmplEk0dcvi7lzEQ0OUrXDrnvK4MR")
 ```
 
-You should notice a small difference between the CI that we manually calculated and the CI that was automatically calculated. The built-in `prop.test` command in R uses a slightly different calculation, called the **Wilson interval**, which adjusts both the center and the width of the interval to account for the fact that proportions are bounded between 0 and 1, making it more accurate than the Wald method for many sample sizes. Our manual calculation uses the **Wald (textbook) method**, which is simpler but can underestimate or overestimate the true confidence interval in some cases.
+:::: {.partners}
+::: {.partner .partner-a}
+### Partner A: North Carolina
 
-## Mini Challenge
+1. Keep only North Carolina with `filter(brfss, x.state == 37)`, and count your rows.
+2. Find the mean of `menthlth` and its 95% confidence interval by hand. *(Step 2)*
+3. Check your interval with `t.test()`. *(Step 3)*
+4. Find the proportion who exercised and its 95% confidence interval with `prop.test()`. *(Step 4)*
 
-Using the code above, calculate the point estimate and the 90% and 95% confidence interval for the two other variables in the pums dataset (hrs_wrked_per_weeek and income)
+When you finish, bring your sample size, both estimates and both intervals to Part 3.
+:::
+
+::: {.partner .partner-b}
+### Partner B: Whole Sample
+
+1. Use every row of `brfss`, and count your rows.
+2. Find the mean of `menthlth` and its 95% confidence interval by hand. *(Step 2)*
+3. Check your interval with `t.test()`. *(Step 3)*
+4. Find the proportion who exercised and its 95% confidence interval with `prop.test()`. *(Step 4)*
+
+When you finish, bring your sample size, both estimates and both intervals to Part 3.
+:::
+::::
+
+## Part 3: Together {#together}
+
+1. Fill in the table.
+2. Work out the width of each interval (upper minus lower). Whose intervals are wider, and by about how much?
+3. Does Partner B's estimate fall inside Partner A's interval? What does that tell you about North Carolina compared with the whole sample?
+
+| Sample | n | Mean poor mental health days (95% CI) | Proportion who exercised (95% CI) |
+|---|---|---|---|
+| North Carolina (Partner A) | | | |
+| Whole sample (Partner B) | | | |
+
+::: {.deliver}
+Each pair turns in one index card before leaving. Write both of your names on it, copy the table, and add two or three sentences explaining why the North Carolina intervals are so much wider.
+:::
+
+## Answer Key {#answer-key .answer-key}
+
+```{r key-values, include = FALSE}
+nc_brfss <- brfss |> filter(x.state == 37)
+ci_txt <- function(ci, d = 2) paste0(fmt(ci[1], d), " to ", fmt(ci[2], d))
+a_m <- t.test(nc_brfss$menthlth); b_m <- t.test(brfss$menthlth)
+a_p <- prop.test(sum(nc_brfss$exerany2), nrow(nc_brfss)); b_p <- prop.test(sum(brfss$exerany2), nrow(brfss))
+w <- function(ci) ci[2] - ci[1]
+```
+
+| Sample | n | Mean poor mental health days (95% CI) | Proportion who exercised (95% CI) |
+|---|---|---|---|
+| North Carolina | `r nrow(nc_brfss)` | `r fmt(a_m$estimate)` (`r ci_txt(a_m$conf.int)`) | `r fmt(a_p$estimate, 3)` (`r ci_txt(a_p$conf.int, 3)`) |
+| Whole sample | `r fmt(nrow(brfss), 0)` | `r fmt(b_m$estimate)` (`r ci_txt(b_m$conf.int)`) | `r fmt(b_p$estimate, 3)` (`r ci_txt(b_p$conf.int, 3)`) |
+
+The hand calculation for the mean matches `t.test()`. The North Carolina intervals are about `r round(w(a_m$conf.int) / w(b_m$conf.int))` times wider for the mean and `r round(w(a_p$conf.int) / w(b_p$conf.int))` times wider for the proportion. The whole-sample estimates fall inside the North Carolina intervals, so these data give no evidence that North Carolina differs from the whole sample.
+
+A good card says something like this. The margin of error shrinks with the square root of n. Partner A had only `r nrow(nc_brfss)` people and Partner B had `r fmt(nrow(brfss), 0)`, about `r round(nrow(brfss) / nrow(nc_brfss))` times as many, so Partner B's intervals are roughly √`r round(nrow(brfss) / nrow(nc_brfss))`, or about `r round(sqrt(nrow(brfss) / nrow(nc_brfss)))`, times narrower. A small sample can still give a sensible estimate, but we are much less sure where the true value is.
+
+```{r, eval = FALSE}
+brfss <- read_csv("https://drive.google.com/uc?export=download&id=11rKXmplEk0dcvi7lzEQ0OUrXDrnvK4MR")
+
+#### Partner A: North Carolina ####
+nc_brfss <- brfss |> filter(x.state == 37)
+nrow(nc_brfss)
+
+x_bar <- mean(nc_brfss$menthlth)
+s <- sd(nc_brfss$menthlth)
+n <- nrow(nc_brfss)
+margin <- qt(0.975, df = n - 1) * s / sqrt(n)
+c(x_bar - margin, x_bar + margin)
+
+t.test(nc_brfss$menthlth, conf.level = 0.95)
+prop.test(sum(nc_brfss$exerany2), nrow(nc_brfss), conf.level = 0.95)
+
+#### Partner B: whole sample ####
+nrow(brfss)
+
+x_bar <- mean(brfss$menthlth)
+s <- sd(brfss$menthlth)
+n <- nrow(brfss)
+margin <- qt(0.975, df = n - 1) * s / sqrt(n)
+c(x_bar - margin, x_bar + margin)
+
+t.test(brfss$menthlth, conf.level = 0.95)
+prop.test(sum(brfss$exerany2), nrow(brfss), conf.level = 0.95)
+```

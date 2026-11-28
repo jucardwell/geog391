@@ -1,179 +1,349 @@
-# Hypothesis Testing
+---
+title: "Hypothesis Testing"
+css: styles/tutorial.css
+---
 
-In this chapter, we will practice common hypothesis testing methods. Hypothesis testing is a statistical approach used to evaluate a claim about a population based on sample data, often comparing differences between groups. This process helps us determine whether observed results are likely due to random chance or reflect a real effect. The p-value of a hypothesis test represents the probability of observing the data (or something more extreme) if the null hypothesis is true. A small p-value suggests that the observed result is unlikely under the null hypothesis.
-
-Most hypothesis tests assume that the sample data is independent, meaning that observations do not have any impact on other observations. Because of the nature of spatial data, we know that this is not true. Because spatial autocorrelation violates the independence assumption of standard hypothesis tests, using these tests can lead to biased test results, underestimated variability, or inflated Type I error rates.
-
-In this chapter, we will practice regular statistical tests, keeping in mind that these tests may not fully account for spatial dependence.
-
-We will use the following spatial datasets:
-
--   A sample of mean summer temperature values across North Carolina from 2000-2010 and 2010-2020 [TerraClimate](https://www.nature.com/articles/sdata2017191).
--   2023 census tract data from the [American Community Survey](https://www.census.gov/programs-surveys/acs.html)
--   Census tract mean PM2.5 from 2016-2020 from the CDC
--   Mobility data during 2020 for North Carolina counties from the [Google Covid Mobility Report](https://www.google.com/covid19/mobility/)
-
-**To follow along with this tutorial, make a new .Rmd document. As you move through the tutorial add chunks, headers, and relevant text to your document.**
-
-```{r, include = F}
-library(tidyverse)
-library(tmap)
-library(sf)
-library(car) 
-
-summer_temp <- st_read("https://drive.google.com/uc?export=download&id=1byhsYTBnqegfPGsZWtAHH4pZgGbSTr_s")
-
-acs <- st_read("https://drive.google.com/uc?export=download&id=1ffMbuX4ZQ8vuZK9uwFOBe61bEbKfKg1j") |> mutate(rural = ifelse(rural == 1, "rural", "non-rural"), low_inc = ifelse(low_inc == 1, "low-income", "high-income"), high_commute = ifelse(high_commute == 1, "high commute", "low commute"))
-
-pm <- st_read("https://drive.google.com/uc?export=download&id=1zf1xk-7pOoSnEwGvGsNVa6XejFoPFzdJ") |> mutate(rural = ifelse(rural == 1, "rural", "non-rural"))
-
-mobility <- st_read("https://drive.google.com/uc?export=download&id=1YbCNVR5K8jDF5HOKHcoJ25gz7VkRvDHa") |> mutate(rural = ifelse(rural == 1, "rural", "non-rural"))
-
+```{=html}
+<style>
+:root {
+  --t-ink: #292010;
+  --t-title: #815C0A;
+  --t-rule: #D9B982;
+  --t-link: #765408;
+  --t-plan-bg: #FFF2DD;
+  --t-plan-edge: #936907;
+  --t-why-bg: #F1F2FE;
+  --t-why-edge: #7976E3;
+  --t-read-bg: #FCF6EC;
+  --t-read-edge: #C29E61;
+  --t-a-bg: #FFECCD;
+  --t-b-bg: #ECEDFD;
+  --t-deliver-bg: #E4E6FD;
+  --t-deliver-edge: #544FA9;
+  --t-code-bg: #FAF6EF;
+  --t-code-edge: #AC7D1B;
+  --t-key-edge: #6660CB;
+  --t-button: #704E03;
+}
+</style>
 ```
 
-```{r, eval = F}
+```{r setup, include = FALSE}
 library(tidyverse)
-library(tmap)
 library(sf)
 library(car)
 
+#course data (read once for the whole page)
+pm <- st_read("https://drive.google.com/uc?export=download&id=1zf1xk-7pOoSnEwGvGsNVa6XejFoPFzdJ", quiet = TRUE) |>
+  mutate(rural = ifelse(rural == 1, "rural", "non-rural"))
+summer_temp <- st_read("https://drive.google.com/uc?export=download&id=1byhsYTBnqegfPGsZWtAHH4pZgGbSTr_s", quiet = TRUE)
+mobility <- st_read("https://drive.google.com/uc?export=download&id=1YbCNVR5K8jDF5HOKHcoJ25gz7VkRvDHa", quiet = TRUE) |>
+  mutate(rural = ifelse(rural == 1, "rural", "non-rural"))
+acs <- st_read("https://drive.google.com/uc?export=download&id=1ffMbuX4ZQ8vuZK9uwFOBe61bEbKfKg1j", quiet = TRUE) |>
+  mutate(rural = ifelse(rural == 1, "rural", "non-rural"),
+         low_inc = ifelse(low_inc == 1, "low income", "not low income"),
+         high_commute = ifelse(high_commute == 1, "high commute", "low commute"))
+
+#numbers quoted in the text below come from here, so they stay right if the data changes
+fmt <- function(x, d = 2) formatC(x, format = "f", digits = d, big.mark = ",")
+pm_key <- t.test(meanpm_2016_2020 ~ rural, data = pm, var.equal = TRUE)
+temp_key <- t.test(summer_temp$av_summer_2010_2020, summer_temp$av_summer_2000_2010, paired = TRUE)
+```
+
+This tutorial runs over two class days. Day 1 covers t-tests and Day 2 covers the chi-square test. Each day has its own walkthrough, partner practice and index card.
+
+## Day 1 Walkthrough: T-Tests {#walkthrough}
+
+Run each chunk in your own .Rmd. You will reuse this code in the Day 1 partner practice.
+
+### Step 1: Load the Data
+
+::: {.why}
+`pm` has the mean daily PM2.5 (µg/m³) from 2016 to 2020 for `r fmt(nrow(pm), 0)` North Carolina census tracts, from the [CDC Environmental Public Health Tracking Network](https://ephtracking.cdc.gov/), with a rural or non-rural label. `summer_temp` has the average summer temperature (°F) at `r nrow(summer_temp)` locations for 2000 to 2010 and for 2010 to 2020, from [TerraClimate](https://www.climatologylab.org/terraclimate.html). We treat both as natural samples.
+:::
+
+```{r, eval = FALSE}
+#load libraries
+library(tidyverse)
+library(sf)
+library(car)
+
+#census tract PM2.5, 2016-2020
+pm <- st_read("https://drive.google.com/uc?export=download&id=1zf1xk-7pOoSnEwGvGsNVa6XejFoPFzdJ") |>
+  mutate(rural = ifelse(rural == 1, "rural", "non-rural"))
+
+#summer temperature at 480 locations
 summer_temp <- st_read("https://drive.google.com/uc?export=download&id=1byhsYTBnqegfPGsZWtAHH4pZgGbSTr_s")
-
-acs <- st_read("https://drive.google.com/uc?export=download&id=1ffMbuX4ZQ8vuZK9uwFOBe61bEbKfKg1j") |> mutate(rural = ifelse(rural == 1, "rural", "non-rural"), low_inc = ifelse(low_inc == 1, "low-income", "high-income"), high_commute = ifelse(high_commute == 1, "high commute", "low commute"))
-
-pm <- st_read("https://drive.google.com/uc?export=download&id=1zf1xk-7pOoSnEwGvGsNVa6XejFoPFzdJ") |> mutate(rural = ifelse(rural == 1, "rural", "non-rural"))
-
-mobility <- st_read("https://drive.google.com/uc?export=download&id=1YbCNVR5K8jDF5HOKHcoJ25gz7VkRvDHa") |> mutate(rural = ifelse(rural == 1, "rural", "non-rural"))
 ```
 
-## One Sample T-Test
+### Step 2: Check the Assumptions
 
-A one-sample t-test is a statistical test used to determine whether the mean of a single sample is significantly different from a known or hypothesized value. It assumes that the data is **continuous**, that the observations are **independent**, and the **sampling distribution of the mean** is normal. While this is guaranteed if the underlying population is normal, the Central Limit Theorem ensures this assumption is met for large samples regardless of the population's distribution.
+::: {.why}
+A t-test needs a continuous variable, independent observations and a roughly normal sampling distribution of the mean. Spatial data are rarely independent, so keep that limit in mind. With `r fmt(nrow(pm), 0)` tracts, the Central Limit Theorem covers the normality assumption even though the histogram is skewed.
+:::
 
-To demonstrate a one sample t-test, we can compare the mean daily PM2.5 value for census tracts across North Carolina to a known value. Although each tract in North Carolina has a mean value (i.e. the census tracts are not sampled), we can consider this a "natural sample".
-
-In geography, inferential statistics are sometimes applied even when datasets include all observed units, because many spatial phenomena contain both systematic and random components. These datasets can be treated as **“natural samples”**, where the observed variation reflects real-world randomness. For example, mean daily PM2.5 values across all census tracts in a state are influenced by systematic factors like industrial activity and traffic patterns, but also by unpredictable environmental processes such as local weather conditions. This natural variability allows the observed values to be treated as a sample from the broader population of possible PM2.5 conditions, making inferential tests like the one-sample t-test appropriate.
-
-**The annual average PM2.5 value for the eastern United States is 7.8µg/m^3^** . Therefore, we could use a one-sample t-test to see if the North Carolina average differs from the United States average.
-
-Before we run a statistical test, the first thing we have to do is check our assumptions. We know that PM2.5 is a continuous variable. Because this data is spatial, it likely violates the assumption of independence (*but we will put a pin in that for now and assume independence*) We can estimate the distribution of the population by using the distribution of the sample. A histogram and QQ-Plot indicates that the data distribution is somewhat non-normal.
-
-```{r}
-ggplot(pm, aes(x = meanpm_2016_2020)) + geom_histogram(binwidth = .5)
-qqnorm(pm$meanpm_2016_2020)
-qqline(pm$meanpm_2016_2020, col = "steelblue", lwd = 2)
+```{r, fig.alt = "Histogram of mean PM2.5 for North Carolina census tracts. Values run from about 5 to 9 micrograms per cubic meter and are skewed left, with most tracts between 7 and 8.5."}
+ggplot(pm, aes(x = meanpm_2016_2020)) +
+  geom_histogram(binwidth = 0.25, fill = "lightgrey", color = "black") +
+  labs(x = "Mean PM2.5, 2016-2020 (µg/m³)", y = "Number of tracts")
 ```
 
-At this point, we have two options for testing whether our sample mean differs from a hypothesized value. The first option is to use a **non-parametric** test, which does not assume any particular distribution for the population. A non-parametric alternative for a one-sample t-test is the Wilcoxon Signed-Rank Test. The second option is to still use the one-sample t-test. While this test assumes that the population is normally distributed, the Central Limit Theorem tells us that, for large sample sizes (generally greater than 30, but higher for highly non-normal data), the sampling distribution of the mean is approximately normal regardless of the population distribution. Since our sample is large (n = 2672), the t-test is valid in this case, even if the data are not normal.
+### Step 3: One-Sample T-Test
 
-Since this class focuses on parametric tests, we will continue on with our t-test. The mean of our dataset is
+::: {.why}
+A one-sample t-test compares a mean with a fixed value. The EPA's annual PM2.5 standard is 9.0 µg/m³. H0: the mean tract PM2.5 is 9.0. H1: it is less than 9.0.
+:::
 
 ```{r}
-mean(pm$meanpm_2016_2020)
+t.test(pm$meanpm_2016_2020, mu = 9.0, alternative = "less")
 ```
 
-**Q1: Formulate a null hypothesis that would use a one sample, one-sided t-test**
+### Step 4: Two-Sample T-Test and Effect Size
 
-We can then test our hypothesis
-
-```{r}
-#test mean 
-t.test(pm$meanpm_2016_2020, mu = 7.8, alternative = "less", conf.level = 0.95)
-
-```
-
-In this case, the low p-value of our t.test allows us to reject the null hypothesis in favor of the alternative hypothesis:
-
-*H1: The mean PM2.5 value for North Carolina is less than the mean value for the eastern US.*
-
-## Two Sample T-Test
-
-A two-sample t-test compares the means of two different samples. For instance, we could compare the mean PM2.5 in urban vs. rural census tracts.
-
-The assumptions for the two sample t-test are the same as the one-sample t-test with one addition: equal variance (also called homoscedasticity). This means that the two groups being compared should have similar variability in their values. If the variances are very different, the standard two-sample t-test may not be appropriate. We can compare the variances a Levene's test (which is robust to non-normal data)
+::: {.why}
+A two-sample t-test compares the means of two groups. Check equal variance first with Levene's test. If its p-value is below 0.05, add `var.equal = FALSE` (Welch's test). H0: rural and non-rural tracts have the same mean PM2.5.
+:::
 
 ```{r}
-
 leveneTest(meanpm_2016_2020 ~ rural, data = pm)
+
+pm_test <- t.test(meanpm_2016_2020 ~ rural, data = pm, var.equal = TRUE)
+pm_test
+
+#effect size: the difference between the two group means, in µg/m³
+pm_test$estimate
+diff(pm_test$estimate)
 ```
 
-In this case, the test indicates no statistical significance, meaning the null hypothesis (no difference in variance) cannot be rejected. If the variances were substantially different, we would need to use a version of the test that does not assume equal variance (Welch’s t-test).
+The p-value says the difference is unlikely to be chance. The effect size says how big it is: rural tracts average `r fmt(abs(diff(pm_key$estimate)))` µg/m³ less PM2.5 than non-rural tracts (`r fmt(pm_key$estimate[2])` vs. `r fmt(pm_key$estimate[1])`).
 
-**Q2. Formulate a null hypothesis that would use a two sample two-sided t-test.**
+### Step 5: Paired T-Test
 
-```{r}
-# Then run a standard two-sample t-test
-#if variances were not equal, you would set var.equal = FALSE
-t.test(meanpm_2016_2020 ~ rural, data = pm, var.equal = TRUE)
-```
+::: {.why}
+A paired t-test is for two measurements of the same places. It tests whether the mean of the differences is 0. H0: the mean change in summer temperature from 2000-2010 to 2010-2020 is 0.
+:::
 
-Based on our t-test results, we can reject the null hypothesis in favor of the alternative hypothesis:
-
-*H1: The mean PM2.5 in urban and rural census tracts is different.*
-
-## Paired T-Test
-
-A paired t-test evaluates whether the average change between two paired observations is significantly different from zero. A paired t-test assumes that data is continuous, and the differences between the paired observations are approximately normally distributed. It is typically used when the same individuals or locations are measured at two time points or under two conditions. For instance, we could consider our summer temperature values. In this dataset, we have a sample of 480 locations and two different values– mean summer temperature from 2000-2010 and mean summer temperature from 2010-2020.
-
-We can consider this dataset a true simple random sample.
-
-First, to test the assumption of normally distributed differences, we can examine a Q-QPlot of the differences. Because the paired t-test is robust to moderate non-normality when sample sizes are large, it is still appropriate to proceed with the test.
-
-```{r}
-#add a column with difference
+```{r, fig.alt = "Histogram of the change in average summer temperature at 480 North Carolina locations from 2000-2010 to 2010-2020. Every change is positive, clustered tightly around 1.1 degrees F."}
 summer_temp <- summer_temp |> mutate(diff = av_summer_2010_2020 - av_summer_2000_2010)
 
-ggplot(summer_temp, aes(x = diff)) + geom_histogram(binwidth = .05)
+ggplot(summer_temp, aes(x = diff)) +
+  geom_histogram(binwidth = 0.02, fill = "lightgrey", color = "black") +
+  labs(x = "Change in summer temperature (°F)", y = "Number of locations")
 
-qqnorm(summer_temp$diff)
-qqline(summer_temp$diff, col = "steelblue", lwd = 2)
+#the estimate in the output is the effect size: the mean change in °F
+t.test(summer_temp$av_summer_2010_2020, summer_temp$av_summer_2000_2010, paired = TRUE)
 ```
 
-**Q3: Formulate a null hypothesis that would use a one-sample paired t-test**
+## Day 1 Partner Practice {#partner-practice}
+
+Both partners use workplace mobility for North Carolina's 100 counties in 2020, from the [Google COVID-19 Community Mobility Reports](https://www.google.com/covid19/mobility/). `workplace_change` is the percent change in visits to workplaces from March to May 2020, compared with before the pandemic, and `workplace_change_may_dec` is the same for May to December 2020. Negative numbers mean fewer visits. Partner A compares rural and non-rural counties, and Partner B compares the two time periods. Each task tells you in parentheses which walkthrough step to reuse.
+
+```{r, eval = FALSE}
+#county mobility, 2020 (both partners)
+mobility <- st_read("https://drive.google.com/uc?export=download&id=1YbCNVR5K8jDF5HOKHcoJ25gz7VkRvDHa") |>
+  mutate(rural = ifelse(rural == 1, "rural", "non-rural"))
+```
+
+:::: {.partners}
+::: {.partner .partner-a}
+### Partner A: Rural vs. Non-Rural
+
+1. Write H0 and H1 for comparing `workplace_change` in rural and non-rural counties.
+2. Plot a histogram of `workplace_change`. *(Step 2)*
+3. Run Levene's test, then the two-sample t-test. *(Step 4)*
+4. Pull out the two group means and the difference between them. *(Step 4)*
+
+When you finish, bring your hypotheses, p-value, group means and effect size to Day 1 Together.
+:::
+
+::: {.partner .partner-b}
+### Partner B: March to May vs. May to December
+
+1. Write H0 and H1 for comparing `workplace_change_may_dec` with `workplace_change` in the same counties.
+2. Make a column of the differences and plot its histogram. *(Step 5)*
+3. Run the paired t-test. *(Step 5)*
+4. Pull out the mean difference. *(Step 5)*
+
+When you finish, bring your hypotheses, p-value and effect size to Day 1 Together.
+:::
+::::
+
+## Day 1 Together {#together}
+
+1. Fill in the table.
+2. Which result is larger in real terms, the gap between rural and non-rural counties or the change over time?
+3. Counties next to each other tend to have similar mobility. Which assumption does that break?
+
+| Test | H0 | p-value | Effect size (percentage points) |
+|---|---|---|---|
+| Rural vs. non-rural (Partner A) | | | |
+| March-May vs. May-December (Partner B) | | | |
+
+::: {.deliver}
+Each pair turns in one index card before leaving. Write both of your names on it, copy the table, and add two or three sentences describing each result in plain language, with its effect size, for example "rural counties dropped ___ points less than non-rural counties."
+:::
+
+## Day 2 Walkthrough: Chi-Square Test {#walkthrough-2}
+
+### Step 1: Load the Data
+
+::: {.why}
+`acs` has three yes-or-no labels for `r fmt(nrow(acs), 0)` North Carolina census tracts from the [American Community Survey](https://www.census.gov/programs-surveys/acs.html): rural or not (`rural`), low income or not (`low_inc`), and long average commutes or not (`high_commute`). The chi-square test of independence asks whether two categorical variables are related.
+:::
+
+```{r, eval = FALSE}
+#load libraries
+library(tidyverse)
+library(sf)
+
+#census tracts with three categorical labels
+acs <- st_read("https://drive.google.com/uc?export=download&id=1ffMbuX4ZQ8vuZK9uwFOBe61bEbKfKg1j") |>
+  mutate(rural = ifelse(rural == 1, "rural", "non-rural"),
+         low_inc = ifelse(low_inc == 1, "low income", "not low income"),
+         high_commute = ifelse(high_commute == 1, "high commute", "low commute"))
+```
+
+### Step 2: Contingency Table and Row Percentages
+
+::: {.why}
+H0: rural status and low-income status are independent. The row percentages are the effect size: they show how much more common low-income tracts are in one group than the other.
+:::
 
 ```{r}
-t.test(summer_temp$av_summer_2010_2020, summer_temp$av_summer_2000_2010, paired = TRUE, alternative = "greater", conf.level = 0.95)
+inc_table <- table(acs$rural, acs$low_inc)
+inc_table
+
+#share of each row in each column
+prop.table(inc_table, margin = 1)
 ```
 
-Based on our t-test results, we can reject the null hypothesis in favor of the alternative hypothesis:
-
-*H1: The mean summer temperature in 2010-2020 is higher than the mean summer temperature in 2000-2010.*
-
-## Chi Square Test of Independence
-
-The Chi-square test of independence is a statistical test used to determine whether two categorical variables are associated with one another. Because the variables are categorical rather than continuous, the test is non-parametric, meaning it does not assume any particular underlying distribution. Our American Community Data includes three categorical variables:
-
--   Rural/ Non-rural
--   Low income/ High Income
--   Low commute / High commute
-
-We could examine whether any pair of these variables is related. For instance, whether rural/non-rural and low commute/ high commute is related. In this case, the null hypothesis would be:
-
-**H0: Rural/non-rural status and commute category are independent (there is no association between them).**
-
-We can start by looking at a contingency table.
+### Step 3: Run the Test
 
 ```{r}
-table(acs$rural, acs$high_commute)
+inc_test <- chisq.test(inc_table)
+inc_test
 ```
+
+### Step 4: Check the Expected Counts
+
+::: {.why}
+The chi-square test needs an expected count of at least 5 in every cell. The expected counts are what the table would look like if the two variables were unrelated.
+:::
 
 ```{r}
-chisq.test(table(acs$rural, acs$high_commute))
+inc_test$expected
 ```
 
-In this case, our X-squared value is low (.209) and the p-value is high (.65), meaning that we fail to reject the null hypothesis.
+`r fmt(100 * prop.table(table(acs$rural, acs$low_inc), 1)["rural", "low income"], 1)`% of rural tracts are low income, compared with `r fmt(100 * prop.table(table(acs$rural, acs$low_inc), 1)["non-rural", "low income"], 1)`% of non-rural tracts, and the p-value is far below 0.05, so we reject H0.
 
-**Q4: Run a chi square test of independence for another set of variables**
+## Day 2 Partner Practice {#partner-practice-2}
 
-## Mini Challenge
+Both partners use the same `acs` tracts. Partner A tests whether rural status and commute are related, and Partner B tests whether income and commute are related. Each task tells you in parentheses which Day 2 step to reuse.
 
-This challenge will ask you to run hypothesis tests on mobility data for North Carolina counties during Covid-19. We will consider the county values as a natural sample for North Carolina. The `mobility` dataset includes the following variables:
+:::: {.partners}
+::: {.partner .partner-a}
+### Partner A: Rural and Commute
 
--   `rural` - rural/nonrural flag for each county
--   `workplace_change`- percent change in workplace mobility from March-May 2020
--   `workplace_change_may_dec` - percent change in workplace mobility by county from May 2020- Dec 2020
+1. Write H0 and H1 for `rural` and `high_commute`.
+2. Make the contingency table and the row percentages. *(Step 2)*
+3. Run the chi-square test. *(Step 3)*
+4. Check the expected counts. *(Step 4)*
 
-1.  Create two maps– one for each mobility variable. Do you notice any spatial patterns?
-2.  Develop a null hypothesis regarding the relationship between change in workplace mobility between the two time periods. Run a paired t-test between the two time periods to test your hypothesis.
-3.  Develop a null hypothesis regarding the relationship between change in workplace mobility between urban and rural areas (you can pick which workplace change variable to use) . Run an independent samples t-test between the two geographical regions.
-4.  Consider that the known average mobility during the March-May period across the US was -32. Calculate the mean for North Carolina and develop a null hypothesis about the relationship between North Carolina mobility and average US mobility. Run a one sample t-test between the known value and the sample value.
+When you finish, bring your table, the percentage of each group with a high commute, X-squared and the p-value to Day 2 Together.
+:::
+
+::: {.partner .partner-b}
+### Partner B: Income and Commute
+
+1. Write H0 and H1 for `low_inc` and `high_commute`.
+2. Make the contingency table and the row percentages. *(Step 2)*
+3. Run the chi-square test. *(Step 3)*
+4. Check the expected counts. *(Step 4)*
+
+When you finish, bring your table, the percentage of each group with a high commute, X-squared and the p-value to Day 2 Together.
+:::
+::::
+
+## Day 2 Together {#together-2}
+
+1. Fill in the table.
+2. One of you should reject H0 and one should not. Use your row percentages to explain why.
+3. A statistically significant result can still be a small difference. How big is the difference in Partner B's percentages?
+
+| Variables | % high commute in each group | X-squared | p-value | Reject H0? |
+|---|---|---|---|---|
+| Rural and commute (Partner A) | | | | |
+| Income and commute (Partner B) | | | | |
+
+::: {.deliver}
+Each pair turns in one index card before leaving. Write both of your names on it, copy the table, and add two or three sentences explaining each result in plain language, using the percentages.
+:::
+
+## Answer Key {#answer-key .answer-key}
+
+```{r key-values, include = FALSE}
+a_test <- t.test(workplace_change ~ rural, data = mobility, var.equal = TRUE)
+a_lev <- leveneTest(workplace_change ~ rural, data = mobility)
+b_test <- t.test(mobility$workplace_change_may_dec, mobility$workplace_change, paired = TRUE)
+pv <- function(p) ifelse(p < 0.001, "< 0.001", fmt(p, 3))
+tab_a <- table(acs$rural, acs$high_commute); pa <- prop.table(tab_a, 1); ca <- chisq.test(tab_a)
+tab_b <- table(acs$low_inc, acs$high_commute); pb <- prop.table(tab_b, 1); cb <- chisq.test(tab_b)
+```
+
+### Day 1
+
+Partner A. H0: rural and non-rural counties have the same mean `workplace_change`. Levene's p-value is `r fmt(a_lev[1, "Pr(>F)"], 2)`, so equal variance is fine. The t-test p-value is `r pv(a_test$p.value)`. Non-rural counties averaged `r fmt(a_test$estimate[1], 1)`% and rural counties `r fmt(a_test$estimate[2], 1)`%, so non-rural counties cut workplace visits by `r fmt(abs(diff(a_test$estimate)), 1)` percentage points more.
+
+Partner B. H0: the mean difference between the two periods is 0. The paired t-test p-value is `r pv(b_test$p.value)`. The mean difference is `r fmt(b_test$estimate, 1)` percentage points: from May to December, workplace visits were about `r fmt(b_test$estimate, 1)` points closer to normal than in March to May.
+
+Both results are significant and of similar size, about 8 to 9 percentage points. Counties are not independent of their neighbors, so the independence assumption is broken and the p-values are likely too small.
+
+### Day 2
+
+| Variables | % high commute in each group | X-squared | p-value | Reject H0? |
+|---|---|---|---|---|
+| Rural and commute | rural `r fmt(100 * pa["rural", "high commute"], 1)`%, non-rural `r fmt(100 * pa["non-rural", "high commute"], 1)`% | `r fmt(ca$statistic)` | `r pv(ca$p.value)` | No |
+| Income and commute | low income `r fmt(100 * pb["low income", "high commute"], 1)`%, not low income `r fmt(100 * pb["not low income", "high commute"], 1)`% | `r fmt(cb$statistic)` | `r pv(cb$p.value)` | Yes |
+
+Every expected count is well above 5. Rural and non-rural tracts have almost the same share of high-commute tracts, so the two variables look independent. Low-income tracts are less likely to have high commutes, a difference of about `r round(100 * abs(pb["low income", "high commute"] - pb["not low income", "high commute"]))` percentage points. That is significant with this many tracts, but it is a modest difference.
+
+```{r, eval = FALSE}
+mobility <- st_read("https://drive.google.com/uc?export=download&id=1YbCNVR5K8jDF5HOKHcoJ25gz7VkRvDHa") |>
+  mutate(rural = ifelse(rural == 1, "rural", "non-rural"))
+
+#### Day 1, Partner A: rural vs. non-rural ####
+ggplot(mobility, aes(x = workplace_change)) +
+  geom_histogram(binwidth = 2, fill = "lightgrey", color = "black") +
+  labs(x = "Change in workplace visits, March-May 2020 (%)", y = "Number of counties")
+
+leveneTest(workplace_change ~ rural, data = mobility)
+a_test <- t.test(workplace_change ~ rural, data = mobility, var.equal = TRUE)
+a_test
+a_test$estimate
+diff(a_test$estimate)
+
+#### Day 1, Partner B: March-May vs. May-December ####
+mobility <- mobility |> mutate(diff = workplace_change_may_dec - workplace_change)
+
+ggplot(mobility, aes(x = diff)) +
+  geom_histogram(binwidth = 2, fill = "lightgrey", color = "black") +
+  labs(x = "May-December minus March-May (percentage points)", y = "Number of counties")
+
+t.test(mobility$workplace_change_may_dec, mobility$workplace_change, paired = TRUE)
+
+#### Day 2, Partner A: rural and commute ####
+tab_a <- table(acs$rural, acs$high_commute)
+tab_a
+prop.table(tab_a, margin = 1)
+test_a <- chisq.test(tab_a)
+test_a
+test_a$expected
+
+#### Day 2, Partner B: income and commute ####
+tab_b <- table(acs$low_inc, acs$high_commute)
+tab_b
+prop.table(tab_b, margin = 1)
+test_b <- chisq.test(tab_b)
+test_b
+test_b$expected
+```
