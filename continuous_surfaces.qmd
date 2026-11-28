@@ -196,7 +196,7 @@ Use `heat_df`, `grid` and `nc_outline` from Day 1.
 The variogram shows how different two stations' values are, on average, as the distance between them grows. The nugget is the difference at almost no distance, the sill is where the curve levels off, and the range is the distance where it levels off. Beyond the range, stations are no longer related.
 :::
 
-```{r, fig.alt = "Experimental variogram of heat wave temperatures. Semivariance rises quickly over the first 100,000 to 150,000 feet and then levels off at about 17."}
+```{r, fig.alt = "Experimental variogram of heat wave temperatures. Semivariance rises from about 11 to about 17 over the first 150,000 feet, then scatters between about 14 and 20 with no clear trend."}
 heat_vgm <- variogram(value ~ 1, locations = ~x + y, data = heat_df)
 plot(heat_vgm)
 ```
@@ -219,7 +219,7 @@ plot(heat_vgm, heat_fit)
 Kriging uses the fitted variogram to weight the stations. It also gives a kriging variance for every cell, which is a measure of uncertainty: it is low near stations and high far from them.
 :::
 
-```{r, fig.alt = c("Map of the kriging prediction of heat wave temperature for North Carolina, with a legend. Like the IDW surface, it is coolest in the western mountains and hottest in the east, but it is smoother, without bullseyes around stations.", "Map of kriging variance for North Carolina, with a legend. Variance is lowest near clusters of stations and highest along the coast and in gaps between stations, such as the far northeast.")}
+```{r, fig.alt = c("Map of the kriging prediction of heat wave temperature for North Carolina, with a legend. Like the IDW surface, it is coolest in the western mountains and hottest in the east, but it is smoother, without bullseyes around stations.", "Map of kriging variance for North Carolina, with a legend. Variance is lowest at the stations and highest in the gaps between them, so the map looks like a field of dark spots on a lighter background.")}
 krige_model <- gstat(formula = value ~ 1, locations = ~x + y, data = heat_df,
                      model = heat_fit)
 
@@ -325,7 +325,7 @@ Power 3 has the lower RMSE, so it predicts the stations better, even though its 
 | Kriging, exponential | `r par_txt(fit_exp)[1]` | `r par_txt(fit_exp)[2]` | `r par_txt(fit_exp)[3]` | `r fmt(exp_rmse)` |
 | IDW, power 3 | | | | `r fmt(jan_idw[2])` |
 
-Your fitted values can differ a little if `fit.variogram()` starts from different values. Given both shapes, `fit.variogram()` picks the `r as.character(fit_auto$model[2])` model. The exponential model and IDW with power 3 are nearly tied, and both beat the spherical model. Kriging adds the variance map, which is highest in the gaps between stations and along the edges of the state, such as the coast and the far west. A good card recommends the exponential kriging surface (or IDW with power 3 if they prefer its simplicity) and names one of those areas as least certain.
+Your fitted values can differ a little if `fit.variogram()` starts from different values. Given both shapes, `fit.variogram()` picks the `r c(Sph = "spherical", Exp = "exponential")[as.character(fit_auto$model[2])]` model. The exponential model and IDW with power 3 are nearly tied, and both beat the spherical model. Kriging adds the variance map, which is highest in the gaps between stations and near the edges of the state, farthest from any station. A good card recommends the exponential kriging surface (or IDW with power 3 if they prefer its simplicity) and names one of those areas as least certain.
 
 ```{r, eval = FALSE}
 jan_temp <- st_read("https://drive.google.com/uc?export=download&id=1Mtc7SXpWAx-atL5u1aFUuZli0wTMVTcT")

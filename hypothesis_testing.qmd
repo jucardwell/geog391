@@ -82,7 +82,7 @@ summer_temp <- st_read("https://drive.google.com/uc?export=download&id=1byhsYTBn
 A t-test needs a continuous variable, independent observations and a roughly normal sampling distribution of the mean. Spatial data are rarely independent, so keep that limit in mind. With `r fmt(nrow(pm), 0)` tracts, the Central Limit Theorem covers the normality assumption even though the histogram is skewed.
 :::
 
-```{r, fig.alt = "Histogram of mean PM2.5 for North Carolina census tracts. Values run from about 5 to 9 micrograms per cubic meter and are skewed left, with most tracts between 7 and 8.5."}
+```{r, fig.alt = "Histogram of mean PM2.5 for North Carolina census tracts. Values run from about 5 to 9 micrograms per cubic meter and are skewed left, with most tracts between 7 and 9."}
 ggplot(pm, aes(x = meanpm_2016_2020)) +
   geom_histogram(binwidth = 0.25, fill = "lightgrey", color = "black") +
   labs(x = "Mean PM2.5, 2016-2020 (µg/m³)", y = "Number of tracts")
@@ -123,7 +123,7 @@ The p-value says the difference is unlikely to be chance. The effect size says h
 A paired t-test is for two measurements of the same places. It tests whether the mean of the differences is 0. H0: the mean change in summer temperature from 2000-2010 to 2010-2020 is 0.
 :::
 
-```{r, fig.alt = "Histogram of the change in average summer temperature at 480 North Carolina locations from 2000-2010 to 2010-2020. Every change is positive, clustered tightly around 1.1 degrees F."}
+```{r, fig.alt = "Histogram of the change in average summer temperature at 480 North Carolina locations from 2000-2010 to 2010-2020. Every change is positive, from about 0.75 to 1.4 degrees F, with most between 1.0 and 1.35."}
 summer_temp <- summer_temp |> mutate(diff = av_summer_2010_2020 - av_summer_2000_2010)
 
 ggplot(summer_temp, aes(x = diff)) +

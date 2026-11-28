@@ -72,7 +72,7 @@ nc_counties <- st_read("https://drive.google.com/uc?export=download&id=1hXVtKL_3
   st_transform(2264)
 ```
 
-```{r, fig.alt = "Map of percent of people in poverty by North Carolina county in five quantile classes, with a legend. The highest poverty rates are in the northeast and in Robeson and nearby counties in the southeast, and the lowest are around Charlotte, Raleigh and the mountains near Asheville."}
+```{r, fig.alt = "Map of percent of people in poverty by North Carolina county in five quantile classes, with a legend. The highest poverty rates are in the northeast and in Robeson and nearby counties in the southeast, and the lowest are around Raleigh and Charlotte and on parts of the coast."}
 tm_shape(nc_counties) +
   tm_polygons(fill = "pct_pov",
               fill.scale = tm_scale_intervals(style = "quantile", n = 5, values = "brewer.or_rd"),
@@ -219,7 +219,7 @@ table(nc_counties$lisa_cluster)
 Give each cluster type a fixed color, and keep the legend so the map can be read without relying on color alone.
 :::
 
-```{r, fig.alt = "LISA cluster map of county poverty rates with a legend. A High-High cluster of high poverty covers counties in the northeast, such as Bertie, Northampton, Martin, Edgecombe and Pitt, and in the southeast around Robeson, Hoke and Scotland. A Low-Low cluster covers Mecklenburg, Cabarrus and Iredell. Most counties are not significant."}
+```{r, fig.alt = "LISA cluster map of county poverty rates with a legend. A High-High cluster of high poverty covers counties in the northeast, such as Bertie, Northampton, Martin, Edgecombe and Pitt, and in the southeast around Robeson, Hoke and Scotland. A Low-Low cluster covers Mecklenburg, Cabarrus and Iredell, with one High-Low county beside it. Most counties are not significant."}
 lisa_colors <- c("High-High" = "#B2182B", "Low-Low" = "#2166AC", "High-Low" = "#F4A582",
                  "Low-High" = "#92C5DE", "Not significant" = "#E5E5E5")
 

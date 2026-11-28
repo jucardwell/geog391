@@ -1,5 +1,5 @@
 ---
-title: "Regression and Spatial Models"
+title: "Regression and Spatial Regression"
 css: styles/tutorial.css
 ---
 
