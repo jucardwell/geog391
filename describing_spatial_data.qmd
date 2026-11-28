@@ -70,7 +70,7 @@ torn <- st_read("https://drive.google.com/uc?export=download&id=1K5yFnDthJGKnWPr
 The mean center is the average x coordinate and the average y coordinate of all the points.
 :::
 
-```{r}
+```{r, fig.alt = "Map of U.S. tornado touchdown points from 1954 to 2022 in grey, densest from the Great Plains through the Southeast, with the mean center shown as a large blue dot in southern Missouri."}
 torn_center <- center_mean(torn)
 
 tm_shape(torn) + tm_dots(fill = "grey70") +
@@ -83,7 +83,7 @@ tm_shape(torn) + tm_dots(fill = "grey70") +
 A weighted mean center gives more pull to points with larger values of a variable. Weighting by fatalities moves the center toward the places where deadly tornadoes happen.
 :::
 
-```{r}
+```{r, fig.alt = "Map of U.S. tornado touchdown points in grey with two large dots, labeled in the legend. The mean center is in southern Missouri, and the center weighted by fatalities is about 106 miles to the southeast, near where Missouri, Kentucky and Tennessee meet."}
 torn_center_fat <- center_mean(torn, weights = torn$fat)
 
 tm_shape(torn) + tm_dots(fill = "grey70") +
@@ -101,7 +101,7 @@ st_distance(torn_center, torn_center_fat) / 1609.34
 The standard deviational ellipse shows the spread of the points around the mean center and the direction they stretch in.
 :::
 
-```{r}
+```{r, fig.alt = "Map of U.S. tornado touchdown points in grey with a shaded standard deviational ellipse centered in southern Missouri. The ellipse stretches farther east to west than north to south, covering most of the Plains, the Midwest and the Southeast."}
 #calculate the ellipse values, then turn them into a shape
 ellipse_vals <- std_dev_ellipse(torn)
 torn_ellipse <- st_ellipse(geometry = ellipse_vals,
