@@ -180,7 +180,7 @@ When you finish, bring the mean, median, standard deviation and maximum to Part 
 3. Map `pct_no_veh` by tract. *(Step 3)*
 4. Find the tract with the highest value. Its `GEOID` starts with the state and county codes, so you can tell which county it is in.
 
-When you finish, bring the mean, median, standard deviation and maximum to Part 3, along with the tract that has the maximum.
+When you finish, bring the mean, median, standard deviation and maximum to Part 3, along with the tract or tracts that have the maximum.
 :::
 ::::
 
