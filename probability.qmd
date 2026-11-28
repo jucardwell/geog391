@@ -131,7 +131,7 @@ most_likely <- probability_days |> slice_max(probability)
 ### Step 5: Normal Distribution
 
 ::: {.why}
-A continuous variable can be modelled with a normal curve built from its mean and standard deviation. `pnorm()` gives the share *below* a value, so subtract from 1 for "above".
+A continuous variable can be modeled with a normal curve built from its mean and standard deviation. `pnorm()` gives the share *below* a value, so subtract from 1 for "above".
 :::
 
 ```{r, fig.alt = "Histogram of daily January high temperatures at RDU with a normal curve drawn on top and a dashed vertical line at 60 degrees F. Most highs fall between 40 and 65 degrees, and the curve follows the histogram closely, so the share of bars to the right of the dashed line is about the same as the area under the curve there."}
