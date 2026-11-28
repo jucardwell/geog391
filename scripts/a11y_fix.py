@@ -66,6 +66,18 @@ def fix(path: pathlib.Path) -> list[str]:
                 level = new
             last = level
 
+    # Wide tables scroll inside their own box instead of the whole page (reflow
+    # at 320px); the box takes keyboard focus so it can be scrolled without a mouse.
+    for i, table in enumerate(main.find_all("table") if main is not None else []):
+        if table.find_parent(class_="table-scroll") is not None or table.find_parent("table") is not None:
+            continue
+        cap = table.find("caption")
+        label = cap.get_text(" ", strip=True) if cap else f"Table {i + 1}"
+        box = soup.new_tag("div", attrs={"class": "table-scroll", "role": "region",
+                                         "aria-label": label[:120], "tabindex": "0"})
+        table.wrap(box)
+        changed = True
+
     for a in soup.find_all("a"):
         t = a.get_text(" ", strip=True).lower()
         if t in {"here", "click here", "link", "this", "this link", "read more"}:

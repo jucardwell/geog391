@@ -81,7 +81,10 @@ summary:focus-visible, [tabindex]:focus-visible, .nav-link:focus-visible {
   .quarto-title, h1.title { position: relative; }
   h1.title { display: inline-block; background: #FFFFFF; padding: 4px 14px; margin: 0; border: 1px solid $ink; }
 }
-h1.title { font-size: 2.6rem; line-height: 1.05; }
+h1.title { font-size: 2.6rem; line-height: 1.05; max-width: 100%; overflow-wrap: break-word; }
+@media (max-width: 480px) { h1.title { font-size: 1.9rem; } }
+.table-scroll { max-width: 100%; overflow-x: auto; margin-bottom: 1rem; }
+.table-scroll > table { margin-bottom: 0; }
 .quarto-title-meta-heading { display: none; }
 h2 { font-size: 1.6rem; margin-top: 2rem; border-bottom: 0; }
 h3, h2.h3 { font-size: 1.3rem; }
@@ -255,6 +258,7 @@ table.plain-list {
 
 // ---- How this course works ---------------------------------------------
 .facts dl { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 8px 20px; }
+@media (max-width: 480px) { .facts dl { grid-template-columns: minmax(0, 1fr); gap: 2px; } .facts dd { margin-bottom: 8px; } }
 .facts dt { font-weight: 700; }
 .facts dd { margin: 0; }
 .grade-table, .scale-table { width: 100%; border-collapse: collapse; }
@@ -262,7 +266,7 @@ table.plain-list {
 .grade-table td { padding: 10px 6px; border-bottom: 1px solid $rule; vertical-align: baseline; }
 .grade-table td:last-child { text-align: right; font-weight: 700; font-size: 20px; width: 70px; }
 .scale-table td { border: 1px solid $ink; padding: 6px 10px; }
-.expect { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); border-top: 1px solid $ink; border-left: 1px solid $ink; }
+.expect { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); border-top: 1px solid $ink; border-left: 1px solid $ink; }
 .expect > div { border-right: 1px solid $ink; border-bottom: 1px solid $ink; padding: 14px 18px; }
 .expect h3 { font-size: 1.05rem; margin: 0 0 6px; }
 
@@ -270,7 +274,7 @@ table.plain-list {
 .plan, .why, .reading, .deliver { border-left: 3px solid $water; background: #F4F7FA; padding: 12px 16px; margin: 1rem 0; }
 .why { border-left-color: $brown; background: $tint; }
 .deliver { border-left-color: $green; background: #EEF4E8; }
-.partners { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); border: 1px solid $ink; margin: 1rem 0; }
+.partners { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); border: 1px solid $ink; margin: 1rem 0; }
 .partner { padding: 14px 16px; }
 .partner + .partner { border-left: 1px solid $ink; }
 .partner-a { background: #FFFFFF; }
